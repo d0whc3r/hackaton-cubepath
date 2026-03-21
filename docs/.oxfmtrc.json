@@ -1,24 +1,22 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
   "ignorePatterns": [
-    ".git",
-    ".astro",
-    ".claude",
-    ".agents",
-    ".codex",
-    ".husky",
-    ".opencode",
-    ".specify",
-    "specs",
-    ".astro",
-    ".trae",
-    ".agent",
-    ".env",
-    "!.env.example"
+    ".agents/",
+    ".agent/",
+    ".github/",
+    ".opencode/",
+    ".trae/",
+    ".kiro/",
+    ".specify/",
+    "*.log",
+    "chart/",
+    "patches/",
+    "pnpm-lock.yaml",
+    "content/auth0/"
   ],
   "singleQuote": true,
   "jsxSingleQuote": false,
-  "semi": false,
+  "semi": true,
   "trailingComma": "all",
   "bracketSpacing": true,
   "bracketSameLine": false,
@@ -38,18 +36,12 @@
       "unknown"
     ],
     "internalPattern": ["@/"],
-    "newlinesBetween": true,
+    "newlinesBetween": false,
     "order": "asc",
     "ignoreCase": true,
     "partitionByNewline": false,
     "sortSideEffects": false,
     "partitionByComment": false
   },
-  "sortPackageJson": true,
-  "sortTailwindcss": {
-    "stylesheet": "./src/styles/global.css",
-    "attributes": ["class", "className"],
-    "functions": ["clsx", "cn", "cva", "twMerge"],
-    "preserveWhitespace": true
-  }
+  "sortPackageJson": true
 }
