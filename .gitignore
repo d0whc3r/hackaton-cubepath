@@ -1,0 +1,13 @@
+!.agents/
+!.claude/
+!.codex/
+!.specify/
+!.opencode/
+node_modules/
+dist/
+build/
+coverage/
+*.log
+*.env
+.DS_Store
+.idea/
