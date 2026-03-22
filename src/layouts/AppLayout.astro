@@ -3,18 +3,22 @@ import { ClientRouter } from 'astro:transitions';
 import '@/styles/global.css';
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
   image?: string;
   fullScreen?: boolean;
 }
 
+const APP_NAME = 'SLM Router';
+const DEFAULT_TITLE = 'Intelligent Code Assistant';
+
 const {
-  title,
+  title = DEFAULT_TITLE,
   description = 'Intelligent small-model routing for developer workflows. Route code tasks to specialist AI models running locally with Ollama.',
-  fullScreen = false,
+  fullScreen = true,
 } = Astro.props;
 
+const pageTitle = title.startsWith(`${APP_NAME} —`) ? title : `${APP_NAME} — ${title}`;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-router.local');
 ---
 
@@ -31,7 +35,7 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-rout
     <link rel="canonical" href={canonicalURL} />
 
     <!-- Primary -->
-    <title>{title}</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#6366f1" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#818cf8" media="(prefers-color-scheme: dark)" />
@@ -39,13 +43,13 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-rout
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="SLM Router" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content={title} />
+    <meta name="twitter:title" content={pageTitle} />
     <meta name="twitter:description" content={description} />
 
     <ClientRouter />

@@ -10,7 +10,8 @@
       "Bash(pnpm build:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(npx oxlint:*)"
+      "Bash(npx oxlint:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

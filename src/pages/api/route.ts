@@ -10,6 +10,7 @@ import type { TaskType } from '@/lib/schemas/route'
 import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { estimateCost } from '@/lib/cost/calculator'
+import { detectLanguage } from '@/lib/router/detector'
 import { isDirectTask, routeDirect } from '@/lib/router/direct'
 import { routeWithAnalyst } from '@/lib/router/index'
 import { DEFAULT_ANALYST_MODEL, DEFAULT_MODELS, OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
@@ -155,9 +156,26 @@ async function buildDirectStream(req: ValidatedRequest, emit: SseEmitter): Promi
   const resolvedModelId = req[DIRECT_TASK_MODEL_KEY[req.taskType]] as string
   const { displayName, modelId, systemPrompt } = routeDirect(req.taskType, resolvedModelId)
 
+  emit('routing_step', { label: 'Analysing code...', status: 'active', step: 'detecting_language' })
+  const { language } = detectLanguage(req.input)
+  emit('routing_step', {
+    detail: language,
+    label: `${language} detected`,
+    status: 'done',
+    step: 'detecting_language',
+  })
+
+  emit('routing_step', { label: 'Analysing task type...', status: 'active', step: 'analyzing_task' })
+  emit('routing_step', {
+    detail: req.taskType,
+    label: `Task: ${req.taskType}`,
+    status: 'done',
+    step: 'analyzing_task',
+  })
+
   emit('specialist_selected', {
     displayName: `${displayName} Specialist`,
-    language: 'code',
+    language,
     modelId,
     specialistId: `${req.taskType}-specialist`,
   })

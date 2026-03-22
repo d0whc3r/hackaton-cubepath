@@ -9,9 +9,10 @@ interface ChatContainerProps {
   fixedTaskType?: TaskType
   pageTitle?: string
   pageDescription?: string
+  composer?: React.ReactNode
 }
 
-export function ChatContainer({ fixedTaskType, pageTitle, pageDescription }: ChatContainerProps) {
+export function ChatContainer({ fixedTaskType, pageTitle, pageDescription, composer }: ChatContainerProps) {
   const session = useChatSession(fixedTaskType)
 
   return (
@@ -37,7 +38,7 @@ export function ChatContainer({ fixedTaskType, pageTitle, pageDescription }: Cha
           </div>
         )}
         <ChatMessages />
-        <ChatInput />
+        {composer ?? <ChatInput />}
       </div>
     </ChatContext.Provider>
   )

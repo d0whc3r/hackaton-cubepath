@@ -17,16 +17,16 @@ vi.mock(import('@/lib/context/chat-context'), () => ({
   })),
 }))
 
-const MAX_CHARS = 8000
+const MAX_CHARS = 15_000
 
 describe('useChatInput', () => {
-  it('overLimit is false when input <= 8000 chars', () => {
+  it('overLimit is false when input <= 15000 chars', () => {
     const setInput = vi.fn()
     const { result } = renderHook(() => useChatInput('hello', setInput))
     expect(result.current.overLimit).toBeFalsy()
   })
 
-  it('overLimit is true when input > 8000 chars', () => {
+  it('overLimit is true when input > 15000 chars', () => {
     const setInput = vi.fn()
     const longInput = 'a'.repeat(MAX_CHARS + 1)
     const { result } = renderHook(() => useChatInput(longInput, setInput))

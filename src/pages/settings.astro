@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar.astro'
 import { ModelConfigPage } from '@/components/model/ModelConfigPage'
 ---
 
-<AppLayout title="SLM Router — Settings">
+<AppLayout title="Settings" fullScreen={false}>
   <Navbar currentPath={Astro.url.pathname} />
   <ModelConfigPage client:load />
 </AppLayout>

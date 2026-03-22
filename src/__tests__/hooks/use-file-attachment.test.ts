@@ -2,7 +2,7 @@ import { renderHook, act } from '@testing-library/react'
 
 import { useFileAttachment } from '@/hooks/use-file-attachment'
 
-const MAX_CHARS = 8000
+const MAX_CHARS = 15_000
 
 function makeMockFileReader(content: string) {
   let capturedOnload: ((ev: ProgressEvent<FileReader>) => void) | null = null

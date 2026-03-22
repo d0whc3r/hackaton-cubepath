@@ -1,4 +1,3 @@
-import { useMutation } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 
 import type { AssistantMessage, ConversationEntry, RoutingStep, TaskType } from '@/lib/schemas/route'
@@ -21,6 +20,24 @@ export interface UseChatSessionReturn {
 }
 
 type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
+type EntriesByTask = Record<TaskType, ConversationEntry[]>
+type LoadingByTask = Record<TaskType, boolean>
+
+const TASK_TYPES: TaskType[] = [
+  'explain',
+  'test',
+  'refactor',
+  'commit',
+  'docstring',
+  'type-hints',
+  'error-explain',
+  'performance-hint',
+  'naming-helper',
+  'dead-code',
+]
+
+const EMPTY_ENTRIES_BY_TASK = Object.fromEntries(TASK_TYPES.map((task) => [task, []])) as EntriesByTask
+const EMPTY_LOADING_BY_TASK = Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as LoadingByTask
 
 function mergeRoutingStep(steps: RoutingStep[], step: RoutingStep): RoutingStep[] {
   const idx = steps.findIndex((st) => st.step === step.step)
@@ -31,48 +48,82 @@ function mergeRoutingStep(steps: RoutingStep[], step: RoutingStep): RoutingStep[
 }
 
 export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
-  const taskType = fixedTaskType ?? 'explain'
+  const defaultTask = fixedTaskType ?? 'explain'
 
-  const [entries, setEntries] = useState<ConversationEntry[]>([])
-  const [activeTask, setActiveTask] = useState<TaskType>(taskType)
+  const [entriesByTask, setEntriesByTask] = useState<EntriesByTask>(EMPTY_ENTRIES_BY_TASK)
+  const [loadingByTask, setLoadingByTask] = useState<LoadingByTask>(EMPTY_LOADING_BY_TASK)
+  const [activeTask, setActiveTask] = useState<TaskType>(defaultTask)
   const [isHydrated, setIsHydrated] = useState(false)
-  const [currentModel, setCurrentModel] = useState(() => getModelForTask(DEFAULTS, fixedTaskType ?? taskType))
-  const abortRef = useRef<AbortController | null>(null)
+  const [currentModel, setCurrentModel] = useState(() => getModelForTask(DEFAULTS, defaultTask))
 
-  // Load history and real model config after hydration to avoid SSR/client mismatch
+  const loadedTasksRef = useRef<Set<TaskType>>(new Set())
+  const abortControllersRef = useRef<Partial<Record<TaskType, AbortController>>>({})
+
+  const viewTask = fixedTaskType ?? activeTask
+
+  function ensureTaskHistoryLoaded(task: TaskType) {
+    if (loadedTasksRef.current.has(task)) {
+      return
+    }
+    loadedTasksRef.current.add(task)
+    setEntriesByTask((prev) => ({ ...prev, [task]: loadHistory(task) }))
+  }
+
+  // Initial hydration
   useEffect(() => {
-    const config = loadModelConfig()
-    setEntries(loadHistory(taskType))
-    setCurrentModel(getModelForTask(config, fixedTaskType ?? taskType))
+    ensureTaskHistoryLoaded(defaultTask)
+    setCurrentModel(getModelForTask(loadModelConfig(), defaultTask))
     setIsHydrated(true)
-  }, [taskType, fixedTaskType])
+  }, [defaultTask])
 
-  // Side effect: writes to localStorage
+  // Load history lazily when switching visible task and sync model badge
   useEffect(() => {
-    saveHistory(entries, fixedTaskType ?? activeTask)
-  }, [entries, fixedTaskType, activeTask])
+    ensureTaskHistoryLoaded(viewTask)
+    setCurrentModel(getModelForTask(loadModelConfig(), viewTask))
+  }, [viewTask])
 
-  function updateLastAssistant(updater: AssistantUpdater) {
-    setEntries((prev) => {
-      if (prev.length === 0) {
+  // Persist loaded task histories
+  useEffect(() => {
+    loadedTasksRef.current.forEach((task) => {
+      saveHistory(entriesByTask[task], task)
+    })
+  }, [entriesByTask])
+
+  function updateLastAssistant(task: TaskType, updater: AssistantUpdater) {
+    setEntriesByTask((prev) => {
+      const taskEntries = prev[task]
+      if (taskEntries.length === 0) {
         return prev
       }
-      const next = [...prev]
-      const last = next.at(-1)!
-      next[next.length - 1] = { ...last, assistantMessage: updater(last.assistantMessage) }
-      return next
+      const nextTaskEntries = [...taskEntries]
+      const last = nextTaskEntries.at(-1)
+      if (!last) {
+        return prev
+      }
+      nextTaskEntries[nextTaskEntries.length - 1] = {
+        ...last,
+        assistantMessage: updater(last.assistantMessage),
+      }
+      return { ...prev, [task]: nextTaskEntries }
     })
   }
 
-  const { mutate, isPending } = useMutation(buildRouteMutationOptions())
-
   function handleSubmit(input: string, submittedTaskType: TaskType, fileName?: string) {
+    const task = fixedTaskType ?? submittedTaskType
     const config = loadModelConfig()
-    setCurrentModel(getModelForTask(config, fixedTaskType ?? submittedTaskType))
+    const model = getModelForTask(config, task)
 
-    abortRef.current?.abort()
+    ensureTaskHistoryLoaded(task)
+
+    if (!fixedTaskType) {
+      setActiveTask(task)
+    }
+    setCurrentModel(model)
+
+    // Cancel only an in-flight request for the same task.
+    abortControllersRef.current[task]?.abort()
     const abort = new AbortController()
-    abortRef.current = abort
+    abortControllersRef.current[task] = abort
 
     const newEntry: ConversationEntry = {
       assistantMessage: {
@@ -84,28 +135,36 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
         status: 'streaming',
       },
       id: `${Date.now()}-${Math.random()}`,
-      userMessage: { content: input, fileName, taskType: submittedTaskType, timestamp: new Date() },
+      userMessage: { content: input, fileName, taskType: task, timestamp: new Date() },
     }
 
-    setEntries((prev) => [...prev, newEntry])
-    if (!fixedTaskType) {
-      setActiveTask(submittedTaskType)
+    setEntriesByTask((prev) => ({
+      ...prev,
+      [task]: [...prev[task], newEntry],
+    }))
+    setLoadingByTask((prev) => ({ ...prev, [task]: true }))
+
+    const { mutationFn } = buildRouteMutationOptions()
+    if (!mutationFn) {
+      updateLastAssistant(task, (prev) => ({ ...prev, error: 'Route mutation is not configured.', status: 'error' }))
+      setLoadingByTask((prev) => ({ ...prev, [task]: false }))
+      return
     }
 
-    mutate({
+    void mutationFn({
       analystModel: getAnalystModel(config),
       callbacks: {
         onCost: (cost) => {
-          updateLastAssistant((prev) => ({ ...prev, cost }))
+          updateLastAssistant(task, (prev) => ({ ...prev, cost }))
           addSaving(cost.largeModelCostUsd, cost.inputTokens, cost.outputTokens)
         },
-        onDone: () => updateLastAssistant((prev) => ({ ...prev, status: 'done' })),
-        onError: (message) => updateLastAssistant((prev) => ({ ...prev, error: message, status: 'error' })),
-        onInterrupted: () => updateLastAssistant((prev) => ({ ...prev, status: 'interrupted' })),
-        onResponseChunk: (text) => updateLastAssistant((prev) => ({ ...prev, content: prev.content + text })),
+        onDone: () => updateLastAssistant(task, (prev) => ({ ...prev, status: 'done' })),
+        onError: (message) => updateLastAssistant(task, (prev) => ({ ...prev, error: message, status: 'error' })),
+        onInterrupted: () => updateLastAssistant(task, (prev) => ({ ...prev, status: 'interrupted' })),
+        onResponseChunk: (text) => updateLastAssistant(task, (prev) => ({ ...prev, content: prev.content + text })),
         onRoutingStep: (step) =>
-          updateLastAssistant((prev) => ({ ...prev, routingSteps: mergeRoutingStep(prev.routingSteps, step) })),
-        onSpecialistSelected: (payload) => updateLastAssistant((prev) => ({ ...prev, specialist: payload })),
+          updateLastAssistant(task, (prev) => ({ ...prev, routingSteps: mergeRoutingStep(prev.routingSteps, step) })),
+        onSpecialistSelected: (payload) => updateLastAssistant(task, (prev) => ({ ...prev, specialist: payload })),
       },
       commitModel: config.commitModel,
       deadCodeModel: config.deadCodeModel,
@@ -118,36 +177,56 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
       performanceHintModel: config.performanceHintModel,
       refactorModel: config.refactorModel,
       signal: abort.signal,
-      taskType: submittedTaskType,
+      taskType: task,
       testModel: config.testModel,
       typeHintsModel: config.typeHintsModel,
     })
+      .catch((error) => {
+        if (abort.signal.aborted) {
+          updateLastAssistant(task, (prev) => ({ ...prev, status: 'interrupted' }))
+          return
+        }
+        updateLastAssistant(task, (prev) => ({
+          ...prev,
+          error: error instanceof Error ? error.message : 'Unknown error',
+          status: 'error',
+        }))
+      })
+      .finally(() => {
+        if (abortControllersRef.current[task] === abort) {
+          abortControllersRef.current[task] = undefined
+        }
+        setLoadingByTask((prev) => ({ ...prev, [task]: false }))
+      })
   }
 
   function handleCancel() {
-    abortRef.current?.abort()
-    updateLastAssistant((prev) => ({ ...prev, status: 'interrupted' }))
+    const task = viewTask
+    abortControllersRef.current[task]?.abort()
+    setLoadingByTask((prev) => ({ ...prev, [task]: false }))
+    updateLastAssistant(task, (prev) => ({ ...prev, status: 'interrupted' }))
   }
 
   function handleClearHistory() {
-    // Side effect: writes to localStorage
-    clearHistory(fixedTaskType ?? activeTask)
-    setEntries([])
+    const task = viewTask
+    clearHistory(task)
+    setEntriesByTask((prev) => ({ ...prev, [task]: [] }))
   }
 
   return {
-    activeTask: fixedTaskType ?? activeTask,
+    activeTask: viewTask,
     currentModel,
-    entries,
+    entries: entriesByTask[viewTask],
     handleCancel,
     handleClearHistory,
     handleSubmit,
     isHydrated,
-    isLoading: isPending,
+    isLoading: loadingByTask[viewTask],
     setActiveTask: (task: TaskType) => {
-      if (!fixedTaskType) {
-        setActiveTask(task)
+      if (fixedTaskType) {
+        return
       }
+      setActiveTask(task)
     },
   }
 }

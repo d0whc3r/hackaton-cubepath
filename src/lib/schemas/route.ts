@@ -68,7 +68,7 @@ export const RouteRequestSchema = z.object({
   docstringModel: z.string().optional(),
   errorExplainModel: z.string().optional(),
   explainModel: z.string().optional(),
-  input: z.string().min(1).max(8000),
+  input: z.string().min(1).max(15_000),
   namingHelperModel: z.string().optional(),
   ollamaBaseUrl: z.string().optional(),
   performanceHintModel: z.string().optional(),

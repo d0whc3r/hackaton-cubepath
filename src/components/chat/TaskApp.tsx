@@ -10,9 +10,10 @@ interface TaskAppProps {
   fixedTaskType?: TaskType
   pageTitle?: string
   pageDescription?: string
+  composer?: React.ReactNode
 }
 
-export function TaskApp({ fixedTaskType, pageTitle, pageDescription }: TaskAppProps) {
+export function TaskApp({ fixedTaskType, pageTitle, pageDescription, composer }: TaskAppProps) {
   return (
     <AppProviders>
       <SidebarProvider className="h-screen overflow-hidden">
@@ -32,7 +33,7 @@ export function TaskApp({ fixedTaskType, pageTitle, pageDescription }: TaskAppPr
           </header>
           {/* Min-h-0 is critical: lets this flex child shrink below content height */}
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-            <ChatContainer fixedTaskType={fixedTaskType} />
+            <ChatContainer fixedTaskType={fixedTaskType} composer={composer} />
           </div>
         </SidebarInset>
       </SidebarProvider>

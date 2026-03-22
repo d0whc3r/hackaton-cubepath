@@ -10,7 +10,7 @@ const TASK_OPTIONS: { value: TaskType; label: string; placeholder: string }[] = 
   { label: 'Write Commit', placeholder: 'Paste a git diff or describe your changes…', value: 'commit' },
 ]
 
-export const MAX_CHARS = 8000
+export const MAX_CHARS = 15_000
 
 export interface UseChatInputReturn {
   displayTask: TaskType

@@ -18,7 +18,7 @@ const TASK_OPTIONS: { value: TaskType; label: string; placeholder: string }[] = 
   { label: 'Write Commit', placeholder: 'Paste a git diff or describe your changes…', value: 'commit' },
 ]
 
-const CHAR_AMBER_THRESHOLD = 7000
+const CHAR_AMBER_THRESHOLD = 13_000
 
 function charCountColorClass(overLimit: boolean, charCount: number): string {
   if (overLimit) {

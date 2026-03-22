@@ -1,11 +1,10 @@
-// Provide a minimal QueryClient wrapper
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, act } from '@testing-library/react'
-import { createElement } from 'react'
 
 import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
 
 import { useChatSession } from '@/hooks/use-chat-session'
+import { getModelForTask, loadModelConfig } from '@/lib/config/model-config'
+import { buildRouteMutationOptions } from '@/lib/services/route.service'
 import { clearHistory, loadHistory, saveHistory } from '@/lib/utils/history'
 
 // --- Mocks ---
@@ -21,12 +20,27 @@ vi.mock(import('@/lib/utils/savings'), () => ({
 
 vi.mock(import('@/lib/services/route.service'), () => ({
   buildRouteMutationOptions: vi.fn(() => ({
-    mutationFn: vi.fn(),
+    mutationFn: vi.fn().mockResolvedValue(),
     mutationKey: ['route'],
   })),
 }))
 
-vi.mock(import('@/components/model/ModelConfigDialog'), () => ({
+vi.mock(import('@/lib/config/model-config'), () => ({
+  DEFAULTS: {
+    analystModel: 'analyst-model',
+    commitModel: 'commit-model',
+    deadCodeModel: 'dead-code-model',
+    docstringModel: 'docstring-model',
+    errorExplainModel: 'error-explain-model',
+    explainModel: 'explain-model',
+    namingHelperModel: 'naming-helper-model',
+    ollamaBaseUrl: 'http://localhost:11434',
+    performanceHintModel: 'performance-hint-model',
+    refactorModel: 'refactor-model',
+    testModel: 'test-model',
+    translateModel: 'translate-model',
+    typeHintsModel: 'type-hints-model',
+  },
   getAnalystModel: vi.fn(() => 'analyst-model'),
   getModelForTask: vi.fn(() => 'test-model'),
   loadModelConfig: vi.fn(() => ({
@@ -40,17 +54,30 @@ vi.mock(import('@/components/model/ModelConfigDialog'), () => ({
   })),
 }))
 
-function makeWrapper() {
-  const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false }, queries: { retry: false } } })
-  return function Wrapper({ children }: { children: React.ReactNode }) {
-    return createElement(QueryClientProvider, { client: queryClient }, children)
-  }
-}
-
 describe('useChatSession', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     vi.mocked(loadHistory).mockReturnValue([])
+    vi.mocked(getModelForTask).mockReturnValue('test-model')
+    vi.mocked(loadModelConfig).mockReturnValue({
+      analystModel: 'analyst-model',
+      commitModel: 'commit-model',
+      deadCodeModel: 'dead-code-model',
+      docstringModel: 'docstring-model',
+      errorExplainModel: 'error-explain-model',
+      explainModel: 'explain-model',
+      namingHelperModel: 'naming-helper-model',
+      ollamaBaseUrl: 'http://localhost:11434',
+      performanceHintModel: 'performance-hint-model',
+      refactorModel: 'refactor-model',
+      testModel: 'test-model',
+      translateModel: 'translate-model',
+      typeHintsModel: 'type-hints-model',
+    })
+    vi.mocked(buildRouteMutationOptions).mockReturnValue({
+      mutationFn: vi.fn().mockResolvedValue(),
+      mutationKey: ['route'],
+    })
   })
 
   it('initialises entries from loadHistory', () => {
@@ -61,23 +88,23 @@ describe('useChatSession', () => {
     }
     vi.mocked(loadHistory).mockReturnValueOnce([mockEntry])
 
-    const { result } = renderHook(() => useChatSession('explain'), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession('explain'))
     expect(result.current.entries).toHaveLength(1)
     expect(result.current.entries[0].id).toBe('1')
   })
 
   it('initialises activeTask from fixedTaskType', () => {
-    const { result } = renderHook(() => useChatSession('commit'), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession('commit'))
     expect(result.current.activeTask).toBe('commit')
   })
 
   it('defaults activeTask to explain when no fixedTaskType', () => {
-    const { result } = renderHook(() => useChatSession(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession())
     expect(result.current.activeTask).toBe('explain')
   })
 
   it('handleSubmit appends entry with streaming status', () => {
-    const { result } = renderHook(() => useChatSession(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession())
 
     act(() => {
       result.current.handleSubmit('const x = 1', 'explain')
@@ -89,7 +116,11 @@ describe('useChatSession', () => {
   })
 
   it('handleCancel sets last entry status to interrupted', () => {
-    const { result } = renderHook(() => useChatSession(), { wrapper: makeWrapper() })
+    vi.mocked(buildRouteMutationOptions).mockReturnValueOnce({
+      mutationFn: vi.fn(() => new Promise<void>(() => {})),
+      mutationKey: ['route'],
+    })
+    const { result } = renderHook(() => useChatSession())
 
     act(() => {
       result.current.handleSubmit('some code', 'explain')
@@ -110,7 +141,7 @@ describe('useChatSession', () => {
         userMessage: { content: 'test', taskType: 'explain', timestamp: new Date() },
       },
     ])
-    const { result } = renderHook(() => useChatSession('explain'), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession('explain'))
 
     act(() => {
       result.current.handleClearHistory()
@@ -121,7 +152,7 @@ describe('useChatSession', () => {
   })
 
   it('saveHistory side-effect is called when entries change', () => {
-    const { result } = renderHook(() => useChatSession(), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession())
 
     act(() => {
       result.current.handleSubmit('code', 'test')
@@ -131,7 +162,7 @@ describe('useChatSession', () => {
   })
 
   it('fixedTaskType locks activeTask despite setActiveTask calls', () => {
-    const { result } = renderHook(() => useChatSession('refactor'), { wrapper: makeWrapper() })
+    const { result } = renderHook(() => useChatSession('refactor'))
 
     act(() => {
       result.current.setActiveTask('explain' as TaskType)
