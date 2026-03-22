@@ -16,9 +16,9 @@
 
 **Purpose**: Install new packages and wire up test infrastructure configuration. Nothing in the app changes yet.
 
-- [ ] T001 Add `wretch` and `wretch-middlewares` as production dependencies in `package.json` (run `pnpm add wretch wretch-middlewares`)
-- [ ] T002 Add `msw` as dev dependency in `package.json` (run `pnpm add -D msw`)
-- [ ] T003 Update `vitest.config.ts` — add `setupFiles: ['src/__tests__/msw/setup.ts']` to the `test` config block
+- [x] T001 Add `wretch` and `wretch-middlewares` as production dependencies in `package.json` (run `pnpm add wretch wretch-middlewares`)
+- [x] T002 Add `msw` as dev dependency in `package.json` (run `pnpm add -D msw`)
+- [x] T003 Update `vitest.config.ts` — add `setupFiles: ['src/__tests__/msw/setup.ts']` to the `test` config block
 
 ---
 
@@ -28,7 +28,7 @@
 
 **⚠️ CRITICAL**: All user story tasks depend on this phase being complete.
 
-- [ ] T004 Create `src/lib/http/ollama-client.ts` — export `ollamaWretch` as a server-side wretch base instance with `retry({ maxAttempts: 3, delayTimer: 500, exponential: true, until: (res) => res != null && res.status < 500 })` and `dedupe()` middleware from `wretch-middlewares`; no fixed base URL (Ollama URL is dynamic per-request)
+- [x] T004 Create `src/lib/http/ollama-client.ts` — export `ollamaWretch` as a server-side wretch base instance with `retry({ maxAttempts: 3, delayTimer: 500, exponential: true, until: (res) => res != null && res.status < 500 })` and `dedupe()` middleware from `wretch-middlewares`; no fixed base URL (Ollama URL is dynamic per-request)
 - [ ] T005 [P] Create `src/lib/http/app-client.ts` — export `appWretch` as a client-side wretch base instance with `QueryStringAddon` from `wretch/addons/queryString`, plus `retry({ maxAttempts: 3, delayTimer: 500, exponential: true, until: (res) => res != null && res.status < 500 })` and `dedupe()` middleware from `wretch-middlewares`; no fixed base URL (all paths are relative `/api/...`)
 - [ ] T006 [P] Create `src/__tests__/msw/server.ts` — set up MSW node server with `setupServer(...handlers)` importing from `./handlers`
 - [ ] T007 [P] Create `src/__tests__/msw/setup.ts` — call `beforeAll`, `afterEach`, `afterAll` as **module-level side-effects** (not exported): `beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))`, `afterEach(() => server.resetHandlers())`, `afterAll(() => server.close())`; Vitest's `setupFiles` executes this module automatically

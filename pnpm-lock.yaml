@@ -62,6 +62,12 @@ importers:
       tw-animate-css:
         specifier: 1.4.0
         version: 1.4.0
+      wretch:
+        specifier: 3.0.7
+        version: 3.0.7
+      wretch-middlewares:
+        specifier: 0.1.13
+        version: 0.1.13(wretch@3.0.7)
       zod:
         specifier: 4.3.6
         version: 4.3.6
@@ -114,6 +120,9 @@ importers:
       lint-staged:
         specifier: 16.4.0
         version: 16.4.0
+      msw:
+        specifier: 2.12.14
+        version: 2.12.14(@types/node@25.5.0)(typescript@5.9.3)
       oxfmt:
         specifier: 0.41.0
         version: 0.41.0
@@ -4974,6 +4983,15 @@ packages:
 
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
+
+  wretch-middlewares@0.1.13:
+    resolution: {integrity: sha512-PngjqcaIHgF776r3ZXUL44Mh6BMQvealyJ0OBmC4GruNsV77c3wZGqboH6s0KvMCve4QEIBkIC6HEvQXpBeYsA==}
+    peerDependencies:
+      wretch: ^1.7.6
+
+  wretch@3.0.7:
+    resolution: {integrity: sha512-1zvhHLcwjGx5OMGHcdkuVmHWd/8NQ0gS4oV6+Er1YTnav4QTMTDl7ZI5QklELNVsX1BDNQk2kUrhoUSILomelg==}
+    engines: {node: '>=22'}
 
   ws@8.18.0:
     resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
@@ -10191,6 +10209,12 @@ snapshots:
       strip-ansi: 7.2.0
 
   wrappy@1.0.2: {}
+
+  wretch-middlewares@0.1.13(wretch@3.0.7):
+    dependencies:
+      wretch: 3.0.7
+
+  wretch@3.0.7: {}
 
   ws@8.18.0: {}
 

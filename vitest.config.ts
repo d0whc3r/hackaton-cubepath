@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'happy-dom',
     globals: true,
     include: ['src/**/*.test.{ts,tsx}'],
+    setupFiles: ['src/__tests__/msw/setup.ts'],
     watch: false,
   },
 })
