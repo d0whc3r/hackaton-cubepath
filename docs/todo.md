@@ -1,7 +1,7 @@
 gestion de errores
 logging
 sentry
-external logger
+external logger https://loglayer.dev
 info mejor para el usuario feedback
 
 tasks:

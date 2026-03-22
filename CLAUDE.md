@@ -4,6 +4,8 @@ Auto-generated from all feature plans. Last updated: 2026-03-22
 
 ## Active Technologies
 
+- TypeScript 5.9.3 (strict mode) + wretch (new), wretch-middlewares (new), msw 2.x (new, dev), Astro 6.0.8, React 19, Vitest 4.1.0 (005-migrate-fetch-wretch)
+
 - TypeScript 5.9.3 (strict mode) + React 19+, Vitest + happy-dom (testing) (003-storage-hook-attempt)
 - Browser localStorage / sessionStorage (Web Storage API) (003-storage-hook-attempt)
 - TypeScript 5.9.3 (strict mode) + Vitest (testing), AI SDK (`ai` package) (004-prompt-refinement)
@@ -27,10 +29,10 @@ TypeScript 5.9.3 (strict mode): Follow standard conventions
 
 ## Recent Changes
 
+- 005-migrate-fetch-wretch: Added TypeScript 5.9.3 (strict mode) + wretch (new), wretch-middlewares (new), msw 2.x (new, dev), Astro 6.0.8, React 19, Vitest 4.1.0
+
 - 004-prompt-refinement: Added TypeScript 5.9.3 (strict mode) + Vitest (testing), AI SDK (`ai` package)
 - 003-storage-hook-attempt: Added TypeScript 5.9.3 (strict mode) + React 19+, Vitest + happy-dom (testing)
-
-- 002-code-quality-refactor: Added TypeScript 5.9.3 (strict mode)
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
