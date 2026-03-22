@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an improvement or new capability.
+title: '[Feature]: '
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What user or developer pain does this address?
+      placeholder: Describe the problem first.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Explain the desired behavior.
+      placeholder: Describe the feature proposal.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What options did you consider?
+      placeholder: Optional alternatives.
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Expected impact
+      description: How would this improve the project?
+      placeholder: UX, quality, performance, maintainability, etc.
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help implement this.
+          required: false
