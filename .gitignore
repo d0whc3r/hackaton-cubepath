@@ -1,8 +1,10 @@
 !.agents/
+!.agent/
 !.claude/
 !.codex/
 !.specify/
 !.opencode/
+!.trae/
 node_modules/
 .pnpm-store/
 dist/
@@ -16,3 +18,4 @@ coverage/
 .idea/
 worker-configuration.d.ts
 *.tsbuildinfo
+ollama_data/

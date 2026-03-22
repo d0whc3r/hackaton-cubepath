@@ -109,12 +109,9 @@ export default defineConfig({
   ],
   plugins: ['typescript', 'unicorn', 'oxc', 'import'],
   rules: {
+    complexity: ['warn', 10],
     'eslint/no-unused-vars': 'error',
-    'func-style': [
-      'warn',
-      'declaration',
-      { allowArrowFunctions: true, overrides: { namedExports: 'ignore' } },
-    ],
+    'func-style': ['warn', 'declaration', { allowArrowFunctions: true, overrides: { namedExports: 'ignore' } }],
     'group-exports': 'off',
     'id-length': [
       'warn',
@@ -136,6 +133,7 @@ export default defineConfig({
     'import/no-unresolved': 'error',
     'import/no-unused-modules': 'warn',
     'max-dependencies': 'off',
+    'max-depth': ['warn', 6],
     'max-lines': ['warn', MAX_LINES],
     'max-lines-per-function': ['warn', MAX_LINES_PER_FUNCTION],
     'max-params': ['warn', 3],

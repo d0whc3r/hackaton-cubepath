@@ -1,0 +1,19 @@
+packages:
+  - .
+
+allowedDeprecatedVersions: {}
+
+lockfile: true
+
+packageExtensions: {}
+
+preferFrozenLockfile: true
+
+resolutionMode: highest
+
+shamefullyHoist: true
+hoist: true
+
+supportedArchitectures:
+  cpu: [x64, arm64]
+  os: [darwin, linux]

@@ -1,0 +1,12 @@
+{
+  "extends": ["astro/tsconfigs/strict", "./tsconfig.base.json"],
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "@astrojs/ts-plugin"
+      }
+    ]
+  },
+  "include": [".astro/types.d.ts", "src/**/*", "./worker-configuration.d.ts"],
+  "exclude": ["dist", "src/**/*.test.ts", "src/**/*.test.tsx", "vitest.config.ts"]
+}
