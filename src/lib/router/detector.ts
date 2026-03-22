@@ -86,7 +86,7 @@ export function detectLanguage(input: string): DetectedLanguage {
     return { confidence: 'low', language: 'unknown' }
   }
 
-  const sorted = [...scores.entries()].toSorted((a, b) => b[1] - a[1])
+  const sorted = [...scores.entries()].toSorted((elementA, elementB) => elementB[1] - elementA[1])
   const [language, topScore] = sorted[0]
 
   const confidence: DetectedLanguage['confidence'] = topScore >= 3 ? 'high' : topScore >= 2 ? 'medium' : 'low'

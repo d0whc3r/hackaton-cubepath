@@ -85,6 +85,6 @@ function defaultFramework(language: string): string | null {
   return map[language.toLowerCase()] ?? null
 }
 
-function isConfidence(v: unknown): v is CodeContext['confidence'] {
-  return v === 'high' || v === 'medium' || v === 'low'
+function isConfidence(val: unknown): val is CodeContext['confidence'] {
+  return val === 'high' || val === 'medium' || val === 'low'
 }

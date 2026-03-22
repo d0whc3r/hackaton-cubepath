@@ -83,6 +83,9 @@ export default defineConfig({
     {
       files: ['**/*.astro'],
       rules: {
+        // Astro components use side-effect CSS imports and inline IIFEs
+        'func-names': 'off',
+        'import/no-unassigned-import': 'off',
         'unicorn/filename-case': ['warn', { case: 'pascalCase' }],
       },
     },
@@ -147,7 +150,7 @@ export default defineConfig({
     'max-depth': ['warn', 6],
     'max-lines': ['warn', MAX_LINES],
     'max-lines-per-function': ['warn', MAX_LINES_PER_FUNCTION],
-    'max-params': ['warn', 3],
+    'max-params': ['warn', 5],
     'max-statements': ['warn', MAX_STATEMENTS],
     'no-array-for-each': 'off',
     'no-await-in-loop': 'off',
@@ -162,7 +165,7 @@ export default defineConfig({
     'no-magic-numbers': [
       'warn',
       {
-        ignore: [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1024],
+        ignore: [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1024],
         ignoreArrayIndexes: true,
         ignoreDefaultValues: true,
         ignoreNumericLiteralTypes: true,
@@ -170,6 +173,7 @@ export default defineConfig({
         ignoreTypeIndexes: true,
       },
     ],
+    'no-map-spread': 'off',
     'no-named-export': 'allow',
     'no-negated-condition': 'off',
     'no-nested-ternary': 'off',
@@ -186,6 +190,7 @@ export default defineConfig({
     'sort-imports': 'off',
     'typescript/no-explicit-any': 'warn',
     'typescript/no-unused-vars': 'warn',
+    'typescript/unified-signatures': 'off',
     'unicorn/filename-case': ['warn', { case: 'kebabCase' }],
     'unicorn/no-nested-ternary': 'error',
     'unicorn/no-null': 'off',

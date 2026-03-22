@@ -30,7 +30,7 @@ export function estimateCost(inputChars: number, outputChars: number): CostEstim
       providerId: provider.id,
       providerLabel: provider.label,
     }
-  }).filter((c): c is NonNullable<typeof c> => c !== null)
+  }).filter((prov): prov is NonNullable<typeof prov> => prov !== null)
 
   const specialistCostUsd = totalTokens * SPECIALIST_COST_PER_TOKEN
   const largeModelCostUsd = totalTokens * LARGE_MODEL_COST_PER_TOKEN
