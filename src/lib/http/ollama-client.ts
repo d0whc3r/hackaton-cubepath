@@ -1,5 +1,4 @@
 import wretch from 'wretch'
-import { dedupe, retry } from 'wretch-middlewares'
 
 /**
  * Server-side wretch instance for calling the Ollama API.
@@ -7,10 +6,8 @@ import { dedupe, retry } from 'wretch-middlewares'
  * No fixed base URL — callers pass the full endpoint URL via `.url(fullUrl)` because
  * the Ollama base URL is dynamic (supplied per-request from query params or request body).
  *
- * Middleware applied globally:
- * - retry: retries on network errors and HTTP 5xx, max 3 attempts, exponential backoff.
- *          HTTP 4xx responses are NOT retried (they indicate a client-side problem).
- * - dedupe: collapses identical in-flight GET requests.
+ * Retry and deduplication are handled by React Query's QueryClient on the client side.
+ * Server-side API routes handle errors via try/catch.
  *
  * Usage patterns:
  *
@@ -24,13 +21,4 @@ import { dedupe, retry } from 'wretch-middlewares'
  * Overriding defaults for a specific call (does NOT modify the shared instance):
  *   await ollamaWretch.url('https://other.api/path').options({ credentials: 'include' }).get().json()
  */
-export const ollamaWretch = wretch().middlewares([
-  retry({
-    delayRamp: (delay, attempt) => delay * 2 ** (attempt - 1),
-    delayTimer: 500,
-    maxAttempts: 3,
-    retryOnNetworkError: true,
-    until: (res) => res !== null && res !== undefined && res.status < 500,
-  }),
-  dedupe(),
-])
+export const ollamaWretch = wretch()

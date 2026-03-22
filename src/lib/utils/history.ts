@@ -15,15 +15,14 @@ function historyKey(taskType: TaskType | string | undefined): string {
 }
 
 function toSerializedEntries(entries: ConversationEntry[]): SerializedEntry[] {
-  return entries.slice(-MAX_ENTRIES).map((entry) =>
-    Object.assign(entry, {
-      assistantMessage: {
-        ...entry.assistantMessage,
-        status: entry.assistantMessage.status === `streaming` ? `interrupted` : entry.assistantMessage.status,
-      },
-      userMessage: { ...entry.userMessage, timestamp: entry.userMessage.timestamp.toISOString() },
-    }),
-  )
+  return entries.slice(-MAX_ENTRIES).map((entry) => ({
+    ...entry,
+    assistantMessage: {
+      ...entry.assistantMessage,
+      status: entry.assistantMessage.status === `streaming` ? `interrupted` : entry.assistantMessage.status,
+    },
+    userMessage: { ...entry.userMessage, timestamp: entry.userMessage.timestamp.toISOString() },
+  }))
 }
 
 function fromSerializedEntries(data: SerializedEntry[]): ConversationEntry[] {

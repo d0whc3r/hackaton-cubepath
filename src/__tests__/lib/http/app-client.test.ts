@@ -22,7 +22,7 @@ describe('appWretch', () => {
     expect(data.models).toEqual(['llama3.2'])
   })
 
-  it('sends correct Content-Type for POST with object body', async () => {
+  it('sends POST with object body', async () => {
     const res = await appWretch
       .url('/api/ollama/pull')
       .post({ baseUrl: 'http://localhost:11434', model: 'llama3.2' })
@@ -30,10 +30,9 @@ describe('appWretch', () => {
     expect(res.ok).toBeTruthy()
   })
 
-  it('throws after exhausting retries on 5xx', async () => {
+  it('throws WretchError on 5xx', async () => {
     server.use(appErrorHandlers.models500)
-    // Wretch-middlewares throws "Number of attempts exceeded." after all retries
-    await expect(appWretch.url('/api/ollama/models').get().json()).rejects.toThrow()
+    await expect(appWretch.url('/api/ollama/models').get().json()).rejects.toBeInstanceOf(WretchError)
   })
 
   it('throws WretchError on 4xx', async () => {

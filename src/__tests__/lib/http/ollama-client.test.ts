@@ -23,21 +23,16 @@ describe('ollamaWretch', () => {
     expect(data.capabilities).toContain('completion')
   })
 
-  it('throws WretchError on 4xx (no retry)', async () => {
+  it('throws WretchError on 4xx', async () => {
     server.use(ollamaErrorHandlers.show404)
-    const fetchSpy = vi.spyOn(globalThis, 'fetch')
     await expect(ollamaWretch.url(`${BASE}/api/show`).post({ model: 'missing' }).json()).rejects.toBeInstanceOf(
       WretchError,
     )
-    // 4xx: until() returns true immediately → only 1 attempt
-    expect(fetchSpy).toHaveBeenCalledTimes(1)
-    fetchSpy.mockRestore()
   })
 
-  it('throws after exhausting retries on 5xx', async () => {
+  it('throws WretchError on 5xx', async () => {
     server.use(ollamaErrorHandlers.tags500)
-    // Wretch-middlewares throws "Number of attempts exceeded." after all retries
-    await expect(ollamaWretch.url(`${BASE}/api/tags`).get().json()).rejects.toThrow()
+    await expect(ollamaWretch.url(`${BASE}/api/tags`).get().json()).rejects.toBeInstanceOf(WretchError)
   })
 
   it('returns raw Response for streaming calls via .res()', async () => {
