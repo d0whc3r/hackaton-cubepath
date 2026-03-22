@@ -41,19 +41,19 @@ export function buildSpecialists(env: SpecialistEnv): Record<TaskType, Specialis
       modelId: env.commitModel ?? '',
     },
     explain: {
-      buildSystemPrompt: (context: CodeContext, _input: string) => buildExplainPrompt(context),
+      buildSystemPrompt: (context: CodeContext) => buildExplainPrompt(context),
       displayName: 'Explanation Specialist',
       id: 'explanation-specialist',
       modelId: env.explainModel,
     },
     refactor: {
-      buildSystemPrompt: (context: CodeContext, _input: string) => buildRefactorPrompt(context),
+      buildSystemPrompt: (context: CodeContext) => buildRefactorPrompt(context),
       displayName: 'Refactor Specialist',
       id: 'refactor-specialist',
       modelId: env.refactorModel ?? '',
     },
     test: {
-      buildSystemPrompt: (context: CodeContext, input: string) => {
+      buildSystemPrompt: (context: CodeContext) => {
         const enriched = {
           ...context,
           testFramework: context.testFramework ?? inferTestFramework(context.language),

@@ -171,17 +171,17 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ error: 'VALIDATION_ERROR', message }, { status: 400 })
   }
 
-  const d = parsed.data
+  const { data } = parsed
 
   const req: ValidatedRequest = {
-    analystModel: resolveModel(d.analystModel, import.meta.env.OLLAMA_ANALYST_MODEL, DEFAULT_ANALYST_MODEL),
-    commitModel: resolveModel(d.commitModel, import.meta.env.OLLAMA_COMMIT_MODEL, DEFAULT_MODELS.commit),
-    explainModel: resolveModel(d.explainModel, import.meta.env.OLLAMA_EXPLAIN_MODEL, DEFAULT_MODELS.explain),
-    input: d.input,
-    ollamaBaseUrl: resolveModel(d.ollamaBaseUrl, import.meta.env.OLLAMA_BASE_URL, OLLAMA_BASE_URL_DEFAULT),
-    refactorModel: resolveModel(d.refactorModel, import.meta.env.OLLAMA_REFACTOR_MODEL, DEFAULT_MODELS.refactor),
-    taskType: d.taskType,
-    testModel: resolveModel(d.testModel, import.meta.env.OLLAMA_TEST_MODEL, DEFAULT_MODELS.test),
+    analystModel: resolveModel(data.analystModel, import.meta.env.OLLAMA_ANALYST_MODEL, DEFAULT_ANALYST_MODEL),
+    commitModel: resolveModel(data.commitModel, import.meta.env.OLLAMA_COMMIT_MODEL, DEFAULT_MODELS.commit),
+    explainModel: resolveModel(data.explainModel, import.meta.env.OLLAMA_EXPLAIN_MODEL, DEFAULT_MODELS.explain),
+    input: data.input,
+    ollamaBaseUrl: resolveModel(data.ollamaBaseUrl, import.meta.env.OLLAMA_BASE_URL, OLLAMA_BASE_URL_DEFAULT),
+    refactorModel: resolveModel(data.refactorModel, import.meta.env.OLLAMA_REFACTOR_MODEL, DEFAULT_MODELS.refactor),
+    taskType: data.taskType,
+    testModel: resolveModel(data.testModel, import.meta.env.OLLAMA_TEST_MODEL, DEFAULT_MODELS.test),
   }
 
   const stream = buildSSEStream(req)

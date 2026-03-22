@@ -23,11 +23,11 @@ export interface UseChatSessionReturn {
 type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
 
 function mergeRoutingStep(steps: RoutingStep[], step: RoutingStep): RoutingStep[] {
-  const idx = steps.findIndex((s) => s.step === step.step)
+  const idx = steps.findIndex((st) => st.step === step.step)
   if (idx === -1) {
     return [...steps, step]
   }
-  return steps.map((s, i) => (i === idx ? step : s))
+  return steps.map((st, i) => (i === idx ? step : st))
 }
 
 export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
