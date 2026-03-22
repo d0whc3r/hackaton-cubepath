@@ -38,13 +38,7 @@ const STEP_LABELS: Record<RoutingStepName, string> = {
   selecting_specialist: 'Select specialist',
 }
 
-function StepIcon({
-  status,
-  stepName,
-}: {
-  readonly status: RoutingStep['status']
-  readonly stepName: RoutingStepName
-}) {
+function StepIcon({ status, stepName }: { status: RoutingStep['status']; stepName: RoutingStepName }) {
   const Icon = STEP_ICONS[stepName]
   if (status === 'active') {
     return <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
@@ -59,9 +53,9 @@ function StepIcon({
 }
 
 interface RoutingProgressProps {
-  readonly steps: RoutingStep[]
-  readonly specialist: SpecialistInfo | null
-  readonly isStreaming: boolean
+  steps: RoutingStep[]
+  specialist: SpecialistInfo | null
+  isStreaming: boolean
 }
 
 export function RoutingProgress({ steps, specialist, isStreaming }: RoutingProgressProps) {

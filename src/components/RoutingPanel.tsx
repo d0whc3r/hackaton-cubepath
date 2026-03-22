@@ -6,8 +6,8 @@ interface SpecialistBadge {
 }
 
 interface RoutingPanelProps {
-  readonly steps: RoutingStep[]
-  readonly specialist: SpecialistBadge | null
+  steps: RoutingStep[]
+  specialist: SpecialistBadge | null
 }
 
 export function RoutingPanel({ steps, specialist }: RoutingPanelProps) {

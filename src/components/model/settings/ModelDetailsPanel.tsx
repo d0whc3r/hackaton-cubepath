@@ -10,16 +10,16 @@ import type { PullState, RuntimeModelDetails, SectionDef } from './types'
 import { ollamaModelUrl } from './helpers'
 
 interface ModelDetailsPanelProps {
-  readonly section: SectionDef
-  readonly config: ModelConfig
-  readonly isCustom: boolean
-  readonly isInstalled: boolean
-  readonly copiedModelId: string | null
-  readonly pullState?: PullState
-  readonly runtimeDetails: RuntimeModelDetails | null
-  readonly ollamaBaseUrl: string
-  readonly onPull: (modelId: string, baseUrl: string) => void
-  readonly onCopyPull: (modelId: string) => void
+  section: SectionDef
+  config: ModelConfig
+  isCustom: boolean
+  isInstalled: boolean
+  copiedModelId: string | null
+  pullState?: PullState
+  runtimeDetails: RuntimeModelDetails | null
+  ollamaBaseUrl: string
+  onPull: (modelId: string, baseUrl: string) => void
+  onCopyPull: (modelId: string) => void
 }
 
 const BYTES_IN_GB = 1024 * 1024 * 1024

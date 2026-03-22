@@ -113,7 +113,7 @@ type LangCode = (typeof LANGUAGES)[number]['code']
 type Status = 'idle' | 'translating' | 'done' | 'error'
 
 interface TranslateButtonProps {
-  readonly content: string
+  content: string
 }
 
 export function TranslateButton({ content }: TranslateButtonProps) {

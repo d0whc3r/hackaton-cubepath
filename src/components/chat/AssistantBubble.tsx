@@ -8,7 +8,7 @@ import { CostBadge } from '@/components/cost/CostBadge'
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
 
 interface AssistantBubbleProps {
-  readonly msg: AssistantMessage
+  msg: AssistantMessage
 }
 
 export function AssistantBubble({ msg }: AssistantBubbleProps) {

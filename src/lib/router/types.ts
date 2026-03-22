@@ -1,19 +1,19 @@
 export type TaskType = 'explain' | 'test' | 'refactor' | 'commit'
 
 export interface ModelOption {
-  readonly id: string
-  readonly label: string
-  readonly params: string
-  readonly size: string
-  readonly description: string
+  id: string
+  label: string
+  params: string
+  size: string
+  description: string
   /** Context window in tokens (e.g. 8192, 32768, 131072) */
-  readonly contextWindow?: number
+  contextWindow?: number
   /**
    * Translation section only — true if the model can reliably translate
    * code blocks (not just prose). When false/absent, code blocks are always
    * extracted client-side before sending to the model.
    */
-  readonly canTranslateCode?: boolean
+  canTranslateCode?: boolean
 }
 
 export interface DetectedLanguage {

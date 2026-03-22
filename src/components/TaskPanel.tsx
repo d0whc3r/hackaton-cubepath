@@ -10,10 +10,10 @@ const TASK_BUTTONS: { label: string; value: TaskType }[] = [
 ]
 
 interface TaskTypeButtonProps {
-  readonly label: string
-  readonly value: TaskType
-  readonly active: boolean
-  readonly onSelect: (value: TaskType) => void
+  label: string
+  value: TaskType
+  active: boolean
+  onSelect: (value: TaskType) => void
 }
 
 function TaskTypeButton({ label, value, active, onSelect }: TaskTypeButtonProps) {
@@ -29,10 +29,10 @@ function TaskTypeButton({ label, value, active, onSelect }: TaskTypeButtonProps)
 }
 
 interface TaskPanelProps {
-  readonly isLoading: boolean
-  readonly onSubmit: (input: string, taskType: TaskType) => void
-  readonly onCancel: () => void
-  readonly initialInput?: string
+  isLoading: boolean
+  onSubmit: (input: string, taskType: TaskType) => void
+  onCancel: () => void
+  initialInput?: string
 }
 
 export function TaskPanel({ isLoading, onSubmit, onCancel, initialInput = '' }: TaskPanelProps) {

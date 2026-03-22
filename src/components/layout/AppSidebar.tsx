@@ -51,7 +51,7 @@ const TASK_PATH_BY_TYPE: Record<TaskType, string> = {
 }
 
 interface AppSidebarProps {
-  readonly fixedTaskType?: TaskType
+  fixedTaskType?: TaskType
 }
 
 export function AppSidebar({ fixedTaskType }: AppSidebarProps) {

@@ -11,11 +11,11 @@ import {
 import type { SectionDef } from './types'
 
 interface MissingModelsDialogProps {
-  readonly open: boolean
-  readonly sections: SectionDef[]
-  readonly getModelId: (section: SectionDef) => string
-  readonly onOpenChange: (open: boolean) => void
-  readonly onInstallMissing: () => void
+  open: boolean
+  sections: SectionDef[]
+  getModelId: (section: SectionDef) => string
+  onOpenChange: (open: boolean) => void
+  onInstallMissing: () => void
 }
 
 export function MissingModelsDialog({

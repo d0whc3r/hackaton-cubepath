@@ -9,11 +9,11 @@ import { clearHistory, loadHistory, saveHistory } from '@/lib/utils/history'
 import { addSaving } from '@/lib/utils/savings'
 
 export interface UseChatSessionReturn {
-  readonly entries: ConversationEntry[]
-  readonly activeTask: TaskType
-  readonly isLoading: boolean
-  readonly isHydrated: boolean
-  readonly currentModel: string
+  entries: ConversationEntry[]
+  activeTask: TaskType
+  isLoading: boolean
+  isHydrated: boolean
+  currentModel: string
   setActiveTask: (task: TaskType) => void
   handleSubmit: (input: string, taskType: TaskType, fileName?: string) => void
   handleCancel: () => void

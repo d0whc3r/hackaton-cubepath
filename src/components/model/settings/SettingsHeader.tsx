@@ -4,9 +4,9 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
 interface SettingsHeaderProps {
-  readonly onBack: () => void
-  readonly onReset: () => void
-  readonly onSave: () => void
+  onBack: () => void
+  onReset: () => void
+  onSave: () => void
 }
 
 export function SettingsHeader({ onBack, onReset, onSave }: SettingsHeaderProps) {

@@ -1,7 +1,7 @@
 import type { CostEstimate } from '../lib/router/types'
 
 interface CostBadgeProps {
-  readonly cost: CostEstimate | null
+  cost: CostEstimate | null
 }
 
 function formatUsd(usd: number): string {

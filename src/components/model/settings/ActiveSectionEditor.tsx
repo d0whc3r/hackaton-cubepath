@@ -5,13 +5,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { SectionDef } from './types'
 
 interface ActiveSectionEditorProps {
-  readonly section: SectionDef
-  readonly selectValue: string
-  readonly defaultModelId: string
-  readonly customValue: string
-  readonly isCustom: boolean
-  readonly onModelChange: (value: string) => void
-  readonly onCustomModelChange: (value: string) => void
+  section: SectionDef
+  selectValue: string
+  defaultModelId: string
+  customValue: string
+  isCustom: boolean
+  onModelChange: (value: string) => void
+  onCustomModelChange: (value: string) => void
 }
 
 export function ActiveSectionEditor({

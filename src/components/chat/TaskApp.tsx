@@ -7,9 +7,9 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 
 interface TaskAppProps {
-  readonly fixedTaskType?: TaskType
-  readonly pageTitle?: string
-  readonly pageDescription?: string
+  fixedTaskType?: TaskType
+  pageTitle?: string
+  pageDescription?: string
 }
 
 export function TaskApp({ fixedTaskType, pageTitle, pageDescription }: TaskAppProps) {

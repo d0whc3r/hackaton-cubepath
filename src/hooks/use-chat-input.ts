@@ -13,11 +13,11 @@ const TASK_OPTIONS: { value: TaskType; label: string; placeholder: string }[] = 
 export const MAX_CHARS = 8000
 
 export interface UseChatInputReturn {
-  readonly displayTask: TaskType
-  readonly currentOption: { value: TaskType; label: string; placeholder: string } | undefined
-  readonly charCount: number
-  readonly overLimit: boolean
-  readonly modelLabel: string
+  displayTask: TaskType
+  currentOption: { value: TaskType; label: string; placeholder: string } | undefined
+  charCount: number
+  overLimit: boolean
+  modelLabel: string
   onSubmit: () => void
   onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void
 }

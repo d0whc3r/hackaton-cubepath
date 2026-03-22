@@ -9,8 +9,8 @@ export interface HistoryItem {
 }
 
 interface HistoryPanelProps {
-  readonly history: HistoryItem[]
-  readonly onReuse: (input: string, taskType: TaskType) => void
+  history: HistoryItem[]
+  onReuse: (input: string, taskType: TaskType) => void
 }
 
 const PAGE_SIZE = 10

@@ -1,8 +1,8 @@
 interface ResponsePanelProps {
-  readonly responseText: string
-  readonly specialistDisplayName: string | null
-  readonly error: string | null
-  readonly interrupted: boolean
+  responseText: string
+  specialistDisplayName: string | null
+  error: string | null
+  interrupted: boolean
 }
 
 export function ResponsePanel({ responseText, specialistDisplayName, error, interrupted }: ResponsePanelProps) {

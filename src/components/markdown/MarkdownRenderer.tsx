@@ -6,8 +6,8 @@ const REMARK_PLUGINS = [remarkGfm] as const
 const REHYPE_PLUGINS = [rehypeHighlight] as const
 
 interface MarkdownRendererProps {
-  readonly content: string
-  readonly className?: string
+  content: string
+  className?: string
 }
 
 export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {

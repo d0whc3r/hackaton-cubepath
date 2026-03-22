@@ -3,12 +3,12 @@ import { createContext, useContext } from 'react'
 import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
 
 export interface ChatContextValue {
-  readonly entries: ConversationEntry[]
-  readonly isLoading: boolean
-  readonly isHydrated: boolean
-  readonly activeTask: TaskType
-  readonly fixedTaskType?: TaskType
-  readonly currentModel: string
+  entries: ConversationEntry[]
+  isLoading: boolean
+  isHydrated: boolean
+  activeTask: TaskType
+  fixedTaskType?: TaskType
+  currentModel: string
   setActiveTask: (task: TaskType) => void
   handleSubmit: (input: string, taskType: TaskType, fileName?: string) => void
   handleCancel: () => void

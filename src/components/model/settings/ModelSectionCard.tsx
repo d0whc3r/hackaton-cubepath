@@ -10,21 +10,21 @@ import { CONTEXT_DIVISOR, CUSTOM_VALUE } from './constants'
 import { ModelStatusBadge } from './ModelStatusBadge'
 
 interface ModelSectionCardProps {
-  readonly section: SectionDef
-  readonly config: ModelConfig
-  readonly isActive: boolean
-  readonly selectValue: string
-  readonly isCustom: boolean
-  readonly customValue: string
-  readonly defaultModelId: string
-  readonly isInstalled: boolean
-  readonly installedModelsReady: boolean
-  readonly pullState?: PullState
-  readonly ollamaBaseUrl: string
-  readonly onActivate: () => void
-  readonly onModelChange: (value: string) => void
-  readonly onCustomModelChange: (value: string) => void
-  readonly onPull: (modelId: string, baseUrl: string) => void
+  section: SectionDef
+  config: ModelConfig
+  isActive: boolean
+  selectValue: string
+  isCustom: boolean
+  customValue: string
+  defaultModelId: string
+  isInstalled: boolean
+  installedModelsReady: boolean
+  pullState?: PullState
+  ollamaBaseUrl: string
+  onActivate: () => void
+  onModelChange: (value: string) => void
+  onCustomModelChange: (value: string) => void
+  onPull: (modelId: string, baseUrl: string) => void
 }
 
 export function ModelSectionCard({

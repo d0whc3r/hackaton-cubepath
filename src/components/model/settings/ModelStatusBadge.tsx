@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge'
 import type { PullState } from './types'
 
 interface ModelStatusBadgeProps {
-  readonly modelId: string
-  readonly installed: boolean
-  readonly pullState: PullState | undefined
-  readonly ollamaBaseUrl: string
-  readonly onPull: (modelId: string, baseUrl: string) => void
+  modelId: string
+  installed: boolean
+  pullState: PullState | undefined
+  ollamaBaseUrl: string
+  onPull: (modelId: string, baseUrl: string) => void
 }
 
 export function ModelStatusBadge({ modelId, installed, pullState, ollamaBaseUrl, onPull }: ModelStatusBadgeProps) {

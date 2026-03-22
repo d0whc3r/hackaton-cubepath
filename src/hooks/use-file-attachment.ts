@@ -3,8 +3,8 @@ import { useRef, useState } from 'react'
 export type OnFileContent = (content: string, fileName: string) => void
 
 export interface UseFileAttachmentReturn {
-  readonly attachedFileName: string | null
-  readonly fileInputRef: React.RefObject<HTMLInputElement>
+  attachedFileName: string | null
+  fileInputRef: React.RefObject<HTMLInputElement>
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   removeFile: () => void
 }

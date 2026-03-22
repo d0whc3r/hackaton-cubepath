@@ -12,7 +12,7 @@ function formatTokens(tokens: number): string {
 }
 
 interface CostBadgeProps {
-  readonly cost: CostEstimate
+  cost: CostEstimate
 }
 
 export function CostBadge({ cost }: CostBadgeProps) {

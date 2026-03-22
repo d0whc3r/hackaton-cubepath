@@ -3,11 +3,11 @@ import { Badge } from '@/components/ui/badge'
 import type { SectionDef } from './types'
 
 interface SectionCardButtonProps {
-  readonly section: SectionDef
-  readonly selected: boolean
-  readonly modelId: string
-  readonly installed: boolean
-  readonly onSelectSection: (section: SectionDef) => void
+  section: SectionDef
+  selected: boolean
+  modelId: string
+  installed: boolean
+  onSelectSection: (section: SectionDef) => void
 }
 
 function SectionCardButton({ section, selected, modelId, installed, onSelectSection }: SectionCardButtonProps) {
@@ -45,11 +45,11 @@ function SectionCardButton({ section, selected, modelId, installed, onSelectSect
 }
 
 interface SectionCardsStripProps {
-  readonly sections: SectionDef[]
-  readonly activeSectionId: string
-  readonly getModelId: (section: SectionDef) => string
-  readonly isInstalled: (modelId: string) => boolean
-  readonly onSelectSection: (section: SectionDef) => void
+  sections: SectionDef[]
+  activeSectionId: string
+  getModelId: (section: SectionDef) => string
+  isInstalled: (modelId: string) => boolean
+  onSelectSection: (section: SectionDef) => void
 }
 
 export function SectionCardsStrip({

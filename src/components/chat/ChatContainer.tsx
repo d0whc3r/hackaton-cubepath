@@ -6,9 +6,9 @@ import { useChatSession } from '@/hooks/use-chat-session'
 import { ChatContext } from '@/lib/context/chat-context'
 
 interface ChatContainerProps {
-  readonly fixedTaskType?: TaskType
-  readonly pageTitle?: string
-  readonly pageDescription?: string
+  fixedTaskType?: TaskType
+  pageTitle?: string
+  pageDescription?: string
 }
 
 export function ChatContainer({ fixedTaskType, pageTitle, pageDescription }: ChatContainerProps) {

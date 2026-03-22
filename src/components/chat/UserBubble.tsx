@@ -21,7 +21,7 @@ const TASK_LABEL: Record<string, string> = {
 const PREVIEW_LIMIT = 300
 
 interface UserBubbleProps {
-  readonly msg: UserMessage
+  msg: UserMessage
 }
 
 export function UserBubble({ msg }: UserBubbleProps) {
