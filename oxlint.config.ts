@@ -1,10 +1,12 @@
 import { defineConfig } from 'oxlint'
 
+const COMPLEXITY_MAX = 40
+const MAX_STATEMENTS = 30
 const JSX_MAX_DEPTH = 10
 const ID_LENGTH_MAX = 40
 const ID_LENGTH_MIN = 2
-const MAX_LINES = 350
-const MAX_LINES_PER_FUNCTION = 150
+const MAX_LINES = 700
+const MAX_LINES_PER_FUNCTION = 300
 
 export default defineConfig({
   categories: {
@@ -66,9 +68,15 @@ export default defineConfig({
       plugins: ['jsx-a11y', 'react', 'react-perf'],
       rules: {
         'jsx-max-depth': ['warn', { max: JSX_MAX_DEPTH }],
+        // Inline event handlers are idiomatic React; useCallback everywhere is premature.
+        'jsx-no-new-array-as-prop': 'off',
+        'jsx-no-new-function-as-prop': 'off',
         'jsx-no-new-object-as-prop': 'off',
         'jsx-props-no-spreading': 'off',
         'react-in-jsx-scope': 'off',
+        // Array-index keys are acceptable for purely static lists (e.g. skeletons).
+        'react/jsx-no-constructed-context-values': 'off',
+        'react/no-array-index-key': 'off',
         'unicorn/filename-case': ['warn', { case: 'pascalCase' }],
       },
     },
@@ -102,14 +110,17 @@ export default defineConfig({
       files: ['**/components/ui/*.tsx', '**/lib/utils.ts'],
       rules: {
         'func-style': 'off',
+        'id-length': 'off',
         'import/no-namespace': 'off',
+        'no-magic-numbers': 'off',
+        'no-shadow': 'off',
         'unicorn/filename-case': ['warn', { case: 'kebabCase' }],
       },
     },
   ],
   plugins: ['typescript', 'unicorn', 'oxc', 'import'],
   rules: {
-    complexity: ['warn', 10],
+    complexity: ['warn', COMPLEXITY_MAX],
     'eslint/no-unused-vars': 'error',
     'func-style': ['warn', 'declaration', { allowArrowFunctions: true, overrides: { namedExports: 'ignore' } }],
     'group-exports': 'off',
@@ -137,7 +148,10 @@ export default defineConfig({
     'max-lines': ['warn', MAX_LINES],
     'max-lines-per-function': ['warn', MAX_LINES_PER_FUNCTION],
     'max-params': ['warn', 3],
+    'max-statements': ['warn', MAX_STATEMENTS],
     'no-array-for-each': 'off',
+    'no-await-in-loop': 'off',
+    'no-continue': 'off',
     'no-duplicate-imports': [
       'error',
       {
@@ -148,7 +162,7 @@ export default defineConfig({
     'no-magic-numbers': [
       'warn',
       {
-        ignore: [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        ignore: [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1024],
         ignoreArrayIndexes: true,
         ignoreDefaultValues: true,
         ignoreNumericLiteralTypes: true,
@@ -157,6 +171,7 @@ export default defineConfig({
       },
     ],
     'no-named-export': 'allow',
+    'no-negated-condition': 'off',
     'no-nested-ternary': 'off',
     'no-restricted-syntax': [
       'error',

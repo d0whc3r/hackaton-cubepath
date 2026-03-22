@@ -1,0 +1,123 @@
+import { useEffect, useRef, useState } from 'react'
+
+import type { PullState } from './types'
+
+interface PullEvent {
+  completed?: number
+  error?: string
+  status?: string
+  total?: number
+}
+
+const PERCENT_BASE = 100
+
+function parsePullEvent(line: string): PullEvent | null {
+  if (!line.startsWith('data:')) {
+    return null
+  }
+
+  try {
+    return JSON.parse(line.slice(5).trim()) as PullEvent
+  } catch {
+    return null
+  }
+}
+
+export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAction<string[] | null>>) {
+  const [pullStates, setPullStates] = useState<Record<string, PullState>>({})
+  const pullAborts = useRef<Record<string, AbortController>>({})
+
+  useEffect(
+    () => () => {
+      for (const abort of Object.values(pullAborts.current)) {
+        abort.abort()
+      }
+    },
+    [],
+  )
+
+  function applySuccessEvent(modelId: string): void {
+    setPullStates((previous) => ({ ...previous, [modelId]: { status: 'done' } }))
+    setInstalledModels((previous) => {
+      if (!previous) {
+        return [modelId]
+      }
+      return previous.includes(modelId) ? previous : [...previous, modelId]
+    })
+  }
+
+  function applyPullEvent(modelId: string, event: PullEvent): boolean {
+    if (event.status === 'success') {
+      applySuccessEvent(modelId)
+      return true
+    }
+
+    if (event.status === 'error' || event.error) {
+      const message = typeof event.error === 'string' ? event.error : 'Pull failed'
+      setPullStates((previous) => ({ ...previous, [modelId]: { error: message, status: 'error' } }))
+      return true
+    }
+
+    const hasProgress = typeof event.completed === 'number' && typeof event.total === 'number' && event.total > 0
+    const progressLabel = hasProgress
+      ? `${Math.round((event.completed! / event.total!) * PERCENT_BASE)}%`
+      : (event.status ?? 'Pulling…')
+
+    setPullStates((previous) => ({ ...previous, [modelId]: { progress: progressLabel, status: 'pulling' } }))
+    return false
+  }
+
+  function handlePull(modelId: string, baseUrl: string) {
+    pullAborts.current[modelId]?.abort()
+
+    const abort = new AbortController()
+    pullAborts.current[modelId] = abort
+    setPullStates((previous) => ({ ...previous, [modelId]: { status: 'pulling' } }))
+
+    fetch('/api/ollama/pull', {
+      body: JSON.stringify({ baseUrl, model: modelId }),
+      headers: { 'Content-Type': 'application/json' },
+      method: 'POST',
+      signal: abort.signal,
+    })
+      .then(async (response) => {
+        if (!response.body) {
+          throw new Error('No stream')
+        }
+
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) {
+            break
+          }
+
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
+
+          for (const line of lines) {
+            const event = parsePullEvent(line)
+            if (event && applyPullEvent(modelId, event)) {
+              return
+            }
+          }
+        }
+      })
+      .catch((error) => {
+        if (error instanceof Error && error.name === 'AbortError') {
+          return
+        }
+
+        setPullStates((previous) => ({
+          ...previous,
+          [modelId]: { error: 'Connection failed', status: 'error' },
+        }))
+      })
+  }
+
+  return { handlePull, pullStates }
+}

@@ -1,0 +1,66 @@
+---
+import { ModelConfigDialog } from '@/components/model/ModelConfigDialog'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
+
+interface Props {
+  currentPath: string
+}
+
+const { currentPath } = Astro.props
+
+const NAV_GROUPS = [
+  [{ href: '/', label: 'Overview' }],
+  [
+    { href: '/tasks/explain', label: 'Explain' },
+    { href: '/tasks/test', label: 'Tests' },
+    { href: '/tasks/refactor', label: 'Refactor' },
+    { href: '/tasks/commit', label: 'Commit' },
+  ],
+]
+---
+
+<header class="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
+  <div class="mx-auto flex min-h-14 max-w-7xl flex-wrap items-center gap-3 px-4 py-2 md:px-6">
+    <a href="/" class="flex shrink-0 items-center gap-2 font-semibold text-foreground">
+      <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+      </span>
+      <span class="hidden sm:inline">SLM Router</span>
+    </a>
+
+    <div class="hidden h-5 w-px bg-border sm:block"></div>
+
+    <nav class="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
+      {NAV_GROUPS.map((group, groupIndex) => (
+        <div class="flex items-center gap-1" role="group">
+          {group.map((item) => {
+            const active = currentPath === item.href
+            return (
+              <a
+                href={item.href}
+                class:list={[
+                  'flex shrink-0 items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                  active
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                ]}
+              >
+                {item.label}
+              </a>
+            )
+          })}
+          {groupIndex < NAV_GROUPS.length - 1 && <span class="mx-1 hidden h-4 w-px bg-border sm:inline-block"></span>}
+        </div>
+      ))}
+    </nav>
+
+    <div class="hidden h-5 w-px bg-border lg:block"></div>
+
+    <div class="ml-auto flex shrink-0 flex-col items-end gap-1 sm:ml-0 sm:flex-row sm:items-center">
+      <ModelConfigDialog client:load />
+      <ThemeToggle client:load />
+    </div>
+  </div>
+</header>
