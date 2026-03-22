@@ -7,7 +7,7 @@ import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { DEFAULT_TRANSLATE_MODEL, OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
-const Schema = z.object({
+const translateSchema = z.object({
   model: z.string().optional(),
   ollamaBaseUrl: z.string().optional(),
   targetLanguage: z.string().min(1).max(80),
@@ -22,6 +22,8 @@ Output ONLY the translated text — no explanations, disclaimers, or commentary.
 Preserve every [[CODE:N]] placeholder exactly as-is (do not translate or alter them).`
 }
 
+const ABORT_TIMEOUT_MS = 120_000
+
 export const POST: APIRoute = async ({ request }) => {
   let raw: unknown
   try {
@@ -30,7 +32,7 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ error: 'INVALID_JSON' }, { status: 400 })
   }
 
-  const parsed = Schema.safeParse(raw)
+  const parsed = translateSchema.safeParse(raw)
   if (!parsed.success) {
     return Response.json({ error: 'VALIDATION_ERROR', message: parsed.error.issues[0]?.message }, { status: 400 })
   }
@@ -42,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
   const stream = createSseStream(async (emit) => {
     const ollama = ollamaClient(baseUrl)
     const abort = new AbortController()
-    const timeout = setTimeout(() => abort.abort(), 120_000)
+    const timeout = setTimeout(() => abort.abort(), ABORT_TIMEOUT_MS)
 
     try {
       const result = streamText({

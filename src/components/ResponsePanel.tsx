@@ -16,13 +16,9 @@ export function ResponsePanel({ responseText, specialistDisplayName, error, inte
 
       {interrupted && <div className="text-yellow-600">Interrupted — partial output below</div>}
 
-      {error ? (
-        <div className="text-red-600">{error}</div>
-      ) : responseText ? (
-        <pre className="whitespace-pre-wrap">{responseText}</pre>
-      ) : (
-        <div className="text-muted-foreground">Response will appear here</div>
-      )}
+      {error && <div className="text-red-600">{error}</div>}
+      {!error && responseText && <pre className="whitespace-pre-wrap">{responseText}</pre>}
+      {!error && !responseText && <div className="text-muted-foreground">Response will appear here</div>}
 
       {responseText && (
         <button type="button" onClick={handleCopy}>

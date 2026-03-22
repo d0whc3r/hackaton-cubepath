@@ -79,11 +79,12 @@ export function RoutingProgress({ steps, specialist, isStreaming }: RoutingProgr
     return null
   }
 
+  const stepPlural = doneCount !== 1 ? 's' : ''
   const statusLine = activeStep
     ? activeStep.label
     : specialist
       ? `${specialist.displayName} · ${specialist.language}`
-      : `${doneCount} step${doneCount !== 1 ? 's' : ''} completed`
+      : `${doneCount} step${stepPlural} completed`
 
   return (
     <div className="mt-3 border-t border-border/40 pt-2.5">
@@ -94,13 +95,9 @@ export function RoutingProgress({ steps, specialist, isStreaming }: RoutingProgr
         aria-expanded={expanded}
       >
         <div className="flex h-4 w-4 shrink-0 items-center justify-center">
-          {isStreaming && !activeStep ? (
-            <Circle className="h-3 w-3 text-muted-foreground/40" />
-          ) : activeStep ? (
-            <Loader2 className="h-3 w-3 animate-spin text-primary" />
-          ) : (
-            <Zap className="h-3 w-3 text-primary" />
-          )}
+          {isStreaming && !activeStep && <Circle className="h-3 w-3 text-muted-foreground/40" />}
+          {activeStep && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+          {!isStreaming && !activeStep && <Zap className="h-3 w-3 text-primary" />}
         </div>
         <span className="flex-1 truncate text-[11px] text-muted-foreground">{statusLine}</span>
         {expanded ? (

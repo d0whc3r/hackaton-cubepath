@@ -19,7 +19,7 @@ export interface UseChatInputReturn {
   readonly overLimit: boolean
   readonly modelLabel: string
   onSubmit: () => void
-  onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement>) => void
+  onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void
 }
 
 export function useChatInput(
@@ -30,10 +30,10 @@ export function useChatInput(
   const { isLoading, activeTask, fixedTaskType, handleSubmit, currentModel } = useChatContext()
 
   const displayTask = fixedTaskType ?? activeTask
-  const currentOption = TASK_OPTIONS.find((t) => t.value === displayTask)
+  const currentOption = TASK_OPTIONS.find((task) => task.value === displayTask)
   const charCount = input.length
   const overLimit = charCount > MAX_CHARS
-  const modelLabel = MODELS_BY_TASK[displayTask].find((m) => m.id === currentModel)?.label ?? currentModel
+  const modelLabel = MODELS_BY_TASK[displayTask].find((model) => model.id === currentModel)?.label ?? currentModel
 
   function onSubmit() {
     const text = input.trim()
@@ -44,9 +44,9 @@ export function useChatInput(
     setInput('')
   }
 
-  function onKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-      e.preventDefault()
+  function onKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+      event.preventDefault()
       onSubmit()
     }
   }

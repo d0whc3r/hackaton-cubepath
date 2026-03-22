@@ -123,13 +123,15 @@ export const PROVIDERS: Provider[] = [
  * ~$0.00 — used only to show "you ran this locally".
  */
 export const SPECIALIST_LOCAL_COST_PER_TOKEN = 0
+export const MILLION_UNIT = 1_000_000
 
 export function getRepresentativeModel(provider: Provider): ProviderModel | undefined {
-  return provider.models.find((m) => m.id === provider.representativeModelId)
+  return provider.models.find((model) => model.id === provider.representativeModelId)
 }
 
 export function calcProviderCost(model: ProviderModel, inputTokens: number, outputTokens: number): number {
   return (
-    (inputTokens * model.inputPricePerMillion) / 1_000_000 + (outputTokens * model.outputPricePerMillion) / 1_000_000
+    (inputTokens * model.inputPricePerMillion) / MILLION_UNIT +
+    (outputTokens * model.outputPricePerMillion) / MILLION_UNIT
   )
 }

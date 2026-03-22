@@ -23,6 +23,7 @@ interface ModelDetailsPanelProps {
 }
 
 const BYTES_IN_GB = 1024 * 1024 * 1024
+const CONTEXT_DIVISOR = 1000
 
 export function ModelDetailsPanel({
   section,

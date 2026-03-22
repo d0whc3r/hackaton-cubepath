@@ -10,7 +10,7 @@ export function useStorage<T>(
   options?: { storage?: StorageType; defaultValue?: T },
 ): {
   value: T | null
-  error: unknown | null
+  error: Error | null
   set: (value: T) => AttemptResult<void>
   remove: () => AttemptResult<void>
 } {
@@ -18,17 +18,21 @@ export function useStorage<T>(
   const storageType = options?.storage
 
   const [value, setValue] = useState<T | null>(defaultValue as T | null)
-  const [error, setError] = useState<unknown | null>(null)
+  const [storageError, setStorageError] = useState<Error | null>(null)
 
   // Post-hydration read
   useEffect(() => {
     const result = readStorage<T>(key, { defaultValue: options?.defaultValue, storage: storageType })
     if (result.ok) {
       setValue(result.value)
-      setError(null)
+      setStorageError(null)
     } else {
       setValue(defaultValue as T | null)
-      setError(result.error)
+      if (result.error instanceof Error) {
+        setStorageError(result.error)
+      } else {
+        setStorageError(new Error('Unknown error'))
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, storageType])
@@ -42,16 +46,20 @@ export function useStorage<T>(
 
       if (event.newValue === null) {
         setValue(defaultValue as T | null)
-        setError(null)
+        setStorageError(null)
         return
       }
 
       try {
         const parsed = JSON.parse(event.newValue) as T
         setValue(parsed)
-        setError(null)
+        setStorageError(null)
       } catch (error) {
-        setError(error)
+        if (error instanceof Error) {
+          setStorageError(error)
+        } else {
+          setStorageError(new Error('Unknown error'))
+        }
       }
     }
 
@@ -65,9 +73,11 @@ export function useStorage<T>(
       const result = writeStorage<T>(key, newValue, { storage: storageType })
       if (result.ok) {
         setValue(newValue)
-        setError(null)
+        setStorageError(null)
+      } else if (result.error instanceof Error) {
+        setStorageError(result.error)
       } else {
-        setError(result.error)
+        setStorageError(new Error('Unknown error'))
       }
       return result
     },
@@ -78,12 +88,14 @@ export function useStorage<T>(
     const result = removeStorage(key, { storage: storageType })
     if (result.ok) {
       setValue(defaultValue as T | null)
-      setError(null)
+      setStorageError(null)
+    } else if (result.error instanceof Error) {
+      setStorageError(result.error)
     } else {
-      setError(result.error)
+      setStorageError(new Error('Unknown error'))
     }
     return result
   }, [key, storageType, defaultValue])
 
-  return { error, remove, set, value }
+  return { error: storageError, remove, set, value }
 }
