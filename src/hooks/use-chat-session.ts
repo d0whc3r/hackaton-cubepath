@@ -96,16 +96,16 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
       analystModel: getAnalystModel(config),
       callbacks: {
         onCost: (cost) => {
-          updateLastAssistant((a) => ({ ...a, cost }))
+          updateLastAssistant((prev) => ({ ...prev, cost }))
           addSaving(cost.largeModelCostUsd, cost.inputTokens, cost.outputTokens)
         },
-        onDone: () => updateLastAssistant((a) => ({ ...a, status: 'done' })),
-        onError: (message) => updateLastAssistant((a) => ({ ...a, error: message, status: 'error' })),
-        onInterrupted: () => updateLastAssistant((a) => ({ ...a, status: 'interrupted' })),
-        onResponseChunk: (text) => updateLastAssistant((a) => ({ ...a, content: a.content + text })),
+        onDone: () => updateLastAssistant((prev) => ({ ...prev, status: 'done' })),
+        onError: (message) => updateLastAssistant((prev) => ({ ...prev, error: message, status: 'error' })),
+        onInterrupted: () => updateLastAssistant((prev) => ({ ...prev, status: 'interrupted' })),
+        onResponseChunk: (text) => updateLastAssistant((prev) => ({ ...prev, content: prev.content + text })),
         onRoutingStep: (step) =>
-          updateLastAssistant((a) => ({ ...a, routingSteps: mergeRoutingStep(a.routingSteps, step) })),
-        onSpecialistSelected: (payload) => updateLastAssistant((a) => ({ ...a, specialist: payload })),
+          updateLastAssistant((prev) => ({ ...prev, routingSteps: mergeRoutingStep(prev.routingSteps, step) })),
+        onSpecialistSelected: (payload) => updateLastAssistant((prev) => ({ ...prev, specialist: payload })),
       },
       commitModel: config.commitModel,
       explainModel: config.explainModel,
@@ -120,7 +120,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
 
   function handleCancel() {
     abortRef.current?.abort()
-    updateLastAssistant((a) => ({ ...a, status: 'interrupted' }))
+    updateLastAssistant((prev) => ({ ...prev, status: 'interrupted' }))
   }
 
   function handleClearHistory() {
