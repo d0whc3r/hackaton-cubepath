@@ -108,13 +108,19 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
         onSpecialistSelected: (payload) => updateLastAssistant((prev) => ({ ...prev, specialist: payload })),
       },
       commitModel: config.commitModel,
+      deadCodeModel: config.deadCodeModel,
+      docstringModel: config.docstringModel,
+      errorExplainModel: config.errorExplainModel,
       explainModel: config.explainModel,
       input,
+      namingHelperModel: config.namingHelperModel,
       ollamaBaseUrl: config.ollamaBaseUrl,
+      performanceHintModel: config.performanceHintModel,
       refactorModel: config.refactorModel,
       signal: abort.signal,
       taskType: submittedTaskType,
       testModel: config.testModel,
+      typeHintsModel: config.typeHintsModel,
     })
   }
 

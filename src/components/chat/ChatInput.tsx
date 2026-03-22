@@ -32,9 +32,15 @@ function charCountColorClass(overLimit: boolean, charCount: number): string {
 
 const TASK_COLORS: Record<TaskType, string> = {
   commit: 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-transparent',
+  'dead-code': 'bg-red-500/10 text-red-600 dark:text-red-400 border-transparent',
+  docstring: 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-transparent',
+  'error-explain': 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-transparent',
   explain: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-transparent',
+  'naming-helper': 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-transparent',
+  'performance-hint': 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-transparent',
   refactor: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-transparent',
   test: 'bg-green-500/10 text-green-600 dark:text-green-400 border-transparent',
+  'type-hints': 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-transparent',
 }
 
 export function ChatInput() {

@@ -1,0 +1,13 @@
+---
+import AppLayout from '@/layouts/AppLayout.astro'
+import { TaskApp } from '@/components/chat/TaskApp'
+---
+
+<AppLayout fullScreen title="SLM Router — Docstring" description="Generate or update documentation comments. Paste your code and an optional description of what the module does.">
+  <TaskApp
+    client:load
+    fixedTaskType="docstring"
+    pageTitle="Docstring"
+    pageDescription="Generate or update documentation comments without changing any logic."
+  />
+</AppLayout>

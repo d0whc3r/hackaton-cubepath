@@ -1,4 +1,14 @@
-export type TaskType = 'explain' | 'test' | 'refactor' | 'commit'
+export type TaskType =
+  | 'explain'
+  | 'test'
+  | 'refactor'
+  | 'commit'
+  | 'docstring'
+  | 'type-hints'
+  | 'error-explain'
+  | 'performance-hint'
+  | 'naming-helper'
+  | 'dead-code'
 
 export interface ModelOption {
   id: string

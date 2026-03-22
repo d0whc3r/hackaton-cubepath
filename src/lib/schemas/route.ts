@@ -1,6 +1,17 @@
 import { z } from 'zod'
 
-export const TaskTypeSchema = z.enum(['explain', 'test', 'refactor', 'commit'])
+export const TaskTypeSchema = z.enum([
+  'explain',
+  'test',
+  'refactor',
+  'commit',
+  'docstring',
+  'type-hints',
+  'error-explain',
+  'performance-hint',
+  'naming-helper',
+  'dead-code',
+])
 export type TaskType = z.infer<typeof TaskTypeSchema>
 
 export const RoutingStepNameSchema = z.enum([
@@ -53,12 +64,18 @@ export type SpecialistInfo = z.infer<typeof SpecialistInfoSchema>
 export const RouteRequestSchema = z.object({
   analystModel: z.string().optional(),
   commitModel: z.string().optional(),
+  deadCodeModel: z.string().optional(),
+  docstringModel: z.string().optional(),
+  errorExplainModel: z.string().optional(),
   explainModel: z.string().optional(),
   input: z.string().min(1).max(8000),
+  namingHelperModel: z.string().optional(),
   ollamaBaseUrl: z.string().optional(),
+  performanceHintModel: z.string().optional(),
   refactorModel: z.string().optional(),
   taskType: TaskTypeSchema,
   testModel: z.string().optional(),
+  typeHintsModel: z.string().optional(),
 })
 export type RouteRequest = z.infer<typeof RouteRequestSchema>
 

@@ -1,11 +1,17 @@
 import {
+  AlertCircle,
   BookOpen,
+  FileText,
   GitCommitHorizontal,
   LayoutDashboard,
   RefreshCw,
   RotateCcw,
+  Tag,
   TestTube2,
+  Trash2,
   TrendingDown,
+  Type,
+  Zap,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -34,20 +40,35 @@ import { loadSavings, resetSavings } from '@/lib/utils/savings'
 
 const NAV_ITEMS = [{ href: '/', icon: LayoutDashboard, label: 'Overview' }] as const
 
-const TASK_ITEMS = [
+const ANALYSIS_TASK_ITEMS = [
   { href: '/tasks/explain', icon: BookOpen, label: 'Explain Code' },
+  { href: '/tasks/error-explain', icon: AlertCircle, label: 'Error Explain' },
+  { href: '/tasks/performance-hint', icon: Zap, label: 'Performance Hint' },
+  { href: '/tasks/dead-code', icon: Trash2, label: 'Dead Code' },
+  { href: '/tasks/naming-helper', icon: Tag, label: 'Naming Helper' },
+] as const
+
+const GENERATION_TASK_ITEMS = [
   { href: '/tasks/test', icon: TestTube2, label: 'Generate Tests' },
   { href: '/tasks/refactor', icon: RefreshCw, label: 'Refactor' },
   { href: '/tasks/commit', icon: GitCommitHorizontal, label: 'Write Commit' },
+  { href: '/tasks/docstring', icon: FileText, label: 'Docstring' },
+  { href: '/tasks/type-hints', icon: Type, label: 'Type Hints' },
 ] as const
 
 const EMPTY_SAVINGS: SavingsData = { queryCount: 0, totalInputTokens: 0, totalOutputTokens: 0, totalSavedUsd: 0 }
 const normalizePath = (path: string) => (path === '/' ? path : path.replace(/\/+$/, ''))
 const TASK_PATH_BY_TYPE: Record<TaskType, string> = {
   commit: '/tasks/commit',
+  'dead-code': '/tasks/dead-code',
+  docstring: '/tasks/docstring',
+  'error-explain': '/tasks/error-explain',
   explain: '/tasks/explain',
+  'naming-helper': '/tasks/naming-helper',
+  'performance-hint': '/tasks/performance-hint',
   refactor: '/tasks/refactor',
   test: '/tasks/test',
+  'type-hints': '/tasks/type-hints',
 }
 
 interface AppSidebarProps {
@@ -147,10 +168,36 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel>Tasks</SidebarGroupLabel>
+          <SidebarGroupLabel>Analysis</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {TASK_ITEMS.map((item) => (
+              {ANALYSIS_TASK_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={
+                      activeTaskHref
+                        ? activeTaskHref === item.href
+                        : pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    }
+                    tooltip={item.label}
+                  >
+                    <a href={item.href}>
+                      <item.icon />
+                      <span>{item.label}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Generation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {GENERATION_TASK_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.href}>
                   <SidebarMenuButton
                     asChild

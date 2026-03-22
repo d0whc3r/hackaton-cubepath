@@ -1,0 +1,13 @@
+---
+import AppLayout from '@/layouts/AppLayout.astro'
+import { TaskApp } from '@/components/chat/TaskApp'
+---
+
+<AppLayout fullScreen title="SLM Router — Type Hints" description="Add type annotations to your functions and parameters without changing any logic.">
+  <TaskApp
+    client:load
+    fixedTaskType="type-hints"
+    pageTitle="Type Hints"
+    pageDescription="Add type annotations to your functions and parameters without changing any logic."
+  />
+</AppLayout>

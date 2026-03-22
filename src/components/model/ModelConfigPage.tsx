@@ -18,8 +18,9 @@ import { SectionCardsStrip } from './settings/SectionCardsStrip'
 import { useModelConfigPage } from './settings/use-model-config-page'
 
 const GROUPS: { id: SectionGroupId; label: string }[] = [
-  { id: 'management', label: 'Management' },
-  { id: 'code', label: 'Code' },
+  { id: 'infrastructure', label: 'Infrastructure' },
+  { id: 'analysis', label: 'Analysis' },
+  { id: 'generation', label: 'Generation' },
   { id: 'language', label: 'Language' },
 ]
 
