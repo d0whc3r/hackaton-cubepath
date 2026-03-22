@@ -1,10 +1,8 @@
 ---
-import AppLayout from '@/layouts/AppLayout.astro'
-import Navbar from '@/components/Navbar.astro'
+import NonTaskLayout from '@/layouts/NonTaskLayout.astro'
 import { ModelConfigPage } from '@/components/model/ModelConfigPage'
 ---
 
-<AppLayout title="Settings" fullScreen={false}>
-  <Navbar currentPath={Astro.url.pathname} />
+<NonTaskLayout title="Settings">
   <ModelConfigPage client:load />
-</AppLayout>
+</NonTaskLayout>

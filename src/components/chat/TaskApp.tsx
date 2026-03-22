@@ -2,6 +2,7 @@ import type { TaskType } from '@/lib/schemas/route'
 
 import { AppProviders } from '@/components/AppProviders'
 import { ChatContainer } from '@/components/chat/ChatContainer'
+import { ErrorExplainComposer } from '@/components/chat/ErrorExplainComposer'
 import { AppSidebar } from '@/components/layout/AppSidebar'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
@@ -10,10 +11,11 @@ interface TaskAppProps {
   fixedTaskType?: TaskType
   pageTitle?: string
   pageDescription?: string
-  composer?: React.ReactNode
 }
 
-export function TaskApp({ fixedTaskType, pageTitle, pageDescription, composer }: TaskAppProps) {
+export function TaskApp({ fixedTaskType, pageTitle, pageDescription }: TaskAppProps) {
+  const composer = fixedTaskType === 'error-explain' ? <ErrorExplainComposer /> : undefined
+
   return (
     <AppProviders>
       <SidebarProvider className="h-screen overflow-hidden">

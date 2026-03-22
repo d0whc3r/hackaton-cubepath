@@ -1,34 +1,27 @@
 ---
-import AppLayout from '@/layouts/AppLayout.astro';
-import { ErrorExplainApp } from '@/components/chat/ErrorExplainApp';
-import { TaskApp } from '@/components/chat/TaskApp';
-import { taskPageBySlug, taskPages } from '@/data/task-pages';
+import { TaskApp } from '@/components/chat/TaskApp'
+import { taskPageBySlug, taskPages } from '@/data/task-pages'
+import TaskPageLayout from '@/layouts/TaskPageLayout.astro'
 
 export function getStaticPaths() {
   return taskPages.map((taskPage) => ({
     params: { task: taskPage.slug },
-  }));
+  }))
 }
 
-const {task} = Astro.params;
-const config = task ? taskPageBySlug[task] : undefined;
+const { task } = Astro.params
+const config = task ? taskPageBySlug[task] : undefined
 
 if (!config) {
-  return Astro.redirect('/');
+  return Astro.redirect('/')
 }
 ---
 
-<AppLayout title={config.title} description={config.description}>
-  {
-    config.app === 'task' ? (
-      <TaskApp
-        client:load
-        fixedTaskType={config.fixedTaskType}
-        pageTitle={config.pageTitle}
-        pageDescription={config.pageDescription}
-      />
-    ) : (
-      <ErrorExplainApp client:load />
-    )
-  }
-</AppLayout>
+<TaskPageLayout title={config.title} description={config.description}>
+  <TaskApp
+    client:load
+    fixedTaskType={config.fixedTaskType}
+    pageTitle={config.pageTitle}
+    pageDescription={config.pageDescription}
+  />
+</TaskPageLayout>

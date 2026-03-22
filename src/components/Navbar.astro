@@ -8,14 +8,13 @@ interface Props {
 
 const { currentPath } = Astro.props
 
-const NAV_GROUPS = [
-  [{ href: '/', label: 'Overview' }],
-  [
-    { href: '/tasks/explain', label: 'Explain' },
-    { href: '/tasks/test', label: 'Tests' },
-    { href: '/tasks/refactor', label: 'Refactor' },
-    { href: '/tasks/commit', label: 'Commit' },
-  ],
+const NAV_ITEMS = [
+  { href: '/', label: 'Overview' },
+  { href: '/tasks/explain', label: 'Explain' },
+  { href: '/tasks/error-explain', label: 'Error' },
+  { href: '/tasks/test', label: 'Tests' },
+  { href: '/tasks/refactor', label: 'Refactor' },
+  { href: '/settings', label: 'Settings' },
 ]
 ---
 
@@ -32,28 +31,23 @@ const NAV_GROUPS = [
 
     <div class="hidden h-5 w-px bg-border sm:block"></div>
 
-    <nav class="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
-      {NAV_GROUPS.map((group, groupIndex) => (
-        <div class="flex items-center gap-1" role="group">
-          {group.map((item) => {
-            const active = currentPath === item.href
-            return (
-              <a
-                href={item.href}
-                class:list={[
-                  'flex shrink-0 items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                  active
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                ]}
-              >
-                {item.label}
-              </a>
-            )
-          })}
-          {groupIndex < NAV_GROUPS.length - 1 && <span class="mx-1 hidden h-4 w-px bg-border sm:inline-block"></span>}
-        </div>
-      ))}
+    <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
+      {NAV_ITEMS.map((item) => {
+        const active = currentPath === item.href
+        return (
+          <a
+            href={item.href}
+            class:list={[
+              'flex shrink-0 items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              active
+                ? 'bg-primary/10 text-primary'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+            ]}
+          >
+            {item.label}
+          </a>
+        )
+      })}
     </nav>
 
     <div class="hidden h-5 w-px bg-border lg:block"></div>
