@@ -4,7 +4,7 @@ export type OnFileContent = (content: string, fileName: string) => void
 
 export interface UseFileAttachmentReturn {
   attachedFileName: string | null
-  fileInputRef: React.RefObject<HTMLInputElement>
+  fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void
   removeFile: () => void
 }
@@ -19,13 +19,15 @@ export function useFileAttachment(onContent: OnFileContent, maxChars: number): U
       return
     }
     const reader = new FileReader()
-    reader.addEventListener('load', (ev) => {
+    // oxlint-disable-next-line unicorn/prefer-add-event-listener
+    reader.onload = (ev) => {
       const content = ev.target?.result
       if (typeof content === 'string') {
         onContent(content.slice(0, maxChars), file.name)
         setAttachedFileName(file.name)
       }
-    })
+    }
+    // oxlint-disable-next-line unicorn/prefer-blob-reading-methods
     reader.readAsText(file)
     event.target.value = ''
   }

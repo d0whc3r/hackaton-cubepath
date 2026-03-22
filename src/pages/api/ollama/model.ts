@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 
+import { ollamaWretch } from '@/lib/http/ollama-client'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 const OLLAMA_TIMEOUT_MS = 5000
@@ -53,22 +54,21 @@ export const GET: APIRoute = async ({ url }) => {
   }
 
   try {
-    const [showRes, tagsRes] = await Promise.all([
-      fetch(`${baseUrl}/api/show`, {
-        body: JSON.stringify({ model }),
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-        signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS),
-      }),
-      fetch(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) }),
+    // WretchError thrown on non-OK is caught by the outer catch block below,
+    // Which returns the same fallback response as before.
+    const [showData, tagsData] = await Promise.all([
+      ollamaWretch
+        .url(`${baseUrl}/api/show`)
+        .options({ signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) })
+        .post({ model })
+        .json<ShowResponse>(),
+      ollamaWretch
+        .url(`${baseUrl}/api/tags`)
+        .options({ signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) })
+        .get()
+        .json<TagsResponse>()
+        .catch(() => ({ models: [] }) as TagsResponse),
     ])
-
-    if (!showRes.ok) {
-      return Response.json({ details: null, model }, { status: 200 })
-    }
-
-    const showData = (await showRes.json()) as ShowResponse
-    const tagsData = tagsRes.ok ? ((await tagsRes.json()) as TagsResponse) : { models: [] }
 
     const normalizedModel = normalizeModelName(model)
     const matchedTag = (tagsData.models ?? []).find((item) => {
@@ -94,6 +94,7 @@ export const GET: APIRoute = async ({ url }) => {
       { status: 200 },
     )
   } catch {
+    // WretchError from show request (e.g. model not found) → return null details
     return Response.json({ details: null, model }, { status: 200 })
   }
 }

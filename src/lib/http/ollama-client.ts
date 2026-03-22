@@ -15,10 +15,10 @@ import { dedupe, retry } from 'wretch-middlewares'
  * Usage patterns:
  *
  * Non-streaming:
- *   await ollamaWretch.url(`${baseUrl}/api/tags`).signal(AbortSignal.timeout(5000)).get().json<T>()
+ *   await ollamaWretch.url(`${baseUrl}/api/tags`).options({ signal: AbortSignal.timeout(5000) }).get().json<T>()
  *
  * Streaming (.res() bypasses error catchers — check res.ok manually):
- *   const res = await ollamaWretch.url(`${baseUrl}/api/pull`).signal(s).post(body).res()
+ *   const res = await ollamaWretch.url(`${baseUrl}/api/pull`).options({ signal: s }).post(body).res()
  *   // → res.body.getReader() for streaming
  *
  * Overriding defaults for a specific call (does NOT modify the shared instance):
@@ -26,11 +26,11 @@ import { dedupe, retry } from 'wretch-middlewares'
  */
 export const ollamaWretch = wretch().middlewares([
   retry({
-    delayRamp: (delay, attempt) => delay * Math.pow(2, attempt - 1),
+    delayRamp: (delay, attempt) => delay * 2 ** (attempt - 1),
     delayTimer: 500,
     maxAttempts: 3,
     retryOnNetworkError: true,
-    until: (res) => res != null && res.status < 500,
+    until: (res) => res !== null && res !== undefined && res.status < 500,
   }),
   dedupe(),
 ])

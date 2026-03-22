@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 
+import { appWretch } from '@/lib/http/app-client'
+
 import type { PullState } from './types'
 
 interface PullEvent {
@@ -74,12 +76,11 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
     pullAborts.current[modelId] = abort
     setPullStates((previous) => ({ ...previous, [modelId]: { status: 'pulling' } }))
 
-    fetch('/api/ollama/pull', {
-      body: JSON.stringify({ baseUrl, model: modelId }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-      signal: abort.signal,
-    })
+    appWretch
+      .url('/api/ollama/pull')
+      .options({ signal: abort.signal })
+      .post({ baseUrl, model: modelId })
+      .res()
       .then(async (response) => {
         if (!response.body) {
           throw new Error('No stream')

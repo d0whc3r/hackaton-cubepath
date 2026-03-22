@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { appWretch } from '@/lib/http/app-client'
+
 export function useInstalledModels(ollamaBaseUrl: string) {
   const [installedModels, setInstalledModels] = useState<string[] | null>(null)
 
@@ -7,8 +9,12 @@ export function useInstalledModels(ollamaBaseUrl: string) {
     const abort = new AbortController()
 
     setInstalledModels(null)
-    fetch(`/api/ollama/models?baseUrl=${encodeURIComponent(ollamaBaseUrl)}`, { signal: abort.signal })
-      .then((response) => response.json() as Promise<{ models?: string[] }>)
+    appWretch
+      .url('/api/ollama/models')
+      .query({ baseUrl: ollamaBaseUrl })
+      .options({ signal: abort.signal })
+      .get()
+      .json<{ models?: string[] }>()
       .then((data) => setInstalledModels(data.models ?? []))
       .catch((error) => {
         if (error instanceof Error && error.name === 'AbortError') {

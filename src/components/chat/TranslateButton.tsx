@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
 import { Button } from '@/components/ui/button'
 import { getTranslateModel, loadModelConfig } from '@/lib/config/model-config'
+import { appWretch } from '@/lib/http/app-client'
 import { TRANSLATE_MODELS } from '@/lib/router/models'
 
 // When includeCode is false, code blocks are extracted client-side before
@@ -154,17 +155,16 @@ export function TranslateButton({ content }: TranslateButtonProps) {
     const model = getTranslateModel(cfg)
 
     try {
-      const res = await fetch('/api/translate', {
-        body: JSON.stringify({
+      const res = await appWretch
+        .url('/api/translate')
+        .options({ signal: abort.signal })
+        .post({
           model,
           ollamaBaseUrl: cfg.ollamaBaseUrl,
           targetLanguage: language.label,
           text: stripped,
-        }),
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-        signal: abort.signal,
-      })
+        })
+        .res()
 
       if (!res.body) {
         throw new Error('No stream')

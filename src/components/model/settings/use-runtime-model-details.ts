@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { appWretch } from '@/lib/http/app-client'
+
 import type { RuntimeModelDetails } from './types'
 
 export function useRuntimeModelDetails(ollamaBaseUrl: string, modelId: string) {
@@ -13,10 +15,12 @@ export function useRuntimeModelDetails(ollamaBaseUrl: string, modelId: string) {
     }
 
     const abort = new AbortController()
-    fetch(`/api/ollama/model?baseUrl=${encodeURIComponent(ollamaBaseUrl)}&model=${encodeURIComponent(modelId)}`, {
-      signal: abort.signal,
-    })
-      .then((response) => response.json() as Promise<{ details?: RuntimeModelDetails | null }>)
+    appWretch
+      .url('/api/ollama/model')
+      .query({ baseUrl: ollamaBaseUrl, model: modelId })
+      .options({ signal: abort.signal })
+      .get()
+      .json<{ details?: RuntimeModelDetails | null }>()
       .then((payload) => {
         if (!payload.details) {
           return

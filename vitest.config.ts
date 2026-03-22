@@ -5,6 +5,9 @@ import { defineConfig } from 'vitest/config'
 export default defineConfig({
   plugins: [tsconfigPaths(), react({ babel: { plugins: [['babel-plugin-react-compiler']] } })],
   test: {
+    coverage: {
+      exclude: ['src/**/*.test.{ts,tsx}', 'src/__tests__/**'],
+    },
     environment: 'happy-dom',
     globals: true,
     include: ['src/**/*.test.{ts,tsx}'],

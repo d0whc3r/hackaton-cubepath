@@ -18,10 +18,10 @@ import QueryStringAddon from 'wretch/addons/queryString'
  * Usage patterns:
  *
  * Non-streaming GET with query params:
- *   await appWretch.url('/api/ollama/models').query({ baseUrl }).signal(abort.signal).get().json<T>()
+ *   await appWretch.url('/api/ollama/models').query({ baseUrl }).options({ signal: abort.signal }).get().json<T>()
  *
  * Streaming POST (.res() bypasses error catchers — check res.ok manually):
- *   const res = await appWretch.url('/api/route').signal(signal).post(body).res()
+ *   const res = await appWretch.url('/api/route').options({ signal }).post(body).res()
  *   // → res.body.getReader() for streaming
  *
  * Overriding defaults for an external URL (does NOT modify the shared instance):
@@ -31,11 +31,11 @@ export const appWretch = wretch()
   .addon(QueryStringAddon)
   .middlewares([
     retry({
-      delayRamp: (delay, attempt) => delay * Math.pow(2, attempt - 1),
+      delayRamp: (delay, attempt) => delay * 2 ** (attempt - 1),
       delayTimer: 500,
       maxAttempts: 3,
       retryOnNetworkError: true,
-      until: (res) => res != null && res.status < 500,
+      until: (res) => res !== null && res !== undefined && res.status < 500,
     }),
     dedupe(),
   ])

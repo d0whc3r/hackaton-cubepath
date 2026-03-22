@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro'
 
 import { z } from 'zod'
 
+import { ollamaWretch } from '@/lib/http/ollama-client'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 const PULL_TIMEOUT_MS = 600_000
@@ -32,12 +33,11 @@ export const POST: APIRoute = async ({ request }) => {
       const emit = (data: unknown) => controller.enqueue(enc.encode(`data: ${JSON.stringify(data)}\n\n`))
 
       try {
-        const ollamaRes = await fetch(`${baseUrl}/api/pull`, {
-          body: JSON.stringify({ name: model, stream: true }),
-          headers: { 'Content-Type': 'application/json' },
-          method: 'POST',
-          signal: AbortSignal.timeout(PULL_TIMEOUT_MS), // 10 min for large models
-        })
+        const ollamaRes = await ollamaWretch
+          .url(`${baseUrl}/api/pull`)
+          .options({ signal: AbortSignal.timeout(PULL_TIMEOUT_MS) }) // 10 min for large models
+          .post({ name: model, stream: true })
+          .res()
 
         if (!ollamaRes.ok || !ollamaRes.body) {
           emit({ error: `Ollama responded with ${ollamaRes.status}`, status: 'error' })
