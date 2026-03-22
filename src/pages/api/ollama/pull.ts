@@ -4,20 +4,22 @@ import { z } from 'zod'
 
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
-const BodySchema = z.object({
+const PULL_TIMEOUT_MS = 600_000
+
+const bodySchema = z.object({
   baseUrl: z.string().optional(),
   model: z.string().min(1),
 })
 
 export const POST: APIRoute = async ({ request }) => {
-  let raw: unknown
+  let raw
   try {
     raw = await request.json()
   } catch {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const parsed = BodySchema.safeParse(raw)
+  const parsed = bodySchema.safeParse(raw)
   if (!parsed.success) {
     return Response.json({ error: 'model is required' }, { status: 400 })
   }
@@ -34,7 +36,7 @@ export const POST: APIRoute = async ({ request }) => {
           body: JSON.stringify({ name: model, stream: true }),
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
-          signal: AbortSignal.timeout(600_000), // 10 min for large models
+          signal: AbortSignal.timeout(PULL_TIMEOUT_MS), // 10 min for large models
         })
 
         if (!ollamaRes.ok || !ollamaRes.body) {

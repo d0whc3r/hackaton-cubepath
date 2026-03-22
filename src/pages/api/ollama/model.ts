@@ -2,6 +2,8 @@ import type { APIRoute } from 'astro'
 
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
+const OLLAMA_TIMEOUT_MS = 5000
+
 interface ShowResponse {
   capabilities?: string[]
   details?: {
@@ -56,9 +58,9 @@ export const GET: APIRoute = async ({ url }) => {
         body: JSON.stringify({ model }),
         headers: { 'Content-Type': 'application/json' },
         method: 'POST',
-        signal: AbortSignal.timeout(5000),
+        signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS),
       }),
-      fetch(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(5000) }),
+      fetch(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) }),
     ])
 
     if (!showRes.ok) {

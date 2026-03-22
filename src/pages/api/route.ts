@@ -14,6 +14,9 @@ import { DEFAULT_ANALYST_MODEL, DEFAULT_MODELS, OLLAMA_BASE_URL_DEFAULT } from '
 import { buildSpecialists } from '@/lib/router/specialists'
 import { RouteRequestSchema } from '@/lib/schemas/route'
 
+/** 5 min: specialist models on consumer hardware can be slow for large inputs */
+const SPECIALIST_TIMEOUT_MS = 300_000
+
 interface ValidatedRequest {
   analystModel: string
   commitModel: string
@@ -69,7 +72,7 @@ async function streamSpecialistResponse(
 ): Promise<void> {
   const abortController = new AbortController()
   // 5 min: specialist models on consumer hardware can be slow for large inputs — generous timeout avoids cutting off long refactors or test generation
-  const timeout = setTimeout(() => abortController.abort(), 300_000)
+  const timeout = setTimeout(() => abortController.abort(), SPECIALIST_TIMEOUT_MS)
   let outputText = ''
 
   try {
@@ -158,7 +161,7 @@ function buildSSEStream(req: ValidatedRequest): ReadableStream {
 }
 
 export const POST: APIRoute = async ({ request }) => {
-  let rawBody: unknown
+  let rawBody
   try {
     rawBody = await request.json()
   } catch {
