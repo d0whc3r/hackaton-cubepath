@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(.specify/scripts/bash/create-new-feature.sh \"Router inteligente de SLMs para tareas del dev\" --json --short-name \"slm-router-dev-tasks\")"
+      "Bash(.specify/scripts/bash/create-new-feature.sh *)",
+      "Bash(bash .specify/scripts/bash/check-prerequisites.sh *)",
+      "WebSearch",
+      "WebFetch(domain:ollama.com)"
     ]
   }
 }
