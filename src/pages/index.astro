@@ -1,18 +1,233 @@
 ---
-const now = new Date().toISOString();
+import AppLayout from '@/layouts/AppLayout.astro'
+import { ModelConfigDialog } from '@/components/model/ModelConfigDialog'
+import { ThemeToggle } from '@/components/layout/ThemeToggle'
+import { OverviewTaskCards } from '@/components/layout/OverviewTaskCards'
 ---
 
-<html lang="es">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Hackaton CubePath | Astro SSR</title>
-  </head>
-  <body>
-    <main>
-      <h1>Astro SSR en Cloudflare Workers</h1>
-      <p>Proyecto inicializado en modo servidor.</p>
-      <p>Generado: {now}</p>
-    </main>
-  </body>
-</html>
+<AppLayout title="SLM Router — Intelligent Code Assistant">
+  <!-- Navbar -->
+  <header class="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
+    <div class="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4 md:px-6">
+      <a href="/" class="flex shrink-0 items-center gap-2 font-semibold text-foreground">
+        <span class="flex h-7 w-7 items-center justify-center overflow-hidden rounded-lg bg-primary/10">
+          <img
+            src="/logo-nobg.png"
+            alt="SLM Router logo"
+            width="28"
+            height="28"
+            class="h-7 w-7 object-contain"
+          />
+        </span>
+        <span class="hidden sm:inline">SLM Router</span>
+      </a>
+
+      <div class="hidden h-5 w-px bg-border sm:block"></div>
+
+      <nav class="flex flex-1 items-center gap-1 overflow-x-auto">
+        {[
+          { href: '/', label: 'Overview' },
+          { href: '/tasks/explain', label: 'Explain' },
+          { href: '/tasks/test', label: 'Tests' },
+          { href: '/tasks/refactor', label: 'Refactor' },
+          { href: '/tasks/commit', label: 'Commit' },
+        ].map((item) => {
+          const active = Astro.url.pathname === item.href
+          return (
+            <a
+              href={item.href}
+              class:list={[
+                'flex shrink-0 items-center rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                active
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+              ]}
+            >
+              {item.label}
+            </a>
+          )
+        })}
+      </nav>
+
+      <div class="flex shrink-0 items-center gap-1">
+        <ModelConfigDialog client:load />
+        <ThemeToggle client:load />
+      </div>
+    </div>
+  </header>
+
+  <main class="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
+    <!-- Hero -->
+    <section class="mx-auto mb-16 max-w-4xl pt-8 text-center">
+      <div
+        class="mb-4 inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary"
+      >
+        <span class="relative flex h-2 w-2">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-primary"></span>
+        </span>
+        100% local · Powered by Ollama · No API keys
+      </div>
+      <h1 class="mb-4 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+        Route code tasks to the
+        <span class="bg-linear-to-r from-primary to-blue-400 bg-clip-text text-transparent">right specialist</span>
+      </h1>
+      <p class="mx-auto mb-8 max-w-2xl text-base text-muted-foreground leading-relaxed">
+        SLM Router intelligently dispatches your code to purpose-built small language models running locally via Ollama.
+        Get faster, cheaper results — with an Analyst that detects language and context before routing, live progress, real-time streaming, and response translation into 20+ languages.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="/tasks/explain"
+          class="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-md transition-opacity hover:opacity-90"
+        >
+          Get started
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+        </a>
+        <a
+          href="#tasks"
+          class="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          Browse tasks
+        </a>
+      </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="mx-auto mb-16 max-w-4xl">
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {
+          [
+            { label: 'Cost per query', value: '$0', sub: 'runs free via Ollama' },
+            { label: 'Specialist tasks', value: '4', sub: 'explain · test · refactor · commit' },
+            { label: 'Languages detected', value: '12+', sub: 'auto-detected by Analyst' },
+            { label: 'Translation targets', value: '20+', sub: 'translate any response' },
+          ].map((stat) => (
+            <div class="rounded-xl border border-border/70 bg-card p-4 text-center shadow-sm">
+              <p class="text-2xl font-bold text-primary">{stat.value}</p>
+              <p class="text-xs font-medium text-foreground">{stat.label}</p>
+              <p class="text-xs text-muted-foreground">{stat.sub}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Task cards (React island — reads model config from localStorage) -->
+    <section id="tasks" class="mx-auto mb-16 max-w-4xl scroll-mt-20">
+      <h2 class="mb-2 text-xl font-semibold tracking-tight text-foreground">Choose a task</h2>
+      <p class="mb-6 text-sm text-muted-foreground">Each task uses a different specialist model optimised for that specific job.</p>
+      <OverviewTaskCards client:load />
+    </section>
+
+    <!-- How it works -->
+    <section class="mx-auto mb-16 max-w-4xl">
+      <h2 class="mb-2 text-xl font-semibold tracking-tight text-foreground">How it works</h2>
+      <p class="mb-6 text-sm text-muted-foreground">Four steps from input to answer — all running locally.</p>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {
+          [
+            {
+              step: '1',
+              title: 'Analyst analyses',
+              desc: 'A tiny fast model (e.g. Llama 3.2 1B) reads your input and detects the programming language, test framework, and whether it\'s a diff.',
+              color: 'text-blue-500 bg-blue-500/10',
+            },
+            {
+              step: '2',
+              title: 'Specialist selected',
+              desc: 'Based on the task type and detected context, the right specialist model is chosen — not a one-size-fits-all LLM.',
+              color: 'text-purple-500 bg-purple-500/10',
+            },
+            {
+              step: '3',
+              title: 'Response streams',
+              desc: 'The specialist generates the response in real time via Ollama. Long outputs auto-continue if the model hits its token limit.',
+              color: 'text-green-500 bg-green-500/10',
+            },
+            {
+              step: '4',
+              title: 'Translate (optional)',
+              desc: 'After each response, translate it into any of 20+ languages using a dedicated translation model. Code blocks are never translated — only the surrounding prose text.',
+              color: 'text-orange-500 bg-orange-500/10',
+            },
+          ].map((item) => (
+            <div class="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
+              <div class={`mb-3 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold ${item.color}`}>
+                {item.step}
+              </div>
+              <h3 class="mb-1.5 font-semibold text-foreground">{item.title}</h3>
+              <p class="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Features highlight -->
+    <section class="mx-auto mb-16 max-w-4xl">
+      <h2 class="mb-6 text-xl font-semibold tracking-tight text-foreground">Features</h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        {
+          [
+            {
+              icon: '🧠',
+              title: 'Analyst routing',
+              desc: 'A configurable small model pre-analyses your input before routing — detects language, test framework, and diff context.',
+            },
+            {
+              icon: '🌍',
+              title: 'Response translation',
+              desc: 'Translate any response into 20+ languages using a dedicated translation model. Markdown is translated — code blocks are always preserved as-is.',
+            },
+            {
+              icon: '💾',
+              title: 'Per-task history',
+              desc: 'Each task page keeps its own isolated conversation history in localStorage. Clear any task independently.',
+            },
+            {
+              icon: '💸',
+              title: 'Cost comparison',
+              desc: 'After each response, see how much you\'d have spent on GPT-4o, Gemini, or Claude — vs $0 locally.',
+            },
+            {
+              icon: '📎',
+              title: 'File attachment',
+              desc: 'Attach source files directly. Supports TypeScript, Python, Go, Rust, Java, and many more.',
+            },
+            {
+              icon: '⚙️',
+              title: 'Fully configurable',
+              desc: 'Choose the model for each task, the Analyst, and the translate model. Pull any Ollama model directly from the UI.',
+            },
+          ].map((f) => (
+            <div class="flex gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm">
+              <span class="mt-0.5 shrink-0 text-xl">{f.icon}</span>
+              <div>
+                <h3 class="mb-1 text-sm font-semibold text-foreground">{f.title}</h3>
+                <p class="text-xs leading-relaxed text-muted-foreground">{f.desc}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- Cost note -->
+    <section class="mx-auto mb-16 max-w-4xl">
+      <div class="rounded-xl border border-border/60 bg-muted/30 px-5 py-4">
+        <p class="mb-1 text-xs font-semibold text-foreground">About cost estimates</p>
+        <p class="text-xs leading-relaxed text-muted-foreground">
+          After each response, SLM Router shows an estimated cost comparison between running the
+          task locally (via Ollama — effectively <strong class="text-foreground">$0</strong>) and
+          using a cloud LLM API. Token counts are approximated at ~4 characters per token.
+          Cloud prices use official published rates for{' '}
+          <span class="font-medium text-foreground">GPT-4o</span>,{' '}
+          <span class="font-medium text-foreground">Gemini 2.0 Flash</span>, and{' '}
+          <span class="font-medium text-foreground">Claude Sonnet</span> (input + output tokens).
+          All figures are <em>estimates</em> — actual billed amounts may differ.
+        </p>
+      </div>
+    </section>
+  </main>
+</AppLayout>
