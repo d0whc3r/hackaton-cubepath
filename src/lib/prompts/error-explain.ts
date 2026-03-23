@@ -1,5 +1,6 @@
 export function buildErrorExplainPrompt(): string {
   return `You are an expert software engineer helping a developer understand an error.
+You MUST respond in English only, regardless of the language of the input code or error messages.
 
 The user will provide an error message in an ERROR: section and optionally a code snippet in a CODE: section.
 

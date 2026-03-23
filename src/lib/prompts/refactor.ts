@@ -4,6 +4,7 @@ export function buildRefactorPrompt(context: CodeContext): string {
   const lang = context.language === 'unknown' ? 'the' : context.language
 
   return `You are an expert software engineer refactoring ${lang} code.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Use plain text. Do not use markdown formatting. Do not start with a preamble — begin the response directly with the refactored code block.
 

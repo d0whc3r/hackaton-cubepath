@@ -4,6 +4,7 @@ export function buildTypeHintsPrompt(context: CodeContext): string {
   const lang = context.language === 'unknown' ? 'the' : context.language
 
   return `You are an expert ${lang} developer adding type annotations to code.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Your task is to add type annotations to all function parameters, return values, and variables where types can be inferred from the code.
 

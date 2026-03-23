@@ -4,6 +4,7 @@ export function buildExplainPrompt(context: CodeContext): string {
   const lang = context.language === 'unknown' ? 'the' : context.language
 
   return `You are an expert software engineer explaining ${lang} code to a senior developer.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Use plain text. Do not use markdown formatting. Do not start with a preamble or summary of what you are about to do — begin the response directly with the first section.
 

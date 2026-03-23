@@ -1,11 +1,11 @@
-import { Paperclip, Send, Square, Trash2, X } from 'lucide-react'
+import { Paperclip, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
 
 import type { TaskType } from '@/lib/schemas/route'
 
+import { ComposerSubmitControls } from '@/components/chat/ComposerSubmitControls'
+import { ComposerTextarea } from '@/components/chat/ComposerTextarea'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { MAX_CHARS, useChatInput } from '@/hooks/use-chat-input'
 import { useFileAttachment } from '@/hooks/use-file-attachment'
@@ -90,15 +90,12 @@ export function ChatInput() {
       )}
 
       <div className="relative">
-        <Textarea
+        <ComposerTextarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={onKeyDown}
           placeholder={currentOption?.placeholder ?? 'Paste code or text…'}
-          className={[
-            'max-h-48 resize-none overflow-y-auto pr-12 font-mono text-xs leading-relaxed',
-            overLimit ? 'border-destructive focus-visible:ring-destructive' : '',
-          ].join(' ')}
+          className={['max-h-48 pr-12', overLimit ? 'border-destructive focus-visible:ring-destructive' : ''].join(' ')}
         />
         <input
           ref={fileInputRef}
@@ -153,33 +150,13 @@ export function ChatInput() {
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          {isLoading ? (
-            <Button type="button" variant="outline" size="sm" onClick={handleCancel} className="h-8 gap-1.5">
-              <Square className="h-3 w-3 fill-current" />
-              Stop
-            </Button>
-          ) : (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={onSubmit}
-                  disabled={!input.trim() || overLimit}
-                  className="h-8 gap-1.5"
-                >
-                  <Send className="h-3.5 w-3.5" />
-                  Send
-                  <kbd className="hidden rounded border border-primary-foreground/30 px-1 py-0.5 font-mono text-[9px] opacity-70 sm:inline">
-                    ⌘↵
-                  </kbd>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Send (⌘+Enter)</p>
-              </TooltipContent>
-            </Tooltip>
-          )}
+          <ComposerSubmitControls
+            isLoading={isLoading}
+            onCancel={handleCancel}
+            onSubmit={onSubmit}
+            submitDisabled={!input.trim() || overLimit}
+            sendTooltip="Send (⌘+Enter)"
+          />
         </div>
       </div>
     </div>

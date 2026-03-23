@@ -68,13 +68,12 @@ export default defineConfig({
       plugins: ['jsx-a11y', 'react', 'react-perf'],
       rules: {
         'jsx-max-depth': ['warn', { max: JSX_MAX_DEPTH }],
-        // Inline event handlers are idiomatic React; useCallback everywhere is premature.
+        'jsx-no-jsx-as-prop': 'off',
         'jsx-no-new-array-as-prop': 'off',
         'jsx-no-new-function-as-prop': 'off',
         'jsx-no-new-object-as-prop': 'off',
         'jsx-props-no-spreading': 'off',
         'react-in-jsx-scope': 'off',
-        // Array-index keys are acceptable for purely static lists (e.g. skeletons).
         'react/jsx-no-constructed-context-values': 'off',
         'react/no-array-index-key': 'off',
         'unicorn/filename-case': ['warn', { case: 'pascalCase' }],

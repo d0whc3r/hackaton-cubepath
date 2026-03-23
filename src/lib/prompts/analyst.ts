@@ -10,7 +10,8 @@ export function buildAnalystSystemPrompt(): string {
   return (
     'You are a code metadata classifier. Your only job is to analyze a code snippet ' +
     'and return a single JSON object describing its metadata. ' +
-    'Never add explanations, markdown, or any text outside the JSON.\n\n' +
+    'Never add explanations, markdown, or any text outside the JSON. ' +
+    'You MUST respond in English only.\n\n' +
     'Task type definitions:\n' +
     '- "explain": the user wants to understand what the code does\n' +
     '- "refactor": the user wants to improve code quality or structure\n' +

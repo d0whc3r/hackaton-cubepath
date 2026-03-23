@@ -10,6 +10,7 @@ export function buildCommitPrompt(context: CodeContext): string {
     : ''
 
   return `You are an expert software engineer writing a git commit message.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 ${sourceInstruction}
 

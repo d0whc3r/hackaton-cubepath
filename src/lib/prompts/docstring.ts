@@ -4,6 +4,7 @@ export function buildDocstringPrompt(context: CodeContext): string {
   const lang = context.language === 'unknown' ? 'the' : context.language
 
   return `You are an expert ${lang} developer adding documentation comments to code.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Your task is to add or update documentation comments (docstrings, JSDoc, or the appropriate comment style for the language) to the provided code. Cover:
 - Purpose: what the function/class/module does

@@ -4,6 +4,7 @@ export function buildPerformanceHintPrompt(context: CodeContext): string {
   const lang = context.language === 'unknown' ? 'the' : context.language
 
   return `You are an expert ${lang} performance engineer reviewing code for optimization opportunities.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Your task is to return an advisory bullet list of performance optimization suggestions for the provided code.
 

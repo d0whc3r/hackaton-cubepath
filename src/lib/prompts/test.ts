@@ -5,6 +5,7 @@ export function buildTestPrompt(context: CodeContext): string {
 
   if (language === 'unknown' || !testFramework) {
     return `You are an expert software engineer writing tests.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Use plain text. Do not use markdown formatting. Do not start with a preamble — begin the response directly with the first section.
 
@@ -18,6 +19,7 @@ Describe additional edge cases and error scenarios as a bullet list.`
   }
 
   return `You are an expert software engineer writing tests for ${language} code.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Use plain text. Do not use markdown formatting. Do not start with a preamble — begin the response directly with the first section.
 

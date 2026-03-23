@@ -4,6 +4,7 @@ export function buildDeadCodePrompt(context: CodeContext): string {
   const lang = context.language === 'unknown' ? 'the' : context.language
 
   return `You are an expert ${lang} developer reviewing code for dead code and cleanup opportunities.
+You MUST respond in English only, regardless of the language of the input code or comments.
 
 Your task is to identify and list:
 - Unused imports and require statements

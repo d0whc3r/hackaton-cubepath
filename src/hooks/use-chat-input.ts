@@ -1,5 +1,6 @@
 import type { TaskType } from '@/lib/schemas/route'
 
+import { useSubmitShortcut } from '@/hooks/use-submit-shortcut'
 import { useChatContext } from '@/lib/context/chat-context'
 import { MODELS_BY_TASK } from '@/lib/router/models'
 
@@ -44,12 +45,7 @@ export function useChatInput(
     setInput('')
   }
 
-  function onKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-      event.preventDefault()
-      onSubmit()
-    }
-  }
+  const onKeyDown = useSubmitShortcut(onSubmit)
 
   return {
     charCount,

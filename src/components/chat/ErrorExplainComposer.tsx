@@ -1,8 +1,8 @@
-import { Send, Square } from 'lucide-react'
 import { useState } from 'react'
 
-import { Button } from '@/components/ui/button'
-import { Textarea } from '@/components/ui/textarea'
+import { ComposerSubmitControls } from '@/components/chat/ComposerSubmitControls'
+import { ComposerTextarea } from '@/components/chat/ComposerTextarea'
+import { useSubmitShortcut } from '@/hooks/use-submit-shortcut'
 import { useChatContext } from '@/lib/context/chat-context'
 
 export function ErrorExplainComposer() {
@@ -31,12 +31,7 @@ export function ErrorExplainComposer() {
     setTouched(false)
   }
 
-  function handleKeyDown(event: React.KeyboardEvent) {
-    if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
-      event.preventDefault()
-      submit()
-    }
-  }
+  const handleKeyDown = useSubmitShortcut(submit)
 
   return (
     <div className="border-t border-border/60 bg-background/95 p-3 backdrop-blur-sm md:p-4">
@@ -44,14 +39,14 @@ export function ErrorExplainComposer() {
         <label htmlFor="error-msg" className="text-xs font-medium text-foreground">
           Error message <span className="text-destructive">*</span>
         </label>
-        <Textarea
+        <ComposerTextarea
           id="error-msg"
           value={errorMsg}
           onChange={(event) => setErrorMsg(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Paste the error message or stack trace…"
           className={[
-            'max-h-40 resize-none overflow-y-auto font-mono text-xs leading-relaxed',
+            'max-h-40',
             touched && isErrorEmpty ? 'border-destructive focus-visible:ring-destructive' : '',
           ].join(' ')}
           disabled={isLoading}
@@ -63,32 +58,19 @@ export function ErrorExplainComposer() {
         <label htmlFor="code-snippet" className="text-xs font-medium text-muted-foreground">
           Code snippet <span className="text-muted-foreground/60">(optional)</span>
         </label>
-        <Textarea
+        <ComposerTextarea
           id="code-snippet"
           value={codeSnippet}
           onChange={(event) => setCodeSnippet(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Paste the relevant code snippet for more context…"
-          className="max-h-32 resize-none overflow-y-auto font-mono text-xs leading-relaxed"
+          className="max-h-32"
           disabled={isLoading}
         />
       </div>
 
       <div className="flex justify-end">
-        {isLoading ? (
-          <Button type="button" variant="outline" size="sm" onClick={handleCancel} className="h-8 gap-1.5">
-            <Square className="h-3 w-3 fill-current" />
-            Stop
-          </Button>
-        ) : (
-          <Button type="button" size="sm" onClick={submit} className="h-8 gap-1.5">
-            <Send className="h-3.5 w-3.5" />
-            Send
-            <kbd className="hidden rounded border border-primary-foreground/30 px-1 py-0.5 font-mono text-[9px] opacity-70 sm:inline">
-              ⌘↵
-            </kbd>
-          </Button>
-        )}
+        <ComposerSubmitControls isLoading={isLoading} onCancel={handleCancel} onSubmit={submit} />
       </div>
     </div>
   )

@@ -68,6 +68,8 @@ export const RouteRequestSchema = z.object({
   docstringModel: z.string().optional(),
   errorExplainModel: z.string().optional(),
   explainModel: z.string().optional(),
+  /** Small/fast guard model used for semantic input validation. Defaults to qwen2.5:0.5b. */
+  guardModel: z.string().optional(),
   input: z.string().min(1).max(15_000),
   namingHelperModel: z.string().optional(),
   ollamaBaseUrl: z.string().optional(),
