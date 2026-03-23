@@ -4,24 +4,37 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 import type { SectionDef, SectionGroupId } from './settings/types'
 
-import { ActiveSectionEditor } from './settings/ActiveSectionEditor'
 import { SECTIONS } from './settings/constants'
 import { isModelInstalled } from './settings/helpers'
 import { MissingModelsDialog } from './settings/MissingModelsDialog'
-import { ModelDetailsPanel } from './settings/ModelDetailsPanel'
-import { SectionCardsStrip } from './settings/SectionCardsStrip'
+import { TaskRow } from './settings/TaskRow'
 import { useModelConfigPage } from './settings/use-model-config-page'
 
-const GROUPS: { id: SectionGroupId; label: string }[] = [
-  { id: 'infrastructure', label: 'Infrastructure' },
-  { id: 'analysis', label: 'Analysis' },
-  { id: 'generation', label: 'Generation' },
-  { id: 'language', label: 'Language' },
+const GROUPS: { id: SectionGroupId; label: string; description: string }[] = [
+  {
+    description: 'Models that handle pre-processing and initial analysis before specialist dispatch.',
+    id: 'infrastructure',
+    label: 'Core Routing',
+  },
+  {
+    description: 'Read-only intelligence tasks — explain, diagnose, identify, and suggest.',
+    id: 'analysis',
+    label: 'Analysis Tasks',
+  },
+  {
+    description: 'Active transformation tasks — generate, refactor, and rewrite code.',
+    id: 'generation',
+    label: 'Generation Tasks',
+  },
+  {
+    description: 'Multilingual processing — translation and localization.',
+    id: 'language',
+    label: 'Language',
+  },
 ]
 
 function getGroupSections(groupId: SectionGroupId): SectionDef[] {
@@ -30,47 +43,35 @@ function getGroupSections(groupId: SectionGroupId): SectionDef[] {
 
 export function ModelConfigPage() {
   const {
-    config,
-    customModels,
-    installedModels,
-    pullStates,
     activeSection,
-    activeSectionDef,
-    activeIsCustom,
-    activeModelInstalled,
-    ollamaBaseUrl,
+    config,
     copiedModelId,
-    runtimeModelDetails,
+    customModels,
+    getDefaultModelForSection,
+    getSelectValue,
+    handleCopyPull,
+    handleCustomModelChange,
+    handleModelChange,
+    handlePull,
+    handleReset,
+    handleSave,
+    installedModels,
+    isCustom,
     isDirty,
+    ollamaBaseUrl,
+    pullStates,
     setActiveSection,
     setOllamaBaseUrl,
-    getSelectValue,
-    isCustom,
-    getDefaultModelForSection,
-    handleModelChange,
-    handleCustomModelChange,
-    handlePull,
-    handleCopyPull,
-    handleSave,
-    handleReset,
   } = useModelConfigPage()
 
-  const [activeGroup, setActiveGroup] = useState<SectionGroupId>(activeSectionDef.group)
   const [showMissingDialog, setShowMissingDialog] = useState(false)
   const isConfirmingNavigationRef = useRef(false)
   const allowNavigationRef = useRef(false)
-  const groupedSections = getGroupSections(activeGroup)
-  const groupedSectionsLabel = GROUPS.find((group) => group.id === activeGroup)?.label ?? activeGroup
-  const currentSectionModelId = config[activeSectionDef.configKey] as string
-  const missingSections = SECTIONS.filter((section) => {
-    const modelId = config[section.configKey] as string
-    return !isModelInstalled(installedModels, modelId)
-  })
-  const canSave = installedModels !== null && missingSections.length === 0
 
-  useEffect(() => {
-    setActiveGroup(activeSectionDef.group)
-  }, [activeSectionDef.group])
+  const missingSections = SECTIONS.filter(
+    (section) => !isModelInstalled(installedModels, config[section.configKey] as string),
+  )
+  const canSave = installedModels !== null && missingSections.length === 0
 
   useEffect(() => {
     if (!isDirty) {
@@ -84,14 +85,10 @@ export function ModelConfigPage() {
         return
       }
       event.preventDefault()
-      event.returnValue = warningMessage
     }
 
     const onDocumentClickCapture = (event: MouseEvent) => {
-      if (isConfirmingNavigationRef.current) {
-        return
-      }
-      if (allowNavigationRef.current) {
+      if (isConfirmingNavigationRef.current || allowNavigationRef.current) {
         return
       }
       if (
@@ -105,18 +102,13 @@ export function ModelConfigPage() {
         return
       }
 
-      const target = event.target as Element | null
-      const anchor = target?.closest<HTMLAnchorElement>('a[href]')
-      if (!anchor) {
-        return
-      }
-      if (anchor.target === '_blank' || anchor.hasAttribute('download')) {
+      const anchor = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href]')
+      if (!anchor || anchor.target === '_blank' || anchor.hasAttribute('download')) {
         return
       }
 
       const nextUrl = new URL(anchor.href, globalThis.location.href)
-      const currentUrl = new URL(globalThis.location.href)
-      if (nextUrl.href === currentUrl.href) {
+      if (nextUrl.href === globalThis.location.href) {
         return
       }
 
@@ -127,17 +119,12 @@ export function ModelConfigPage() {
         allowNavigationRef.current = true
         return
       }
-      if (!shouldLeave) {
-        event.preventDefault()
-        event.stopPropagation()
-      }
+      event.preventDefault()
+      event.stopPropagation()
     }
 
     const onPopState = () => {
-      if (isConfirmingNavigationRef.current) {
-        return
-      }
-      if (allowNavigationRef.current) {
+      if (isConfirmingNavigationRef.current || allowNavigationRef.current) {
         return
       }
       isConfirmingNavigationRef.current = true
@@ -147,9 +134,7 @@ export function ModelConfigPage() {
         allowNavigationRef.current = true
         return
       }
-      if (!shouldLeave) {
-        globalThis.history.go(1)
-      }
+      globalThis.history.go(1)
     }
 
     globalThis.addEventListener('beforeunload', onBeforeUnload)
@@ -163,14 +148,6 @@ export function ModelConfigPage() {
     }
   }, [isDirty])
 
-  function handleGroupChange(nextGroup: SectionGroupId) {
-    setActiveGroup(nextGroup)
-    const [nextSection] = getGroupSections(nextGroup)
-    if (nextSection) {
-      setActiveSection(nextSection.id)
-    }
-  }
-
   function handleSaveClick() {
     if (!canSave) {
       setShowMissingDialog(true)
@@ -181,33 +158,34 @@ export function ModelConfigPage() {
   }
 
   function handleInstallMissingModels() {
-    const missingModels = [
-      ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
-    ]
-
-    for (const modelId of missingModels) {
+    const missingModelIds = [...new Set(missingSections.map((s) => config[s.configKey] as string).filter(Boolean))]
+    for (const modelId of missingModelIds) {
       handlePull(modelId, ollamaBaseUrl)
     }
-
     const [firstMissing] = missingSections
     if (firstMissing) {
       setActiveSection(firstMissing.id)
-      setActiveGroup(firstMissing.group)
     }
-
     setShowMissingDialog(false)
   }
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
-      <div className="mb-6 flex items-center justify-between gap-3">
+      {/* Header */}
+      <div className="mb-6 flex items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">Model Settings</h1>
-          <p className="text-xs text-muted-foreground">
-            Choose the best model for each task and your local Ollama endpoint.
+          <h1 className="text-2xl font-bold text-foreground">Model Configuration</h1>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            Assign an Ollama model to each task role. Configuration is persisted to{' '}
+            <code className="rounded border border-border/60 bg-muted px-1 py-0.5 font-mono text-xs">localStorage</code>{' '}
+            under key{' '}
+            <code className="rounded border border-border/60 bg-muted px-1 py-0.5 font-mono text-xs">
+              slm-router-model-config
+            </code>
+            .
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={handleReset}>
             Reset
           </Button>
@@ -217,74 +195,78 @@ export function ModelConfigPage() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <Label htmlFor="ollama-url" className="shrink-0 text-xs font-medium text-muted-foreground">
-          Ollama Base URL
-        </Label>
+      {/* Ollama URL with status indicator */}
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+        <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
+          <Label htmlFor="ollama-url" className="shrink-0 font-mono text-xs text-muted-foreground">
+            Ollama endpoint
+          </Label>
+        </div>
         <Input
           id="ollama-url"
           value={ollamaBaseUrl}
           onChange={(event) => setOllamaBaseUrl(event.target.value)}
           placeholder={OLLAMA_BASE_URL_DEFAULT}
-          className="max-w-xl font-mono text-xs"
+          className="max-w-xs font-mono text-xs"
         />
-        <span className="text-[11px] text-muted-foreground">Default: {OLLAMA_BASE_URL_DEFAULT}</span>
       </div>
 
-      <Separator className="my-6" />
+      {missingSections.length > 0 && (
+        <p className="mb-4 text-xs text-destructive">
+          {missingSections.length} selected model{missingSections.length > 1 ? 's are' : ' is'} not installed. Install
+          or change them before saving.
+        </p>
+      )}
 
-      <Tabs value={activeGroup} onValueChange={(value) => handleGroupChange(value as SectionGroupId)}>
-        <TabsList variant="line" className="mb-4 h-10">
-          {GROUPS.map((group) => (
-            <TabsTrigger key={group.id} value={group.id} className="px-3">
-              {group.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <Separator className="mb-8" />
 
-        <TabsContent value={activeGroup}>
-          <p className="mb-2 text-xs text-muted-foreground">
-            Functions in <span className="font-medium text-foreground">{groupedSectionsLabel}</span>
-          </p>
-          {missingSections.length > 0 && (
-            <p className="mb-2 text-xs text-destructive">
-              {missingSections.length} selected model{missingSections.length > 1 ? 's are' : ' is'} not installed.
-              Install or change them before saving.
-            </p>
-          )}
-
-          <SectionCardsStrip
-            sections={groupedSections}
-            activeSectionId={activeSection}
-            getModelId={(section) => config[section.configKey] as string}
-            isInstalled={(modelId) => isModelInstalled(installedModels, modelId)}
-            onSelectSection={(section) => setActiveSection(section.id)}
-          />
-
-          <ActiveSectionEditor
-            section={activeSectionDef}
-            selectValue={getSelectValue(activeSectionDef)}
-            defaultModelId={getDefaultModelForSection(activeSectionDef)}
-            customValue={customModels[activeSectionDef.id] ?? ''}
-            isCustom={isCustom(activeSectionDef.id)}
-            onModelChange={(value) => handleModelChange(activeSectionDef, value)}
-            onCustomModelChange={(value) => handleCustomModelChange(activeSectionDef, value)}
-          />
-
-          <ModelDetailsPanel
-            section={activeSectionDef}
-            config={config}
-            isCustom={activeIsCustom}
-            isInstalled={activeModelInstalled}
-            copiedModelId={copiedModelId}
-            pullState={pullStates[currentSectionModelId]}
-            runtimeDetails={runtimeModelDetails}
-            ollamaBaseUrl={ollamaBaseUrl}
-            onPull={handlePull}
-            onCopyPull={handleCopyPull}
-          />
-        </TabsContent>
-      </Tabs>
+      {/* Groups */}
+      <div className="space-y-8">
+        {GROUPS.map((group) => {
+          const groupSections = getGroupSections(group.id)
+          return (
+            <section key={group.id} aria-labelledby={`group-heading-${group.id}`}>
+              <div className="mb-4">
+                <h2 id={`group-heading-${group.id}`} className="text-base font-semibold text-foreground">
+                  {group.label}
+                </h2>
+                <p className="mt-0.5 text-xs text-muted-foreground">{group.description}</p>
+              </div>
+              <div className="overflow-hidden rounded-xl border border-border bg-card">
+                <div className="divide-y divide-border/60">
+                  {groupSections.map((section) => {
+                    const modelId = config[section.configKey] as string
+                    return (
+                      <TaskRow
+                        key={section.id}
+                        section={section}
+                        modelId={modelId}
+                        isActive={activeSection === section.id}
+                        selectValue={getSelectValue(section)}
+                        defaultModelId={getDefaultModelForSection(section)}
+                        customValue={customModels[section.id] ?? ''}
+                        isCustom={isCustom(section.id)}
+                        isInstalled={isModelInstalled(installedModels, modelId)}
+                        installedModelsReady={installedModels !== null}
+                        pullState={pullStates[modelId]}
+                        ollamaBaseUrl={ollamaBaseUrl}
+                        copiedModelId={copiedModelId}
+                        onActivate={() => setActiveSection(section.id)}
+                        onModelChange={(value) => handleModelChange(section, value)}
+                        onCustomModelChange={(value) => handleCustomModelChange(section, value)}
+                        onPull={handlePull}
+                        onCopyPull={handleCopyPull}
+                        showGroupBadge={false}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            </section>
+          )
+        })}
+      </div>
 
       <MissingModelsDialog
         open={showMissingDialog}

@@ -87,6 +87,17 @@ export function ChatMessages() {
     }
   }, [isTaskUnread, activeTask])
 
+  // When switching tasks, jump to bottom so the latest response is visible.
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) {
+      return
+    }
+    el.scrollTop = el.scrollHeight
+    setIsAtBottom(true)
+    isAtBottomRef.current = true
+  }, [activeTask])
+
   // When a new query is submitted, jump to bottom so the response is visible.
   useEffect(() => {
     if (isLoading) {

@@ -5,8 +5,20 @@ import { ComposerTextarea } from '@/components/chat/ComposerTextarea'
 import { useSubmitShortcut } from '@/hooks/use-submit-shortcut'
 import { useChatContext } from '@/lib/context/chat-context'
 
+function parsePreviousErrorExplainInput(content: string): { errorMsg: string; codeSnippet: string } {
+  const parsed = content.match(/^ERROR:\n([\s\S]*?)(?:\n\nCODE:\n([\s\S]*))?$/)
+  if (!parsed) {
+    return { codeSnippet: '', errorMsg: content }
+  }
+
+  return {
+    codeSnippet: parsed[2] ?? '',
+    errorMsg: parsed[1] ?? '',
+  }
+}
+
 export function ErrorExplainComposer() {
-  const { isLoading, handleSubmit, handleCancel } = useChatContext()
+  const { isLoading, handleSubmit, handleCancel, entries } = useChatContext()
   const [errorMsg, setErrorMsg] = useState('')
   const [codeSnippet, setCodeSnippet] = useState('')
   const [touched, setTouched] = useState(false)
@@ -31,7 +43,31 @@ export function ErrorExplainComposer() {
     setTouched(false)
   }
 
-  const handleKeyDown = useSubmitShortcut(submit)
+  const submitShortcut = useSubmitShortcut(submit)
+
+  function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key === 'ArrowUp' &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !event.shiftKey &&
+      !errorMsg.trim() &&
+      !codeSnippet.trim()
+    ) {
+      const previousInput = entries.at(-1)?.userMessage.content
+      if (previousInput) {
+        const previous = parsePreviousErrorExplainInput(previousInput)
+        event.preventDefault()
+        setErrorMsg(previous.errorMsg)
+        setCodeSnippet(previous.codeSnippet)
+        setTouched(false)
+        return
+      }
+    }
+
+    submitShortcut(event)
+  }
 
   return (
     <div className="border-t border-border/60 bg-background/95 p-3 backdrop-blur-sm md:p-4">

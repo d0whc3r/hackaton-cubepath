@@ -57,6 +57,26 @@ export function ChatInput() {
     attachedFileName,
   )
 
+  function handleInputKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (
+      event.key === 'ArrowUp' &&
+      !event.metaKey &&
+      !event.ctrlKey &&
+      !event.altKey &&
+      !event.shiftKey &&
+      !input.trim()
+    ) {
+      const previousInput = entries.at(-1)?.userMessage.content
+      if (previousInput) {
+        event.preventDefault()
+        setInput(previousInput)
+        return
+      }
+    }
+
+    onKeyDown(event)
+  }
+
   return (
     <div className="border-t border-border/60 bg-background/95 p-3 backdrop-blur-sm md:p-4">
       {attachedFileName && (
@@ -93,7 +113,7 @@ export function ChatInput() {
         <ComposerTextarea
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          onKeyDown={onKeyDown}
+          onKeyDown={handleInputKeyDown}
           placeholder={currentOption?.placeholder ?? 'Paste code or text…'}
           className={['max-h-48 pr-12', overLimit ? 'border-destructive focus-visible:ring-destructive' : ''].join(' ')}
         />
