@@ -31,6 +31,7 @@ export default defineConfig({
     '.astro',
     '.trae',
     '.agent',
+    'design-sample',
   ],
   overrides: [
     {
