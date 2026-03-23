@@ -11,7 +11,6 @@ import {
   getAbortController,
   getServerSnapshot,
   getSnapshot,
-  markRead,
   setAbortController,
   setLoading,
   subscribe,
@@ -56,7 +55,6 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   // Load history lazily when switching visible task and sync model badge
   useEffect(() => {
     ensureLoaded(viewTask)
-    markRead(viewTask)
     setCurrentModel(getModelForTask(loadModelConfig(), viewTask))
   }, [viewTask])
 

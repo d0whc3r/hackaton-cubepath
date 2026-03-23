@@ -1,5 +1,5 @@
 import { ArrowDown } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { AssistantBubble } from '@/components/chat/AssistantBubble'
 import { EmptyState } from '@/components/chat/EmptyState'
@@ -7,6 +7,7 @@ import { UserBubble } from '@/components/chat/UserBubble'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChatContext } from '@/lib/context/chat-context'
+import { getServerSnapshot, getSnapshot, markRead, subscribe } from '@/lib/stores/chat-store'
 
 function ChatSkeleton() {
   return (
@@ -35,42 +36,58 @@ function ChatSkeleton() {
 const BOTTOM_THRESHOLD = 80 // Px from bottom considered "at bottom"
 
 export function ChatMessages() {
-  const { entries, isLoading, isHydrated } = useChatContext()
+  const { entries, isLoading, isHydrated, activeTask } = useChatContext()
+  const { unread } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const [isAtBottom, setIsAtBottom] = useState(true)
+  const isAtBottomRef = useRef(true)
 
-  // Track position for the "jump to bottom" button.
-  // Depends on isHydrated + entries.length so it re-runs when the scroll
-  // Container first appears in the DOM (it doesn't exist during EmptyState).
+  function checkBottom(el: HTMLDivElement) {
+    return el.scrollHeight - el.scrollTop - el.clientHeight <= BOTTOM_THRESHOLD
+  }
+
+  // Track scroll position; clear unread badge when the user reaches the bottom.
+  // Re-runs when entries.length changes so the listener attaches once the container exists.
   useEffect(() => {
     const el = scrollRef.current
     if (!el) {
       return
     }
     const onScroll = () => {
-      const dist = el.scrollHeight - el.scrollTop - el.clientHeight
-      setIsAtBottom(dist <= BOTTOM_THRESHOLD)
+      const atBottom = checkBottom(el)
+      setIsAtBottom(atBottom)
+      isAtBottomRef.current = atBottom
+      if (atBottom) {
+        markRead(activeTask)
+      }
     }
     el.addEventListener('scroll', onScroll, { passive: true })
     return () => el.removeEventListener('scroll', onScroll)
-  }, [isHydrated, entries.length])
+  }, [isHydrated, entries.length, activeTask])
 
-  // Auto-scroll on new content — reads the live scrollTop at effect time.
-  // If the user has already scrolled up, scrollTop is lower and dist > threshold,
-  // So we skip. No flag needed; the DOM position is the source of truth.
+  // Auto-scroll on new content when already near the bottom.
   useEffect(() => {
     const el = scrollRef.current
     if (!el) {
       return
     }
-    const dist = el.scrollHeight - el.scrollTop - el.clientHeight
-    if (dist <= BOTTOM_THRESHOLD) {
+    if (checkBottom(el)) {
       el.scrollTop = el.scrollHeight
+      markRead(activeTask)
     }
-  }, [entries])
+  }, [entries, activeTask])
 
-  // When a new query is submitted, jump to bottom so the response is visible
+  // When the task finishes and the user is already at the bottom, clear the unread
+  // Badge immediately without waiting for a scroll event.
+  const isTaskUnread = unread[activeTask]
+  useEffect(() => {
+    if (isTaskUnread && isAtBottomRef.current) {
+      markRead(activeTask)
+    }
+  }, [isTaskUnread, activeTask])
+
+  // When a new query is submitted, jump to bottom so the response is visible.
   useEffect(() => {
     if (isLoading) {
       const el = scrollRef.current
@@ -78,12 +95,15 @@ export function ChatMessages() {
         el.scrollTop = el.scrollHeight
       }
       setIsAtBottom(true)
+      isAtBottomRef.current = true
     }
   }, [isLoading])
 
   function scrollToBottom() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
     setIsAtBottom(true)
+    isAtBottomRef.current = true
+    markRead(activeTask)
   }
 
   if (!isHydrated) {
