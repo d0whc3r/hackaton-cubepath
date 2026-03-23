@@ -1,6 +1,7 @@
 import type { AssistantMessage, RoutingStep, TaskType } from '@/lib/schemas/route'
 import type { SSECallbacks } from '@/lib/utils/sse'
 
+import { markTaskDone } from '@/lib/stores/chat-store'
 import { addSaving } from '@/lib/utils/savings'
 
 type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
@@ -34,7 +35,10 @@ export function buildStreamCallbacks(
       update(task, (prev) => ({ ...prev, cost }))
       addSaving(cost.largeModelCostUsd, cost.inputTokens, cost.outputTokens)
     },
-    onDone: () => update(task, (prev) => ({ ...prev, status: 'done' })),
+    onDone: () => {
+      update(task, (prev) => ({ ...prev, status: 'done' }))
+      markTaskDone(task)
+    },
     onError: (message) =>
       update(task, (prev) => ({
         ...prev,

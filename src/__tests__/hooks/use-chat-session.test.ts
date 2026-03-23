@@ -5,6 +5,7 @@ import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { useChatSession } from '@/hooks/use-chat-session'
 import { getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { buildRouteMutationOptions } from '@/lib/services/route.service'
+import { resetStore } from '@/lib/stores/chat-store'
 import { clearHistory, loadHistory, saveHistory } from '@/lib/utils/history'
 
 // --- Mocks ---
@@ -56,6 +57,7 @@ vi.mock(import('@/lib/config/model-config'), () => ({
 
 describe('useChatSession', () => {
   beforeEach(() => {
+    resetStore()
     vi.clearAllMocks()
     vi.mocked(loadHistory).mockReturnValue([])
     vi.mocked(getModelForTask).mockReturnValue('test-model')

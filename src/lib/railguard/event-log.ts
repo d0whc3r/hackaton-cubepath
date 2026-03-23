@@ -57,11 +57,6 @@ export function getEvents(): ValidationEvent[] {
  */
 export function getMetrics(windowStart: Date, windowEnd: Date): SecurityMetrics {
   const zeroByCategory: Record<AttackVectorCategory, number> = {
-    'encoding-bypass': 0,
-    'instruction-injection': 0,
-    'persona-switch': 0,
-    'prompt-flooding': 0,
-    'role-play-override': 0,
     'semantic-check': 0,
   }
 

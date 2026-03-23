@@ -13,7 +13,7 @@ import {
   Type,
   Zap,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { TaskType } from '@/lib/schemas/route'
 import type { SavingsData } from '@/lib/utils/savings'
@@ -29,31 +29,33 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { getServerSnapshot, getSnapshot, subscribe } from '@/lib/stores/chat-store'
 import { formatUsd } from '@/lib/utils/format'
 import { loadSavings, resetSavings } from '@/lib/utils/savings'
 
 const NAV_ITEMS = [{ href: '/', icon: LayoutDashboard, label: 'Overview' }] as const
 
 const ANALYSIS_TASK_ITEMS = [
-  { href: '/tasks/explain', icon: BookOpen, label: 'Explain Code' },
-  { href: '/tasks/error-explain', icon: AlertCircle, label: 'Error Explain' },
-  { href: '/tasks/performance-hint', icon: Zap, label: 'Performance Hint' },
-  { href: '/tasks/dead-code', icon: Trash2, label: 'Dead Code' },
-  { href: '/tasks/naming-helper', icon: Tag, label: 'Naming Helper' },
+  { href: '/tasks/explain', icon: BookOpen, label: 'Explain Code', taskType: 'explain' as TaskType },
+  { href: '/tasks/error-explain', icon: AlertCircle, label: 'Error Explain', taskType: 'error-explain' as TaskType },
+  { href: '/tasks/performance-hint', icon: Zap, label: 'Performance Hint', taskType: 'performance-hint' as TaskType },
+  { href: '/tasks/dead-code', icon: Trash2, label: 'Dead Code', taskType: 'dead-code' as TaskType },
+  { href: '/tasks/naming-helper', icon: Tag, label: 'Naming Helper', taskType: 'naming-helper' as TaskType },
 ] as const
 
 const GENERATION_TASK_ITEMS = [
-  { href: '/tasks/test', icon: TestTube2, label: 'Generate Tests' },
-  { href: '/tasks/refactor', icon: RefreshCw, label: 'Refactor' },
-  { href: '/tasks/commit', icon: GitCommitHorizontal, label: 'Write Commit' },
-  { href: '/tasks/docstring', icon: FileText, label: 'Docstring' },
-  { href: '/tasks/type-hints', icon: Type, label: 'Type Hints' },
+  { href: '/tasks/test', icon: TestTube2, label: 'Generate Tests', taskType: 'test' as TaskType },
+  { href: '/tasks/refactor', icon: RefreshCw, label: 'Refactor', taskType: 'refactor' as TaskType },
+  { href: '/tasks/commit', icon: GitCommitHorizontal, label: 'Write Commit', taskType: 'commit' as TaskType },
+  { href: '/tasks/docstring', icon: FileText, label: 'Docstring', taskType: 'docstring' as TaskType },
+  { href: '/tasks/type-hints', icon: Type, label: 'Type Hints', taskType: 'type-hints' as TaskType },
 ] as const
 
 const EMPTY_SAVINGS: SavingsData = { queryCount: 0, totalInputTokens: 0, totalOutputTokens: 0, totalSavedUsd: 0 }
@@ -79,6 +81,7 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
   const [pathname, setPathname] = useState(() => normalizePath(globalThis.location?.pathname ?? '/'))
   const [savings, setSavings] = useState<SavingsData>(EMPTY_SAVINGS)
   const { state } = useSidebar()
+  const { loading, unread } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   useEffect(() => {
     const syncPathname = () => setPathname(normalizePath(globalThis.location.pathname))
@@ -187,6 +190,16 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
                       <span>{item.label}</span>
                     </a>
                   </SidebarMenuButton>
+                  {loading[item.taskType] && (
+                    <SidebarMenuBadge>
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                    </SidebarMenuBadge>
+                  )}
+                  {!loading[item.taskType] && unread[item.taskType] && (
+                    <SidebarMenuBadge>
+                      <span className="h-2 w-2 rounded-full bg-green-500" />
+                    </SidebarMenuBadge>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -213,6 +226,16 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
                       <span>{item.label}</span>
                     </a>
                   </SidebarMenuButton>
+                  {loading[item.taskType] && (
+                    <SidebarMenuBadge>
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                    </SidebarMenuBadge>
+                  )}
+                  {!loading[item.taskType] && unread[item.taskType] && (
+                    <SidebarMenuBadge>
+                      <span className="h-2 w-2 rounded-full bg-green-500" />
+                    </SidebarMenuBadge>
+                  )}
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

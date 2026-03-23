@@ -1,12 +1,23 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 
-import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
+import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
 
 import { DEFAULTS, getAnalystModel, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { buildRouteMutationOptions } from '@/lib/services/route.service'
+import {
+  appendEntry,
+  clearTask,
+  ensureLoaded,
+  getAbortController,
+  getServerSnapshot,
+  getSnapshot,
+  markRead,
+  setAbortController,
+  setLoading,
+  subscribe,
+  updateLastAssistant,
+} from '@/lib/stores/chat-store'
 import { buildStreamCallbacks, GENERATION_STOPPED, mergeRoutingStep } from '@/lib/utils/stream-callbacks'
-
-import { TASK_TYPES, useTaskHistory } from './use-task-history'
 
 export interface UseChatSessionReturn {
   activeTask: TaskType
@@ -20,20 +31,18 @@ export interface UseChatSessionReturn {
   setActiveTask: (task: TaskType) => void
 }
 
-type LoadingByTask = Record<TaskType, boolean>
-
-const EMPTY_LOADING_BY_TASK = Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as LoadingByTask
-
 export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   const defaultTask = fixedTaskType ?? 'explain'
 
-  const { appendEntry, clearTask, entriesByTask, ensureLoaded, updateLastAssistant } = useTaskHistory()
+  const { entries: entriesByTask, loading: loadingByTask } = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  )
 
-  const [loadingByTask, setLoadingByTask] = useState<LoadingByTask>(EMPTY_LOADING_BY_TASK)
   const [activeTask, setActiveTaskState] = useState<TaskType>(defaultTask)
   const [isHydrated, setIsHydrated] = useState(false)
   const [currentModel, setCurrentModel] = useState(() => getModelForTask(DEFAULTS, defaultTask))
-  const abortControllersRef = useRef<Partial<Record<TaskType, AbortController>>>({})
 
   const viewTask = fixedTaskType ?? activeTask
 
@@ -47,6 +56,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   // Load history lazily when switching visible task and sync model badge
   useEffect(() => {
     ensureLoaded(viewTask)
+    markRead(viewTask)
     setCurrentModel(getModelForTask(loadModelConfig(), viewTask))
   }, [viewTask])
 
@@ -60,9 +70,9 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     }
     setCurrentModel(getModelForTask(config, task))
 
-    abortControllersRef.current[task]?.abort()
+    getAbortController(task)?.abort()
     const abort = new AbortController()
-    abortControllersRef.current[task] = abort
+    setAbortController(task, abort)
 
     appendEntry(task, {
       assistantMessage: {
@@ -76,12 +86,16 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
       id: `${Date.now()}-${Math.random()}`,
       userMessage: { content: input, fileName, taskType: task, timestamp: new Date() },
     })
-    setLoadingByTask((prev) => ({ ...prev, [task]: true }))
+    setLoading(task, true)
 
     const { mutationFn } = buildRouteMutationOptions()
     if (!mutationFn) {
-      updateLastAssistant(task, (prev) => ({ ...prev, error: 'Route mutation is not configured.', status: 'error' }))
-      setLoadingByTask((prev) => ({ ...prev, [task]: false }))
+      updateLastAssistant(task, (prev: AssistantMessage) => ({
+        ...prev,
+        error: 'Route mutation is not configured.',
+        status: 'error',
+      }))
+      setLoading(task, false)
       return
     }
 
@@ -105,28 +119,28 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     })
       .catch((error) => {
         if (abort.signal.aborted) {
-          updateLastAssistant(task, (prev) => ({ ...prev, status: 'interrupted' }))
+          updateLastAssistant(task, (prev: AssistantMessage) => ({ ...prev, status: 'interrupted' }))
           return
         }
-        updateLastAssistant(task, (prev) => ({
+        updateLastAssistant(task, (prev: AssistantMessage) => ({
           ...prev,
           error: error instanceof Error ? error.message : 'Unknown error',
           status: 'error',
         }))
       })
       .finally(() => {
-        if (abortControllersRef.current[task] === abort) {
-          abortControllersRef.current[task] = undefined
+        if (getAbortController(task) === abort) {
+          setAbortController(task, undefined)
         }
-        setLoadingByTask((prev) => ({ ...prev, [task]: false }))
+        setLoading(task, false)
       })
   }
 
   function handleCancel() {
     const task = viewTask
-    abortControllersRef.current[task]?.abort()
-    setLoadingByTask((prev) => ({ ...prev, [task]: false }))
-    updateLastAssistant(task, (prev) => ({
+    getAbortController(task)?.abort()
+    setLoading(task, false)
+    updateLastAssistant(task, (prev: AssistantMessage) => ({
       ...prev,
       routingSteps: mergeRoutingStep(prev.routingSteps, GENERATION_STOPPED),
       status: 'interrupted',

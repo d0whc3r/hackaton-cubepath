@@ -7,13 +7,7 @@ import type { TaskType } from '@/lib/schemas/route'
 import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { runStream } from '@/lib/api/stream-runner'
-import {
-  appendEvent,
-  buildValidationEvent,
-  DEFAULT_GUARD_MODEL,
-  validateInput,
-  validateInputSemantic,
-} from '@/lib/railguard'
+import { appendEvent, buildValidationEvent, DEFAULT_GUARD_MODEL, validateInputSemantic } from '@/lib/railguard'
 import { detectLanguage } from '@/lib/router/detector'
 import { isDirectTask, routeDirect } from '@/lib/router/direct'
 import { routeWithAnalyst } from '@/lib/router/index'
@@ -168,16 +162,9 @@ export const POST: APIRoute = async ({ request }) => {
 
   const { data } = parsed
 
-  // [railguard] static rules — blocked inputs never reach the AI layer
-  const staticValidation = validateInput(data.input)
-  appendEvent(buildValidationEvent(staticValidation, data.input))
-  if (staticValidation.decision === 'blocked') {
-    return Response.json({ error: 'Input blocked by security policy.' }, { status: 400 })
-  }
-
   const req = buildRequest(data)
 
-  // [railguard] semantic validation — task-aware AI check after static rules pass
+  // [railguard] semantic validation — task-aware AI check
   const semanticValidation = await validateInputSemantic(data.input, data.taskType, req.ollamaBaseUrl, req.guardModel)
   appendEvent(buildValidationEvent(semanticValidation, data.input))
   if (semanticValidation.decision === 'blocked') {

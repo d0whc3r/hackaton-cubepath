@@ -1,5 +1,4 @@
-export { validateInput } from './validator'
 export { sanitise } from './sanitise'
-export { appendEvent, pruneOlderThan, getMetrics, getEvents, buildValidationEvent } from './event-log'
-export { validateInputSemantic, DEFAULT_GUARD_MODEL } from './semantic-validator'
-export type { AttackVectorCategory, RailguardRule, ValidationResult, ValidationEvent, SecurityMetrics } from './types'
+export { appendEvent, buildValidationEvent, getEvents, getMetrics, pruneOlderThan } from './event-log'
+export { DEFAULT_GUARD_MODEL, validateInputSemantic } from './semantic-validator'
+export type { AttackVectorCategory, SecurityMetrics, ValidationEvent, ValidationResult } from './types'
