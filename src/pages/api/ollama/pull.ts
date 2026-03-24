@@ -1,6 +1,8 @@
 import type { APIRoute } from 'astro'
 import { z } from 'zod'
 import { ollamaWretch } from '@/lib/http/ollama-client'
+import { withApiLogging } from '@/lib/observability/api'
+import { logServer, logServerError } from '@/lib/observability/server'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 const PULL_TIMEOUT_MS = 600_000
@@ -10,16 +12,18 @@ const bodySchema = z.object({
   model: z.string().min(1),
 })
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = withApiLogging('ollama.pull', async ({ request }, requestId) => {
   let raw
   try {
     raw = await request.json()
   } catch {
+    logServer('warn', 'ollama.pull.invalid_json', { requestId })
     return Response.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
   const parsed = bodySchema.safeParse(raw)
   if (!parsed.success) {
+    logServer('warn', 'ollama.pull.validation_error', { requestId })
     return Response.json({ error: 'model is required' }, { status: 400 })
   }
 
@@ -73,6 +77,7 @@ export const POST: APIRoute = async ({ request }) => {
         }
         emit({ status: 'success' })
       } catch (error) {
+        logServerError('ollama.pull.stream_failed', error, { baseUrl, model, requestId })
         emit({ error: error instanceof Error ? error.message : 'Pull failed', status: 'error' })
       } finally {
         controller.close()
@@ -87,4 +92,4 @@ export const POST: APIRoute = async ({ request }) => {
       'Content-Type': 'text/event-stream',
     },
   })
-}
+})

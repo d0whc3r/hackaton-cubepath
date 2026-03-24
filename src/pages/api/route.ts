@@ -5,6 +5,8 @@ import type { TaskType } from '@/lib/schemas/route'
 import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { runStream } from '@/lib/api/stream-runner'
+import { withApiLogging } from '@/lib/observability/api'
+import { logServer, logServerError } from '@/lib/observability/server'
 import { appendEvent, buildValidationEvent, DEFAULT_GUARD_MODEL, validateInputSemantic } from '@/lib/railguard'
 import { detectLanguage } from '@/lib/router/detector'
 import { isDirectTask, routeDirect } from '@/lib/router/direct'
@@ -65,7 +67,7 @@ async function buildDirectStream(req: ValidatedRequest, emit: SseEmitter): Promi
   await runStream({ emit, input: req.input, modelId, ollama: ollamaClient(req.ollamaBaseUrl), systemPrompt })
 }
 
-function buildSSEStream(req: ValidatedRequest): ReadableStream {
+function buildSSEStream(req: ValidatedRequest, requestId: string): ReadableStream {
   return createSseStream(async (emit) => {
     try {
       if (isDirectTask(req.taskType)) {
@@ -98,7 +100,11 @@ function buildSSEStream(req: ValidatedRequest): ReadableStream {
         ollama: ollamaClient(req.ollamaBaseUrl),
         systemPrompt: decision.systemPrompt,
       })
-    } catch {
+    } catch (error) {
+      logServerError('route.stream.failed', error, {
+        requestId,
+        taskType: req.taskType,
+      })
       emit('error', { code: 'INTERNAL', message: 'Internal error. Please try again.' })
     }
   })
@@ -144,17 +150,19 @@ function buildRequest(data: ReturnType<typeof RouteRequestSchema.parse>): Valida
   }
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = withApiLogging('route.main', async ({ request }, requestId) => {
   let rawBody
   try {
     rawBody = await request.json()
   } catch {
+    logServer('warn', 'route.invalid_json', { requestId })
     return Response.json({ error: 'INVALID_JSON', message: 'Request body must be valid JSON' }, { status: 400 })
   }
 
   const parsed = RouteRequestSchema.safeParse(rawBody)
   if (!parsed.success) {
     const message = parsed.error.issues[0]?.message ?? 'Invalid request'
+    logServer('warn', 'route.validation_error', { message, requestId })
     return Response.json({ error: 'VALIDATION_ERROR', message }, { status: 400 })
   }
 
@@ -166,6 +174,11 @@ export const POST: APIRoute = async ({ request }) => {
   const semanticValidation = await validateInputSemantic(data.input, data.taskType, req.ollamaBaseUrl, req.guardModel)
   appendEvent(buildValidationEvent(semanticValidation, data.input))
   if (semanticValidation.decision === 'blocked') {
+    logServer('warn', 'route.blocked_by_railguard', {
+      blockReason: semanticValidation.blockReason,
+      requestId,
+      taskType: data.taskType,
+    })
     return Response.json(
       {
         blockReason: semanticValidation.blockReason ?? 'The request does not appear to match the selected task type.',
@@ -175,5 +188,6 @@ export const POST: APIRoute = async ({ request }) => {
     )
   }
 
-  return sseResponse(buildSSEStream(req))
-}
+  logServer('info', 'route.accepted', { requestId, taskType: data.taskType })
+  return sseResponse(buildSSEStream(req, requestId))
+})

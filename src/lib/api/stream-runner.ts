@@ -1,6 +1,7 @@
 import { streamText } from 'ai'
 import type { ollamaClient, SseEmitter } from '@/lib/api/sse'
 import { estimateCost } from '@/lib/cost/calculator'
+import { logServer, logServerError } from '@/lib/observability/server'
 
 /** 5 min: specialist models on consumer hardware can be slow for large inputs */
 const SPECIALIST_TIMEOUT_MS = 300_000
@@ -32,6 +33,9 @@ export async function runStream({
   const abortController = new AbortController()
   const timeout = setTimeout(() => abortController.abort(), SPECIALIST_TIMEOUT_MS)
   let outputText = ''
+  const startedAt = Date.now()
+
+  logServer('info', 'stream.specialist.start', { autoContinue, inputSize: input.length, modelId })
 
   try {
     const result = streamText({
@@ -68,6 +72,12 @@ export async function runStream({
     }
 
     clearTimeout(timeout)
+    logServer('info', 'stream.specialist.done', {
+      durationMs: Date.now() - startedAt,
+      inputSize: input.length,
+      modelId,
+      outputSize: outputText.length,
+    })
     emit('routing_step', { label: 'Response generated', status: 'done', step: 'generating_response' })
     emit('cost', estimateCost(input.length, outputText.length))
     emit('done', {})
@@ -75,8 +85,10 @@ export async function runStream({
     clearTimeout(timeout)
     const isAbort = error instanceof Error && (error.name === 'AbortError' || error.message.includes('abort'))
     if (isAbort) {
+      logServer('warn', 'stream.specialist.aborted', { durationMs: Date.now() - startedAt, modelId })
       emit('interrupted', {})
     } else {
+      logServerError('stream.specialist.error', error, { durationMs: Date.now() - startedAt, modelId })
       emit('error', {
         code: 'SPECIALIST_UNAVAILABLE',
         message: 'The specialist model is unavailable. Check Ollama is running.',

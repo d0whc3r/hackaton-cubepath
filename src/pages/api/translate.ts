@@ -3,6 +3,8 @@ import { streamText } from 'ai'
 import { z } from 'zod'
 import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
+import { withApiLogging } from '@/lib/observability/api'
+import { logServer, logServerError } from '@/lib/observability/server'
 import { DEFAULT_TRANSLATE_MODEL, OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 const translateSchema = z.object({
@@ -22,16 +24,21 @@ Preserve every [[CODE:N]] placeholder exactly as-is (do not translate or alter t
 
 const ABORT_TIMEOUT_MS = 120_000
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = withApiLogging('translate.main', async ({ request }, requestId) => {
   let raw: unknown
   try {
     raw = await request.json()
   } catch {
+    logServer('warn', 'translate.invalid_json', { requestId })
     return Response.json({ error: 'INVALID_JSON' }, { status: 400 })
   }
 
   const parsed = translateSchema.safeParse(raw)
   if (!parsed.success) {
+    logServer('warn', 'translate.validation_error', {
+      message: parsed.error.issues[0]?.message,
+      requestId,
+    })
     return Response.json({ error: 'VALIDATION_ERROR', message: parsed.error.issues[0]?.message }, { status: 400 })
   }
 
@@ -62,10 +69,12 @@ export const POST: APIRoute = async ({ request }) => {
       clearTimeout(timeout)
       const isAbort = error instanceof Error && (error.name === 'AbortError' || error.message.includes('abort'))
       if (!isAbort) {
+        logServerError('translate.stream.error', error, { model, requestId, targetLanguage })
         emit('error', { message: 'Translation model unavailable. Check Ollama is running.' })
       }
     }
   })
 
+  logServer('info', 'translate.accepted', { model, requestId, targetLanguage })
   return sseResponse(stream)
-}
+})

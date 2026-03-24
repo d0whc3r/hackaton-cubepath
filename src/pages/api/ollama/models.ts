@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro'
 import { ollamaWretch } from '@/lib/http/ollama-client'
+import { withApiLogging } from '@/lib/observability/api'
+import { logServer, logServerError } from '@/lib/observability/server'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 const OLLAMA_TIMEOUT_MS = 5000
@@ -8,7 +10,7 @@ interface OllamaTagsResponse {
   models: { name: string }[]
 }
 
-export const GET: APIRoute = async ({ url }) => {
+export const GET: APIRoute = withApiLogging('ollama.models', async ({ url }, requestId) => {
   const baseUrl = url.searchParams.get('baseUrl') ?? OLLAMA_BASE_URL_DEFAULT
 
   try {
@@ -25,7 +27,9 @@ export const GET: APIRoute = async ({ url }) => {
       return tag && tag !== 'latest' ? `${base}:${tag}` : (base ?? model.name)
     })
     return Response.json({ models: names }, { status: 200 })
-  } catch {
+  } catch (error) {
+    logServerError('ollama.models.fetch_failed', error, { baseUrl, requestId })
+    logServer('warn', 'ollama.models.unreachable', { baseUrl, requestId })
     return Response.json({ error: 'Ollama unreachable', models: [] }, { status: 200 })
   }
-}
+})
