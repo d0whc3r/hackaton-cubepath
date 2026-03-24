@@ -1,4 +1,5 @@
 import { Zap } from 'lucide-react'
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { useChatContext } from '@/lib/context/chat-context'
 
 const TASK_HINTS: Record<string, string> = {
@@ -13,14 +14,14 @@ export function EmptyState() {
   const hint = TASK_HINTS[activeTask] ?? 'Paste code below and the router will pick the right specialist model.'
 
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
-        <Zap className="h-6 w-6 text-primary" />
-      </div>
-      <div className="max-w-sm space-y-1.5">
-        <p className="font-semibold text-foreground">Ready to route</p>
-        <p className="text-sm text-muted-foreground">{hint}</p>
-      </div>
-    </div>
+    <Empty className="min-h-0 flex-1 border-none p-8">
+      <EmptyHeader>
+        <EmptyMedia variant="icon" className="h-14 w-14 rounded-2xl bg-primary/10 ring-1 ring-primary/20">
+          <Zap className="h-6 w-6 text-primary" />
+        </EmptyMedia>
+        <EmptyTitle>Ready to route</EmptyTitle>
+        <EmptyDescription>{hint}</EmptyDescription>
+      </EmptyHeader>
+    </Empty>
   )
 }

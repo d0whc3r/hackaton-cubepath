@@ -228,6 +228,11 @@ export function ModelConfigPage() {
           className="max-w-xs font-mono text-xs"
         />
       </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        You can use your own local Ollama server (for example, <code className="font-mono">http://localhost:11434</code>
+        ) or a server-provided Ollama endpoint. Shared server endpoints may have model, concurrency, or uptime
+        limitations.
+      </p>
 
       {missingSections.length > 0 &&
         (() => {

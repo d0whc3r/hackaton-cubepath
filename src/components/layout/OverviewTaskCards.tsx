@@ -139,7 +139,7 @@ const GENERATION_TASKS: TaskCard[] = [
 
 function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: ReturnType<typeof loadModelConfig> }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {tasks.map(({ task, href, icon: Icon, iconBg, color, title, description, specialist }) => {
         const modelId = getModelForTask(modelConfig, task)
         const modelLabel = MODELS_BY_TASK[task].find((model) => model.id === modelId)?.label ?? modelId
@@ -148,17 +148,22 @@ function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: 
           <a
             key={task}
             href={href}
-            className="group rounded-xl border border-border/70 bg-card p-6 shadow-sm transition-all hover:border-primary/40 hover:shadow-md hover:shadow-primary/5"
+            className="group rounded-xl border border-border/70 bg-card p-5 shadow-sm transition-colors hover:border-primary/40"
           >
-            <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-lg ${iconBg} ${color}`}>
+            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg} ${color}`}>
               <Icon className="h-5 w-5" />
             </div>
-            <h3 className="mb-1.5 font-semibold text-foreground transition-colors group-hover:text-primary">{title}</h3>
-            <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="rounded-full bg-muted px-2 py-0.5 font-mono">{modelLabel}</span>
-              <span>·</span>
-              <span>{specialist}</span>
+
+            <h3 className="mt-4 mb-2 text-base font-semibold text-foreground transition-colors group-hover:text-primary">
+              {title}
+            </h3>
+            <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <span className="rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 font-mono text-primary">
+                {modelLabel}
+              </span>
+              <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1">{specialist}</span>
             </div>
           </a>
         )
@@ -179,11 +184,11 @@ export function OverviewTaskCards() {
   return (
     <div className="flex flex-col gap-8">
       <section>
-        <h2 className="mb-4 text-sm font-semibold tracking-wide text-muted-foreground uppercase">Analysis</h2>
+        <h2 className="mb-4 text-lg font-semibold text-foreground">Analysis workflows</h2>
         <TaskCardGrid tasks={ANALYSIS_TASKS} modelConfig={modelConfig} />
       </section>
       <section>
-        <h2 className="mb-4 text-sm font-semibold tracking-wide text-muted-foreground uppercase">Generation</h2>
+        <h2 className="mb-4 text-lg font-semibold text-foreground">Generation workflows</h2>
         <TaskCardGrid tasks={GENERATION_TASKS} modelConfig={modelConfig} />
       </section>
     </div>

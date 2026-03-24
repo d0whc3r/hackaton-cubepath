@@ -39,7 +39,7 @@ describe('estimateCost', () => {
 
   it('savingsPct is a whole number', () => {
     const result = estimateCost(500, 500)
-    expect(Number.isInteger(result.savingsPct)).toBeTruthy()
+    expect(Number.isInteger(result.savingsPct)).toBe(true)
   })
 
   it('savingsPct is between 0 and 100', () => {
