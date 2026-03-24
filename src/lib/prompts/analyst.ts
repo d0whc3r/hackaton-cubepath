@@ -21,12 +21,12 @@ export function buildAnalystSystemPrompt(): string {
     '- If the task is "explain", focus on detecting the programming language accurately\n' +
     '- If the task is "test", prioritize identifying the correct test framework for the language\n' +
     '- If the task is "commit", check whether the input starts with "diff --git" or contains "@@ " markers to set isDiff\n' +
-    '- "refactor" and "explain" both receive code — distinguish by task type, not input shape'
+    '- "refactor" and "explain" both receive code; distinguish by task type, not input shape'
   )
 }
 
 export function buildAnalystUserPrompt(taskType: string, input: string): string {
-  // Only send a small sample — Analyst needs speed, not full context
+  // Only send a small sample; Analyst needs speed, not full context
   const sample = input.slice(0, 1500)
 
   return `Analyze this code snippet for a "${taskType}" task.

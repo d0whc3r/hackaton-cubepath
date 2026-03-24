@@ -16,7 +16,7 @@ const translateSchema = z.object({
 // So the prompt only needs to handle plain prose translation.
 function systemPrompt(targetLanguage: string): string {
   return `You are a professional translator. Translate ALL text provided by the user into ${targetLanguage}.
-Output ONLY the translated text — no explanations, disclaimers, or commentary.
+Output ONLY the translated text; no explanations, disclaimers, or commentary.
 Preserve every [[CODE:N]] placeholder exactly as-is (do not translate or alter them).`
 }
 

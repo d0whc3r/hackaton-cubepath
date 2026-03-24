@@ -45,7 +45,7 @@ describe('ResponsePanel', () => {
 
   it('shows interrupted notice when interrupted prop set', () => {
     render(<ResponsePanel responseText="partial output" specialistDisplayName={null} error={null} interrupted />)
-    expect(screen.getByText(/interrupted — partial output below/i)).toBeDefined()
+    expect(screen.getByText(/interrupted; partial output below/i)).toBeDefined()
   })
 
   it('copy button copies response text only', () => {

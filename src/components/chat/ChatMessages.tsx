@@ -158,7 +158,7 @@ export function ChatMessages() {
         </div>
       </div>
 
-      {/* Jump to bottom — shown when user has scrolled up */}
+      {/* Jump to bottom; shown when user has scrolled up */}
       {!isAtBottom && (
         <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2">
           <Button

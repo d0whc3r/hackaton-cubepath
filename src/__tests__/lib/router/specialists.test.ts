@@ -5,7 +5,7 @@ const specialists = buildSpecialists(ENV)
 
 const mockLang = { confidence: 'high' as const, language: 'TypeScript' }
 
-// US1 — Explain specialist
+// US1; Explain specialist
 describe('explanation-specialist', () => {
   it('has id explanation-specialist', () => {
     expect(specialists.explain.id).toBe('explanation-specialist')
@@ -38,7 +38,7 @@ describe('explanation-specialist', () => {
   })
 })
 
-// US2 — Test specialist
+// US2; Test specialist
 describe('test-specialist', () => {
   it('has id test-specialist', () => {
     expect(specialists.test.id).toBe('test-specialist')
@@ -73,7 +73,7 @@ describe('test-specialist', () => {
   })
 })
 
-// US3 — Refactor specialist
+// US3; Refactor specialist
 describe('refactor-specialist', () => {
   it('has id refactor-specialist', () => {
     expect(specialists.refactor.id).toBe('refactor-specialist')
@@ -101,7 +101,7 @@ describe('refactor-specialist', () => {
   })
 })
 
-// US4 — Commit specialist
+// US4; Commit specialist
 describe('commit-specialist', () => {
   it('has id commit-specialist', () => {
     expect(specialists.commit.id).toBe('commit-specialist')

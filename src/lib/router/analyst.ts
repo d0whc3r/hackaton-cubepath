@@ -1,5 +1,5 @@
 /**
- * Analyst — a small, fast model that classifies code metadata before routing.
+ * Analyst; a small, fast model that classifies code metadata before routing.
  *
  * Responsibilities (replaces TypeScript if/else heuristics):
  *  • Detect programming language
@@ -15,7 +15,7 @@ import { buildAnalystSystemPrompt, buildAnalystUserPrompt } from '@/lib/prompts/
 import type { CodeContext, TaskType } from './types'
 import { detectLanguage } from './detector'
 
-// 8 seconds balances cold-start latency for local models with user experience —
+// 8 seconds balances cold-start latency for local models with user experience;
 // Fast enough to feel responsive, long enough for a first-run model load
 const ANALYST_TIMEOUT_MS = 8000
 
@@ -25,7 +25,7 @@ export async function runAnalyst(
   analystModelId: string,
   baseUrl: string,
 ): Promise<CodeContext> {
-  // Ollama exposes an OpenAI-compatible /v1 endpoint — ollamaClient wraps it via
+  // Ollama exposes an OpenAI-compatible /v1 endpoint; ollamaClient wraps it via
   // The OpenAI SDK (Adapter pattern), avoiding a separate Ollama SDK dependency
   const ollama = ollamaClient(baseUrl)
 
@@ -36,7 +36,7 @@ export async function runAnalyst(
     system: buildAnalystSystemPrompt(),
   })
 
-  // Model may wrap JSON in ```json ... ``` — extract the bare object
+  // Model may wrap JSON in ```json ... ```; extract the bare object
   const jsonMatch = /\{[\s\S]*?\}/.exec(text)
   if (!jsonMatch) {
     throw new Error('Analyst returned no JSON')

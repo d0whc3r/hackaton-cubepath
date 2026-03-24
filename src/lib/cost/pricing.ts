@@ -118,9 +118,9 @@ export const PROVIDERS: Provider[] = [
 ]
 
 /**
- * Specialist (local SLM via Ollama) cost — effectively free, but we assign
+ * Specialist (local SLM via Ollama) cost; effectively free, but we assign
  * a tiny electricity/infra estimate so comparisons still make sense.
- * ~$0.00 — used only to show "you ran this locally".
+ * ~$0.00; used only to show "you ran this locally".
  */
 export const SPECIALIST_LOCAL_COST_PER_TOKEN = 0
 export const MILLION_UNIT = 1_000_000

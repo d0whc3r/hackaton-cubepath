@@ -13,7 +13,7 @@ export const DEFAULT_GUARD_MODEL = 'qwen2.5:0.5b'
 
 /**
  * Maximum time (ms) to wait for the guard model to respond.
- * Fail-open on timeout — static rules already ran and caught obvious attacks.
+ * Fail-open on timeout; static rules already ran and caught obvious attacks.
  */
 const GUARD_TIMEOUT_MS = 3000
 
@@ -21,7 +21,7 @@ const GUARD_TIMEOUT_MS = 3000
  * Semantic guard: asks a small, fast AI model whether the input is a legitimate
  * request for the given task type.
  *
- * Called AFTER the static regex rules pass. It is a complementary layer —
+ * Called AFTER the static regex rules pass. It is a complementary layer;
  * it catches inputs that bypass keyword filters but are semantically off-topic
  * (e.g. sending a poem to the "explain code" endpoint).
  *
@@ -61,7 +61,7 @@ export async function validateInputSemantic(
     if (hasNo && !hasYes) {
       return {
         attackVectorCategory: 'semantic-check',
-        blockReason: `Your message doesn't look like a "${taskType}" request. Try sending content that matches the selected task — for example, a code snippet or a description of what you want to ${taskType}.`,
+        blockReason: `Your message doesn't look like a "${taskType}" request. Try sending content that matches the selected task; for example, a code snippet or a description of what you want to ${taskType}.`,
         decision: 'blocked',
         matchedRuleId: `semantic-guard-${taskType}`,
       }

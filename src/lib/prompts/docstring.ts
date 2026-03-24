@@ -17,7 +17,7 @@ Rules you MUST follow:
 - Do not rename any identifiers.
 - Do not restructure, reorder, or reformat any code.
 - Do not add, remove, or change any logic.
-- Only add or update documentation comments — nothing else.
+- Only add or update documentation comments; nothing else.
 
 Return the complete code with documentation comments added. Do not include any explanation outside the code.`
 }

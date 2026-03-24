@@ -77,7 +77,7 @@ export const TASK_MODEL_KEY: Record<TaskType, TaskModelKey> = {
  * Loads the persisted model config from localStorage, merging over DEFAULTS.
  * Merging over DEFAULTS ensures new config keys added in future versions always
  * have a valid fallback without breaking existing stored configs.
- * Safe to call during SSR — returns DEFAULTS when window is undefined.
+ * Safe to call during SSR; returns DEFAULTS when window is undefined.
  */
 export function loadModelConfig(): ModelConfig {
   const result = readStorage<Partial<ModelConfig>>(STORAGE_KEY)

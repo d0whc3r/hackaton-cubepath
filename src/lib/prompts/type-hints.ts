@@ -13,7 +13,7 @@ Rules you MUST follow:
 - Do not rename any identifiers.
 - Do not restructure or reformat any code.
 - Do not add, remove, or move any statements.
-- Only add type annotations — nothing else.
+- Only add type annotations; nothing else.
 
 Return the complete code with type annotations added. Do not include any explanation outside the code.`
 }

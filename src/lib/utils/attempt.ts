@@ -1,12 +1,12 @@
 export type AttemptResult<T> = { ok: true; value: T } | { ok: false; error: unknown }
 
-// Sync — no fallback
+// Sync; no fallback
 export function attempt<T>(fn: () => T): AttemptResult<T>
-// Sync — with fallback (plain value or function)
+// Sync; with fallback (plain value or function)
 export function attempt<T>(fn: () => T, fallback: T | (() => T)): AttemptResult<T>
-// Async — no fallback
+// Async; no fallback
 export function attempt<T>(fn: () => Promise<T>): Promise<AttemptResult<T>>
-// Async — with fallback (value or sync/async function)
+// Async; with fallback (value or sync/async function)
 export function attempt<T>(fn: () => Promise<T>, fallback: T | (() => T | Promise<T>)): Promise<AttemptResult<T>>
 export function attempt<T>(
   fn: () => T | Promise<T>,

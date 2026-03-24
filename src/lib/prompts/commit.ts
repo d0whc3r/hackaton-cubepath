@@ -14,7 +14,7 @@ You MUST respond in English only, regardless of the language of the input code o
 
 ${sourceInstruction}
 
-Output only the commit message. Do not add any explanation before or after it. Plain text only — no markdown, no formatting. At most 2 lines:
+Output only the commit message. Do not add any explanation before or after it. Plain text only; no markdown, no formatting. At most 2 lines:
 - Line 1: a short, imperative title (under 72 characters) describing what changed.
 - Line 2 (optional): a brief description or split suggestion if needed.${splitHint}
 

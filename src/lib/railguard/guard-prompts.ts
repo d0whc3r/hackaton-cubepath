@@ -6,7 +6,7 @@ import type { TaskType } from '@/lib/schemas/route'
  * Optimized for tiny models (qwen2.5:0.5b or similar) using few-shot classification:
  * - Brief role definition grounds the model before criteria.
  * - Explicit YES/NO criteria with concrete markers.
- * - Two few-shot examples per prompt — most reliable technique for tiny models.
+ * - Two few-shot examples per prompt; most reliable technique for tiny models.
  * - Format instruction at the END (after examples), where it anchors output generation.
  */
 export const GUARD_PROMPTS: Record<TaskType, string> = {

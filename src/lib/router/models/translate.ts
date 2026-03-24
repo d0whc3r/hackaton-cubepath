@@ -11,7 +11,7 @@ export const TRANSLATE_MODELS: ModelOption[] = [
   {
     canTranslateCode: false,
     contextWindow: 8192,
-    description: 'icky · purpose-built translator, fast and accurate — best default for prose',
+    description: 'icky · purpose-built translator, fast and accurate; best default for prose',
     id: 'icky/translate',
     label: 'icky/translate',
     params: '~1B',
@@ -20,7 +20,7 @@ export const TRANSLATE_MODELS: ModelOption[] = [
   {
     canTranslateCode: false,
     contextWindow: 8192,
-    description: 'Google · purpose-built translator on Gemma 3, 55 languages — best quality/size ratio',
+    description: 'Google · purpose-built translator on Gemma 3, 55 languages; best quality/size ratio',
     id: 'translategemma:4b',
     label: 'TranslateGemma 4B',
     params: '4B',

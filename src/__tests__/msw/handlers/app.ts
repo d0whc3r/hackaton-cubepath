@@ -53,7 +53,7 @@ export const appHandlers = [
   }),
 ]
 
-// Error-case handlers — use with server.use(...) inside a test
+// Error-case handlers; use with server.use(...) inside a test
 export const appErrorHandlers = {
   modelNetworkError: http.get('/api/ollama/model', () => HttpResponse.error()),
   models404: http.get('/api/ollama/models', () => HttpResponse.json({ error: 'not found' }, { status: 404 })),

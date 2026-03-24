@@ -19,19 +19,22 @@ export class BlockedError extends Error {
 export function buildRouteMutationOptions(): MutationOptions<void, Error, RouteStreamParams> {
   return {
     mutationFn: async ({ signal, callbacks, ...body }: RouteStreamParams) => {
-      const res = await appWretch.url('/api/route').options({ signal }).post(body).res()
-
-      if (!res.ok) {
-        const json = (await res.json().catch(() => ({}))) as {
-          blockReason?: string
-          error?: string
-          message?: string
-        }
-        if (json.error === 'BLOCKED_BY_SECURITY_POLICY') {
-          throw new BlockedError(json.blockReason ?? 'The request does not appear to match the selected task type.')
-        }
-        throw new Error(json.message ?? `Request failed with status ${res.status}`)
-      }
+      const res = await appWretch
+        .url('/api/route')
+        .options({ signal })
+        .post(body)
+        .badRequest(async (err) => {
+          const json = (await err.response?.json().catch(() => ({}))) as {
+            blockReason?: string
+            error?: string
+            message?: string
+          }
+          if (json?.error === 'BLOCKED_BY_SECURITY_POLICY') {
+            throw new BlockedError(json.blockReason ?? 'The request does not appear to match the selected task type.')
+          }
+          throw new Error(json?.message ?? 'Bad request')
+        })
+        .res()
 
       if (!res.body) {
         throw new Error('No response body received')

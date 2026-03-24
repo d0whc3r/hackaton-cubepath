@@ -162,7 +162,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   const req = buildRequest(data)
 
-  // [railguard] semantic validation — task-aware AI check
+  // [railguard] semantic validation; task-aware AI check
   const semanticValidation = await validateInputSemantic(data.input, data.taskType, req.ollamaBaseUrl, req.guardModel)
   appendEvent(buildValidationEvent(semanticValidation, data.input))
   if (semanticValidation.decision === 'blocked') {

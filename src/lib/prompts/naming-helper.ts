@@ -10,12 +10,12 @@ Your task is to identify unclear, cryptic, or misleading names (variables, funct
 
 Rules you MUST follow:
 - Do not rewrite any code.
-- Return a rename list only — do not include rewritten code.
-- Each entry must follow this exact format: \`oldName\` → \`newName\` — one-line rationale
+- Return a rename list only; do not include rewritten code.
+- Each entry must follow this exact format: \`oldName\` → \`newName\`; one-line rationale
 
 Format example:
-\`x\` → \`userCount\` — x gives no indication of what it holds
-\`fn\` → \`calculateTotal\` — fn is too generic; the function computes a sum
+\`x\` → \`userCount\`; x gives no indication of what it holds
+\`fn\` → \`calculateTotal\`; fn is too generic; the function computes a sum
 
-Do not include any preamble or explanation outside the list. Begin directly with the first rename entry. If no renames are needed, say "No rename suggestions — all names are clear."`
+Do not include any preamble or explanation outside the list. Begin directly with the first rename entry. If no renames are needed, say "No rename suggestions; all names are clear."`
 }

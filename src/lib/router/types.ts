@@ -19,7 +19,7 @@ export interface ModelOption {
   /** Context window in tokens (e.g. 8192, 32768, 131072) */
   contextWindow?: number
   /**
-   * Translation section only — true if the model can reliably translate
+   * Translation section only; true if the model can reliably translate
    * code blocks (not just prose). When false/absent, code blocks are always
    * extracted client-side before sending to the model.
    */
@@ -39,7 +39,7 @@ export interface DetectedLanguage {
 export interface CodeContext {
   language: string
   confidence: 'high' | 'medium' | 'low'
-  /** E.g. "Vitest", "pytest", "JUnit" — null if not applicable or unknown */
+  /** E.g. "Vitest", "pytest", "JUnit"; null if not applicable or unknown */
   testFramework: string | null
   /** True when the input looks like a git diff */
   isDiff: boolean

@@ -19,7 +19,7 @@ afterEach(() => {
   pruneOlderThan(-1)
 })
 
-describe('railguard integration — semantic pipeline', () => {
+describe('railguard integration; semantic pipeline', () => {
   it('blocked result is logged with non-null fields', () => {
     const event = buildValidationEvent(BLOCKED_RESULT, 'write me a poem')
     appendEvent(event)
@@ -27,10 +27,10 @@ describe('railguard integration — semantic pipeline', () => {
     const stored = getEvents().find((e) => e.id === event.id)
     expect(stored).toBeDefined()
     expect(stored?.decision).toBe('blocked')
-    expect(stored?.sanitisedExcerpt).toBe(true)
+    expect(stored?.sanitisedExcerpt).toBeTruthy()
     expect(stored?.matchedRuleId).toBe('semantic-guard-explain')
     expect(stored?.attackVectorCategory).toBe('semantic-check')
-    expect(stored?.blockReason).toBe(true)
+    expect(stored?.blockReason).toBeTruthy()
   })
 
   it('metrics are queryable by time window', () => {

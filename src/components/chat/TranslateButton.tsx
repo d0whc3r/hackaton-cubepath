@@ -169,7 +169,7 @@ export function TranslateButton({ content }: TranslateButtonProps) {
         throw new Error('No stream')
       }
 
-      // Buffer chunks — restore code blocks only once the full translation
+      // Buffer chunks; restore code blocks only once the full translation
       // Is done, so placeholders never appear in the rendered output.
       let raw = ''
       for await (const chunk of readSseChunks(res.body)) {
@@ -236,7 +236,7 @@ export function TranslateButton({ content }: TranslateButtonProps) {
           )}
         </div>
 
-        {/* Code-block toggle — only shown when the active model supports it */}
+        {/* Code-block toggle; only shown when the active model supports it */}
         {modelCanTranslateCode && (
           <button
             type="button"

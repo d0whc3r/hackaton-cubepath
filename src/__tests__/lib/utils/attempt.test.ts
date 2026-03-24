@@ -1,6 +1,6 @@
 import { attempt } from '@/lib/utils/attempt'
 
-describe('attempt — sync', () => {
+describe('attempt; sync', () => {
   it('returns { ok: true, value } on success', () => {
     const result = attempt(() => 42)
     expect(result).toEqual({ ok: true, value: 42 })
@@ -53,7 +53,7 @@ describe('attempt — sync', () => {
   })
 })
 
-describe('attempt — async', () => {
+describe('attempt; async', () => {
   it('returns Promise<{ ok: true, value }> on resolution', async () => {
     const result = await attempt(() => Promise.resolve('hello'))
     expect(result).toEqual({ ok: true, value: 'hello' })

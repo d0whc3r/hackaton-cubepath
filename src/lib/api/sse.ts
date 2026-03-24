@@ -39,7 +39,7 @@ export function sseResponse(stream: ReadableStream): Response {
 /**
  * Adapter: creates an OpenAI-compatible client pointed at the Ollama /v1 endpoint.
  * Ollama exposes an OpenAI-compatible API at <baseUrl>/v1, so the OpenAI SDK works
- * as a drop-in driver — no separate Ollama SDK dependency required.
+ * as a drop-in driver; no separate Ollama SDK dependency required.
  */
 export function ollamaClient(baseUrl: string) {
   return createOpenAI({ apiKey: 'ollama', baseURL: `${baseUrl}/v1` })

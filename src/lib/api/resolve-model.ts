@@ -1,6 +1,6 @@
 /**
  * Resolves which model to use from three priority levels:
- * - fromBody: per-request override (highest priority — allows clients to choose a model without restarting the server)
+ * - fromBody: per-request override (highest priority; allows clients to choose a model without restarting the server)
  * - envVar: server-side default (set at deploy time via environment variables)
  * - fallback: compiled-in default (lowest priority)
  */

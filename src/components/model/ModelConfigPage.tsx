@@ -18,17 +18,17 @@ const GROUPS: { id: SectionGroupId; label: string; description: string }[] = [
     label: 'Core Routing',
   },
   {
-    description: 'Read-only intelligence tasks — explain, diagnose, identify, and suggest.',
+    description: 'Read-only intelligence tasks; explain, diagnose, identify, and suggest.',
     id: 'analysis',
     label: 'Analysis Tasks',
   },
   {
-    description: 'Active transformation tasks — generate, refactor, and rewrite code.',
+    description: 'Active transformation tasks; generate, refactor, and rewrite code.',
     id: 'generation',
     label: 'Generation Tasks',
   },
   {
-    description: 'Multilingual processing — translation and localization.',
+    description: 'Multilingual processing; translation and localization.',
     id: 'language',
     label: 'Language',
   },

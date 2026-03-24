@@ -31,7 +31,7 @@ export async function routeWithAnalyst(
   try {
     codeContext = await runAnalyst(input, taskType, analystModelId, baseUrl)
   } catch {
-    // Analyst unavailable or timed out — regex fallback keeps routing working
+    // Analyst unavailable or timed out; regex fallback keeps routing working
     codeContext = fallbackAnalysis(input)
   }
 

@@ -42,7 +42,7 @@ describe('sanitise', () => {
   })
 
   it('truncates before redacting (PII beyond char 100 is not present in output)', () => {
-    // Email starts at position 105 — beyond the truncation boundary
+    // Email starts at position 105; beyond the truncation boundary
     const prefix = 'a'.repeat(105)
     const result = sanitise(`${prefix}user@example.com`)
     // The email should not appear (truncated) and no [REDACTED] for out-of-range PII

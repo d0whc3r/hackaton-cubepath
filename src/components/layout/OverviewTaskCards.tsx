@@ -30,7 +30,7 @@ const ANALYSIS_TASKS: TaskCard[] = [
   {
     color: 'text-blue-500',
     description:
-      "Get a senior-level explanation of any code — what it does, why it's structured that way, and potential pitfalls.",
+      "Get a senior-level explanation of any code; what it does, why it's structured that way, and potential pitfalls.",
     href: '/tasks/explain',
     icon: BookOpen,
     iconBg: 'bg-blue-500/10',
@@ -117,7 +117,7 @@ const GENERATION_TASKS: TaskCard[] = [
   {
     color: 'text-teal-500',
     description:
-      'Add or update documentation comments covering parameters, return values, and purpose — logic unchanged.',
+      'Add or update documentation comments covering parameters, return values, and purpose; logic unchanged.',
     href: '/tasks/docstring',
     icon: FileText,
     iconBg: 'bg-teal-500/10',

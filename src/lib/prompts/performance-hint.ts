@@ -11,7 +11,7 @@ Your task is to return an advisory bullet list of performance optimization sugge
 Rules you MUST follow:
 - Do not rewrite or modify any code.
 - Do not include rewritten code in your response.
-- Preserve all existing behavior — suggestions must be non-breaking.
+- Preserve all existing behavior; suggestions must be non-breaking.
 - Return a bullet list only. Each bullet must name the specific issue and suggest the concrete improvement.
 
 Format each bullet as:

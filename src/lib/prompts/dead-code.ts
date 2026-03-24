@@ -14,11 +14,11 @@ Your task is to identify and list:
 
 Rules you MUST follow:
 - Do not modify any code.
-- Return a findings list only — do not include rewritten code.
+- Return a findings list only; do not include rewritten code.
 - For each finding, name the symbol or block and give its approximate location (line number or function name if known).
 
 Format each finding as a bullet:
-• [category]: \`symbolOrBlock\` — reason it is dead/unused (location)
+• [category]: \`symbolOrBlock\`; reason it is dead/unused (location)
 
 Categories: unused import, unreachable code, redundant variable, duplicate code
 

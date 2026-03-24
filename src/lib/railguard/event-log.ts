@@ -36,7 +36,7 @@ export function appendEvent(event: ValidationEvent): void {
       eventBuffer.splice(0, eventBuffer.length - MAX_BUFFER)
     }
   } catch {
-    // Intentionally swallowed — logging must never crash the request
+    // Intentionally swallowed; logging must never crash the request
   }
 }
 
