@@ -14,14 +14,12 @@ function ChatSkeleton() {
     <div className="space-y-6 p-4 md:p-6">
       {[0, 1].map((i) => (
         <div key={i} className="space-y-3">
-          {/* User bubble */}
           <div className="flex justify-end">
             <div className="w-2/3 space-y-1.5">
               <Skeleton className="ml-auto h-3 w-24 rounded-full" />
               <Skeleton className="h-16 w-full rounded-2xl rounded-tr-sm" />
             </div>
           </div>
-          {/* Assistant bubble */}
           <div className="space-y-2">
             <Skeleton className="h-3 w-32 rounded-full" />
             <Skeleton className="h-24 w-full rounded-2xl rounded-tl-sm" />
@@ -97,6 +95,21 @@ export function ChatMessages() {
     setIsAtBottom(true)
     isAtBottomRef.current = true
   }, [activeTask])
+
+  // When history finishes loading (isHydrated: false → true), jump to bottom.
+  useEffect(() => {
+    if (!isHydrated) {
+      return
+    }
+    const el = scrollRef.current
+    if (!el) {
+      return
+    }
+    el.scrollTop = el.scrollHeight
+    setIsAtBottom(true)
+    isAtBottomRef.current = true
+    markRead(activeTask)
+  }, [isHydrated, activeTask])
 
   // When a new query is submitted, jump to bottom so the response is visible.
   useEffect(() => {
