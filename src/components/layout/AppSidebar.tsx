@@ -125,9 +125,9 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <a href="/">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-primary/10">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg">
                   <img
-                    src="/logo-nobg.png"
+                    src="/favicon-96x96.png"
                     alt="SLM Router logo"
                     width={32}
                     height={32}

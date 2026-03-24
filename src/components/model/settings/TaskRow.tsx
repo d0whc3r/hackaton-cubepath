@@ -101,6 +101,7 @@ export function TaskRow({
       )}
       onClick={onActivate}
       onKeyDown={handleRowKeyDown}
+      // oxlint-disable-next-line jsx_a11y/prefer-tag-over-role
       role="button"
       tabIndex={0}
       aria-pressed={isActive}
@@ -124,8 +125,9 @@ export function TaskRow({
         <p className="mt-1.5 text-[11px] text-muted-foreground/70 italic">{section.selectionHint}</p>
       </div>
 
-      {/* Right: select + model details */}
-      <div className="flex w-full shrink-0 flex-col gap-3 sm:w-[26rem]" onClick={(event) => event.stopPropagation()}>
+      {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, jsx_a11y/no-static-element-interactions
+      Right: select + model details */}
+      <div className="flex w-full shrink-0 flex-col gap-3 sm:w-104" onClick={(event) => event.stopPropagation()}>
         {/* Select + status */}
         <div className="flex items-center gap-2">
           <Select value={selectValue} onValueChange={onModelChange}>

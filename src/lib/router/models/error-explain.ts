@@ -2,32 +2,32 @@ import type { ModelOption } from '../types'
 
 export const ERROR_EXPLAIN_MODELS: ModelOption[] = [
   {
-    contextWindow: 131_072,
-    description: 'Microsoft · 128K ctx, best instruction adherence for structured short output',
-    id: 'phi3.5',
-    label: 'Phi 3.5',
-    params: '3.8B',
-    size: '2.2 GB',
+    contextWindow: 262_144,
+    description: 'Alibaba · latest 4B default, strong root-cause explanations with long stack traces',
+    id: 'qwen3:4b',
+    label: 'Qwen 3 4B',
+    params: '4B',
+    size: '2.5 GB',
   },
   {
     contextWindow: 131_072,
-    description: 'Meta · good instruction following, 128K ctx, plain-language explanations',
-    id: 'llama3.2:3b',
-    label: 'Llama 3.2 3B',
-    params: '3B',
-    size: '2.0 GB',
-  },
-  {
-    contextWindow: 131_072,
-    description: 'Google · 128K ctx, strong instruction following, concise structured output',
+    description: 'Google · 128K ctx, clear user-facing explanations for errors and warnings',
     id: 'gemma3:4b',
     label: 'Gemma 3 4B',
     params: '4B',
-    size: '3.0 GB',
+    size: '3.3 GB',
   },
   {
     contextWindow: 131_072,
-    description: 'Alibaba · 128K ctx, strong reasoning for root-cause analysis',
+    description: 'IBM · 128K ctx, efficient option for concise issue explanations and remediation steps',
+    id: 'granite3.3:2b',
+    label: 'Granite 3.3 2B',
+    params: '2B',
+    size: '1.5 GB',
+  },
+  {
+    contextWindow: 32_768,
+    description: 'Alibaba · compact fallback with good reasoning for exception analysis',
     id: 'qwen2.5:3b',
     label: 'Qwen 2.5 3B',
     params: '3B',
@@ -35,12 +35,12 @@ export const ERROR_EXPLAIN_MODELS: ModelOption[] = [
   },
   {
     contextWindow: 131_072,
-    description: 'Meta · fastest option, still solid for short explanations, 128K ctx',
-    id: 'llama3.2:1b',
-    label: 'Llama 3.2 1B',
-    params: '1B',
-    size: '1.3 GB',
+    description: 'Meta · plain-language fallback that stays readable for non-expert users',
+    id: 'llama3.2:3b',
+    label: 'Llama 3.2 3B',
+    params: '3B',
+    size: '2.0 GB',
   },
 ]
 
-export const DEFAULT_ERROR_EXPLAIN_MODEL = 'phi3.5'
+export const DEFAULT_ERROR_EXPLAIN_MODEL = 'qwen3:4b'

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { appWretch } from '@/lib/http/app-client'
 import type { PullState } from './types'
 
@@ -37,6 +38,7 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
   )
 
   function applySuccessEvent(modelId: string): void {
+    toast.success(`Model pulled`, { description: modelId })
     setPullStates((previous) => ({ ...previous, [modelId]: { status: 'done' } }))
     setInstalledModels((previous) => {
       if (!previous) {
@@ -54,6 +56,7 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
 
     if (event.status === 'error' || event.error) {
       const message = typeof event.error === 'string' ? event.error : 'Pull failed'
+      toast.error(`Pull failed: ${modelId}`, { description: message })
       setPullStates((previous) => ({ ...previous, [modelId]: { error: message, status: 'error' } }))
       return true
     }
@@ -111,6 +114,7 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
           return
         }
 
+        toast.error(`Pull failed: ${modelId}`, { description: 'Connection failed. Is Ollama running?' })
         setPullStates((previous) => ({
           ...previous,
           [modelId]: { error: 'Connection failed', status: 'error' },

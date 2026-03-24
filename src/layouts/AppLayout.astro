@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from 'astro:transitions';
 import '@/styles/global.css';
+import { Toaster } from '@/components/ui/sonner';
 
 interface Props {
   title?: string;
@@ -84,5 +85,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-rout
   </head>
   <body class:list={[fullScreen ? 'h-screen overflow-hidden' : 'min-h-screen', 'bg-background text-foreground']}>
     <slot />
+    <Toaster client:load />
   </body>
 </html>

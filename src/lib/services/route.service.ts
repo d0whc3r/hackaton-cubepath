@@ -10,6 +10,7 @@ export interface RouteStreamParams extends RouteRequest {
 }
 
 export class BlockedError extends Error {
+  // oxlint-disable-next-line typescript/parameter-properties
   constructor(public readonly blockReason: string) {
     super('Input blocked by security policy.')
     this.name = 'BlockedError'

@@ -1,4 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
+import { toast } from 'sonner'
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { DEFAULTS, getAnalystModel, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { BlockedError, buildRouteMutationOptions } from '@/lib/services/route.service'
@@ -120,6 +121,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
           return
         }
         if (error instanceof BlockedError) {
+          toast.warning('Request blocked', { description: error.blockReason ?? undefined })
           updateLastAssistant(task, (prev: AssistantMessage) => ({
             ...prev,
             blockReason: error.blockReason,
@@ -127,9 +129,11 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
           }))
           return
         }
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+        toast.error('Request failed', { description: errorMessage })
         updateLastAssistant(task, (prev: AssistantMessage) => ({
           ...prev,
-          error: error instanceof Error ? error.message : 'Unknown error',
+          error: errorMessage,
           status: 'error',
         }))
       })

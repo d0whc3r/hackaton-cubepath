@@ -155,7 +155,9 @@ export function ModelConfigPage() {
   }
 
   function handleInstallMissingModels() {
-    const missingModelIds = [...new Set(missingSections.map((s) => config[s.configKey] as string).filter(Boolean))]
+    const missingModelIds = [
+      ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
+    ]
     for (const modelId of missingModelIds) {
       handlePull(modelId, ollamaBaseUrl)
     }
@@ -169,7 +171,7 @@ export function ModelConfigPage() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
       {/* Header */}
-      <div className="sticky top-0 z-10 -mx-4 mb-6 flex items-start justify-between gap-3 bg-background/95 px-4 py-3 backdrop-blur supports-backdrop-filter:bg-background/60 md:-mx-6 md:px-6">
+      <div className="sticky top-14 z-10 -mx-4 mb-6 flex items-start justify-between gap-3 bg-background/95 px-4 py-3 backdrop-blur supports-backdrop-filter:bg-background/60 md:-mx-6 md:px-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Model Configuration</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
@@ -183,6 +185,24 @@ export function ModelConfigPage() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
+          {missingSections.length > 0 &&
+            (() => {
+              const missingModelIds = [
+                ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
+              ]
+              const isPulling = missingModelIds.some((id) => pullStates[id]?.status === 'pulling')
+              return (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleInstallMissingModels}
+                  disabled={isPulling}
+                >
+                  {isPulling ? 'Pulling…' : `Pull${missingModelIds.length > 1 ? ' All' : ''}`}
+                </Button>
+              )
+            })()}
           <Button type="button" variant="outline" size="sm" onClick={handleReset}>
             Reset
           </Button>
@@ -209,12 +229,21 @@ export function ModelConfigPage() {
         />
       </div>
 
-      {missingSections.length > 0 && (
-        <p className="mb-4 text-xs text-destructive">
-          {missingSections.length} selected model{missingSections.length > 1 ? 's are' : ' is'} not installed. Install
-          or change them before saving.
-        </p>
-      )}
+      {missingSections.length > 0 &&
+        (() => {
+          const missingModelIds = [
+            ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
+          ]
+          const taskCount = missingSections.length
+          const modelCount = missingModelIds.length
+          return (
+            <p className="mb-4 text-xs text-destructive">
+              {taskCount} {taskCount === 1 ? 'task' : 'tasks'} {taskCount === 1 ? 'has' : 'have'} a model not installed
+              {modelCount < taskCount && ` (${modelCount} unique ${modelCount === 1 ? 'model' : 'models'})`}. Install or
+              change {modelCount === 1 ? 'it' : 'them'} before saving.
+            </p>
+          )
+        })()}
 
       <Separator className="mb-8" />
 
