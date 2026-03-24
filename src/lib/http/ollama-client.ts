@@ -1,16 +1,14 @@
 import wretch from 'wretch'
+import { REQUEST_ID_HEADER, readHeaderValue, toMethod } from '@/lib/http/request-trace'
 import { logServer, logServerError } from '@/lib/observability/server'
-
-function toMethod(options?: RequestInit): string {
-  return options?.method?.toUpperCase() ?? 'GET'
-}
 
 const ollamaTraceMiddleware = ((next: (url: string, options: RequestInit) => Promise<Response>) =>
   async (url: string, options: RequestInit = {}) => {
     const method = toMethod(options)
     const startedAt = Date.now()
+    const requestId = readHeaderValue(options.headers, REQUEST_ID_HEADER) ?? crypto.randomUUID()
 
-    logServer('info', 'ollama.request.start', { method, url })
+    logServer('info', 'ollama.request.start', { method, requestId, url })
 
     try {
       const response = await next(url, options)
@@ -18,12 +16,13 @@ const ollamaTraceMiddleware = ((next: (url: string, options: RequestInit) => Pro
       logServer(level, 'ollama.request.end', {
         durationMs: Date.now() - startedAt,
         method,
+        requestId,
         status: response.status,
         url,
       })
       return response
     } catch (error) {
-      logServerError('ollama.request.error', error, { durationMs: Date.now() - startedAt, method, url })
+      logServerError('ollama.request.error', error, { durationMs: Date.now() - startedAt, method, requestId, url })
       throw error
     }
   }) as any

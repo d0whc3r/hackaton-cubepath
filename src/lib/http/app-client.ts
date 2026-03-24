@@ -1,10 +1,7 @@
 import wretch from 'wretch'
 import QueryStringAddon from 'wretch/addons/queryString'
+import { REQUEST_ID_HEADER, readHeaderValue, toMethod, withRequestIdHeader } from '@/lib/http/request-trace'
 import { logClient, logClientError } from '@/lib/observability/client'
-
-function toMethod(options?: RequestInit): string {
-  return options?.method?.toUpperCase() ?? 'GET'
-}
 
 function toPath(url: string): string {
   try {
@@ -22,15 +19,18 @@ const apiTraceMiddleware = ((next: (url: string, options: RequestInit) => Promis
     const method = toMethod(options)
     const path = toPath(url)
     const startedAt = Date.now()
+    const requestId = readHeaderValue(options.headers, REQUEST_ID_HEADER) ?? crypto.randomUUID()
+    const optionsWithRequestId = withRequestIdHeader(options, requestId)
 
-    logClient('info', 'api.client.request.start', { method, path })
+    logClient('info', 'api.client.request.start', { method, path, requestId })
 
     try {
-      const response = await next(url, options)
+      const response = await next(url, optionsWithRequestId)
       logClient(response.status >= 400 ? 'warn' : 'info', 'api.client.request.end', {
         durationMs: Date.now() - startedAt,
         method,
         path,
+        requestId,
         status: response.status,
       })
       return response
@@ -39,6 +39,7 @@ const apiTraceMiddleware = ((next: (url: string, options: RequestInit) => Promis
         durationMs: Date.now() - startedAt,
         method,
         path,
+        requestId,
       })
       throw error
     }

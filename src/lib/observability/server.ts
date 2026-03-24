@@ -6,6 +6,7 @@ import { LogLayer } from 'loglayer'
 import pino from 'pino'
 import { serializeError } from 'serialize-error'
 import type { LogContext, LogLevel } from '@/lib/observability/types'
+import { otelLog } from '@/lib/observability/otel'
 
 function toLogLevel(level: string | undefined, fallback: LogLevel = 'info'): LogLevel {
   if (level === 'debug' || level === 'error' || level === 'info' || level === 'warn') {
@@ -76,15 +77,17 @@ const serverLog = new LogLayer({
 export function logServer(level: LogLevel, message: string, context?: LogContext): void {
   if (context) {
     serverLog.withMetadata(context)[level](message)
-    return
+  } else {
+    serverLog[level](message)
   }
-  serverLog[level](message)
+  otelLog(level, message, context)
 }
 
 export function logServerError(message: string, error: unknown, context?: LogContext): void {
   if (context) {
     serverLog.withError(error).withMetadata(context).error(message)
-    return
+  } else {
+    serverLog.withError(error).error(message)
   }
-  serverLog.withError(error).error(message)
+  otelLog('error', message, context)
 }

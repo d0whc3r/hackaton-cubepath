@@ -6,6 +6,7 @@ import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { runStream } from '@/lib/api/stream-runner'
 import { withApiLogging } from '@/lib/observability/api'
+import { recordRouteBlocked, recordRouteRequest } from '@/lib/observability/metrics'
 import { logServer, logServerError } from '@/lib/observability/server'
 import { appendEvent, buildValidationEvent, DEFAULT_GUARD_MODEL, validateInputSemantic } from '@/lib/railguard'
 import { detectLanguage } from '@/lib/router/detector'
@@ -179,6 +180,7 @@ export const POST: APIRoute = withApiLogging('route.main', async ({ request }, r
       requestId,
       taskType: data.taskType,
     })
+    recordRouteBlocked(data.taskType)
     return Response.json(
       {
         blockReason: semanticValidation.blockReason ?? 'The request does not appear to match the selected task type.',
@@ -189,5 +191,6 @@ export const POST: APIRoute = withApiLogging('route.main', async ({ request }, r
   }
 
   logServer('info', 'route.accepted', { requestId, taskType: data.taskType })
+  recordRouteRequest(data.taskType)
   return sseResponse(buildSSEStream(req, requestId))
 })

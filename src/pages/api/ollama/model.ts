@@ -61,12 +61,18 @@ export const GET: APIRoute = withApiLogging('ollama.model', async ({ url }, requ
     const [showData, tagsData] = await Promise.all([
       ollamaWretch
         .url(`${baseUrl}/api/show`)
-        .options({ signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) })
+        .options({
+          headers: { 'x-request-id': requestId },
+          signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS),
+        })
         .post({ model })
         .json<ShowResponse>(),
       ollamaWretch
         .url(`${baseUrl}/api/tags`)
-        .options({ signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) })
+        .options({
+          headers: { 'x-request-id': requestId },
+          signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS),
+        })
         .get()
         .json<TagsResponse>()
         .catch(() => ({ models: [] }) as TagsResponse),

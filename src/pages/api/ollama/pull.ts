@@ -37,7 +37,10 @@ export const POST: APIRoute = withApiLogging('ollama.pull', async ({ request }, 
       try {
         const ollamaRes = await ollamaWretch
           .url(`${baseUrl}/api/pull`)
-          .options({ signal: AbortSignal.timeout(PULL_TIMEOUT_MS) }) // 10 min for large models
+          .options({
+            headers: { 'x-request-id': requestId },
+            signal: AbortSignal.timeout(PULL_TIMEOUT_MS),
+          }) // 10 min for large models
           .post({ name: model, stream: true })
           .res()
 

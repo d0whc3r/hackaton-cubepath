@@ -18,7 +18,10 @@ export const GET: APIRoute = withApiLogging('ollama.models', async ({ url }, req
     // Which returns the same fallback response as before.
     const data = await ollamaWretch
       .url(`${baseUrl}/api/tags`)
-      .options({ signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS) })
+      .options({
+        headers: { 'x-request-id': requestId },
+        signal: AbortSignal.timeout(OLLAMA_TIMEOUT_MS),
+      })
       .get()
       .json<OllamaTagsResponse>()
     const names = (data.models ?? []).map((model) => {

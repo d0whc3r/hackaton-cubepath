@@ -1,11 +1,12 @@
 import type { APIContext, APIRoute } from 'astro'
+import { REQUEST_ID_HEADER } from '@/lib/http/request-trace'
 import { logServer, logServerError } from '@/lib/observability/server'
 
 type InstrumentedApiHandler = (ctx: APIContext, requestId: string) => Promise<Response>
 
 function withRequestId(response: Response, requestId: string): Response {
   const headers = new Headers(response.headers)
-  headers.set('x-request-id', requestId)
+  headers.set(REQUEST_ID_HEADER, requestId)
   return new Response(response.body, {
     headers,
     status: response.status,
@@ -15,7 +16,7 @@ function withRequestId(response: Response, requestId: string): Response {
 
 export function withApiLogging(routeId: string, handler: InstrumentedApiHandler): APIRoute {
   return async (ctx) => {
-    const requestId = ctx.request.headers.get('x-request-id') ?? crypto.randomUUID()
+    const requestId = ctx.request.headers.get(REQUEST_ID_HEADER) ?? crypto.randomUUID()
     const startedAt = Date.now()
     const { method } = ctx.request
     const path = ctx.url.pathname
