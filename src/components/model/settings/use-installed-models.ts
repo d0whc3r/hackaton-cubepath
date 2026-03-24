@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-
 import { appWretch } from '@/lib/http/app-client'
 
 export function useInstalledModels(ollamaBaseUrl: string) {

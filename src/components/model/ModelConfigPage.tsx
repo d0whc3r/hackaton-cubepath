@@ -1,13 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
-
 import type { SectionDef, SectionGroupId } from './settings/types'
-
 import { SECTIONS } from './settings/constants'
 import { isModelInstalled } from './settings/helpers'
 import { MissingModelsDialog } from './settings/MissingModelsDialog'
@@ -172,7 +169,7 @@ export function ModelConfigPage() {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
       {/* Header */}
-      <div className="mb-6 flex items-start justify-between gap-3">
+      <div className="sticky top-0 z-10 -mx-4 mb-6 flex items-start justify-between gap-3 bg-background/95 px-4 py-3 backdrop-blur supports-backdrop-filter:bg-background/60 md:-mx-6 md:px-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Model Configuration</h1>
           <p className="mt-1 max-w-2xl text-sm text-muted-foreground">

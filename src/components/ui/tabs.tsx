@@ -1,9 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
-
 import { cva } from 'class-variance-authority'
 import { Tabs as TabsPrimitive } from 'radix-ui'
 import * as React from 'react'
-
 import { cn } from '@/lib/utils'
 
 function Tabs({ className, orientation = 'horizontal', ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {

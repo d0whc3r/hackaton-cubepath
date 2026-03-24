@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-
 import type { AttemptResult } from '@/lib/utils/attempt'
 import type { StorageType } from '@/lib/utils/storage'
-
 import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
 
 export function useStorage<T>(

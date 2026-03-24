@@ -1,5 +1,4 @@
 import type { AttemptResult } from '@/lib/utils/attempt'
-
 import { attempt } from '@/lib/utils/attempt'
 
 export type StorageType = 'local' | 'session'

@@ -1,9 +1,7 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
-
 import { DEFAULTS, getAnalystModel, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
-import { buildRouteMutationOptions } from '@/lib/services/route.service'
+import { BlockedError, buildRouteMutationOptions } from '@/lib/services/route.service'
 import {
   appendEntry,
   clearTask,
@@ -16,7 +14,7 @@ import {
   subscribe,
   updateLastAssistant,
 } from '@/lib/stores/chat-store'
-import { buildStreamCallbacks, GENERATION_STOPPED, mergeRoutingStep } from '@/lib/utils/stream-callbacks'
+import { buildStreamCallbacks } from '@/lib/utils/stream-callbacks'
 
 export interface UseChatSessionReturn {
   activeTask: TaskType
@@ -74,6 +72,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
 
     appendEntry(task, {
       assistantMessage: {
+        blockReason: null,
         content: '',
         cost: null,
         error: null,
@@ -120,6 +119,14 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
           updateLastAssistant(task, (prev: AssistantMessage) => ({ ...prev, status: 'interrupted' }))
           return
         }
+        if (error instanceof BlockedError) {
+          updateLastAssistant(task, (prev: AssistantMessage) => ({
+            ...prev,
+            blockReason: error.blockReason,
+            status: 'blocked',
+          }))
+          return
+        }
         updateLastAssistant(task, (prev: AssistantMessage) => ({
           ...prev,
           error: error instanceof Error ? error.message : 'Unknown error',
@@ -140,7 +147,9 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     setLoading(task, false)
     updateLastAssistant(task, (prev: AssistantMessage) => ({
       ...prev,
-      routingSteps: mergeRoutingStep(prev.routingSteps, GENERATION_STOPPED),
+      routingSteps: prev.routingSteps.map((step) =>
+        step.status === 'active' ? { ...step, status: 'error' as const } : step,
+      ),
       status: 'interrupted',
     }))
   }

@@ -1,5 +1,4 @@
 import { act, renderHook } from '@testing-library/react'
-
 import { useStorage } from '@/hooks/use-storage'
 
 describe('useStorage', () => {

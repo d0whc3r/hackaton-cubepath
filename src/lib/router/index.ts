@@ -1,5 +1,4 @@
 import type { RoutingDecision, SpecialistConfig, TaskType } from './types'
-
 import { fallbackAnalysis, runAnalyst } from './analyst'
 
 export function route(

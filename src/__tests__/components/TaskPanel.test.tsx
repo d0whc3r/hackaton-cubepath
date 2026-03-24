@@ -1,5 +1,4 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-
 import { TaskPanel } from '../../components/TaskPanel'
 
 describe('TaskPanel', () => {
@@ -23,13 +22,13 @@ describe('TaskPanel', () => {
   it('submit is disabled when isLoading=true', () => {
     render(<TaskPanel isLoading onSubmit={vi.fn()} onCancel={vi.fn()} initialInput="some code" />)
     const submit = screen.getByText('Processing...') as HTMLButtonElement
-    expect(submit.disabled).toBeTruthy()
+    expect(submit.disabled).toBe(true)
   })
 
   it('submit is disabled when textarea is empty', () => {
     render(<TaskPanel isLoading={false} onSubmit={vi.fn()} onCancel={vi.fn()} />)
     const submit = screen.getByText('Submit') as HTMLButtonElement
-    expect(submit.disabled).toBeTruthy()
+    expect(submit.disabled).toBe(true)
   })
 
   it('cancel button is visible when isLoading=true', () => {

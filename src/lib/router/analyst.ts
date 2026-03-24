@@ -10,12 +10,9 @@
  */
 
 import { generateText } from 'ai'
-
 import { ollamaClient } from '@/lib/api/sse'
 import { buildAnalystSystemPrompt, buildAnalystUserPrompt } from '@/lib/prompts/analyst'
-
 import type { CodeContext, TaskType } from './types'
-
 import { detectLanguage } from './detector'
 
 // 8 seconds balances cold-start latency for local models with user experience —

@@ -1,5 +1,4 @@
 import type { ModelOption, TaskType } from '../types'
-
 import { COMMIT_MODELS, DEFAULT_COMMIT_MODEL } from './commit'
 import { DEAD_CODE_MODELS, DEFAULT_DEAD_CODE_MODEL } from './dead-code'
 import { DEFAULT_DOCSTRING_MODEL, DOCSTRING_MODELS } from './docstring'

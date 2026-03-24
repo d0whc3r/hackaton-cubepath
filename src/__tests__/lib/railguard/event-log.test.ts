@@ -1,5 +1,4 @@
 import type { ValidationEvent, ValidationResult } from '@/lib/railguard'
-
 import { appendEvent, buildValidationEvent, getEvents, getMetrics, pruneOlderThan } from '@/lib/railguard'
 
 function makeEvent(overrides: Partial<ValidationEvent> = {}): ValidationEvent {
@@ -129,6 +128,6 @@ describe('buildValidationEvent', () => {
     expect(event.decision).toBe('blocked')
     expect(event.matchedRuleId).toBe('semantic-guard-explain')
     expect(event.attackVectorCategory).toBe('semantic-check')
-    expect(event.blockReason).toBeTruthy()
+    expect(event.blockReason).toBe(true)
   })
 })

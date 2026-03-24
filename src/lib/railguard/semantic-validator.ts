@@ -1,11 +1,7 @@
 import { generateText } from 'ai'
-
 import type { TaskType } from '@/lib/schemas/route'
-
 import { ollamaClient } from '@/lib/api/sse'
-
 import type { ValidationResult } from './types'
-
 import { GUARD_PROMPTS } from './guard-prompts'
 
 /**
@@ -65,7 +61,7 @@ export async function validateInputSemantic(
     if (hasNo && !hasYes) {
       return {
         attackVectorCategory: 'semantic-check',
-        blockReason: `Input does not appear to be a legitimate "${taskType}" request.`,
+        blockReason: `Your message doesn't look like a "${taskType}" request. Try sending content that matches the selected task — for example, a code snippet or a description of what you want to ${taskType}.`,
         decision: 'blocked',
         matchedRuleId: `semantic-guard-${taskType}`,
       }

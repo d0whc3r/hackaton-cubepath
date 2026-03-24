@@ -1,5 +1,4 @@
 import { useSyncExternalStore } from 'react'
-
 import {
   appendEntry,
   clearTask,

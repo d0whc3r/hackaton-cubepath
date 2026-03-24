@@ -1,14 +1,11 @@
 import { CheckCheck, ClipboardCopy, ExternalLink } from 'lucide-react'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-
 import type { PullState, SectionDef, SectionGroupId } from './types'
-
 import { CUSTOM_VALUE } from './constants'
 import { ollamaModelUrl } from './helpers'
 import { ModelStatusBadge } from './ModelStatusBadge'

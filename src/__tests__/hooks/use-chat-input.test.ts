@@ -1,5 +1,4 @@
 import { renderHook, act } from '@testing-library/react'
-
 import { useChatInput } from '@/hooks/use-chat-input'
 import { useChatContext } from '@/lib/context/chat-context'
 
@@ -23,14 +22,14 @@ describe('useChatInput', () => {
   it('overLimit is false when input <= 15000 chars', () => {
     const setInput = vi.fn()
     const { result } = renderHook(() => useChatInput('hello', setInput))
-    expect(result.current.overLimit).toBeFalsy()
+    expect(result.current.overLimit).toBe(false)
   })
 
   it('overLimit is true when input > 15000 chars', () => {
     const setInput = vi.fn()
     const longInput = 'a'.repeat(MAX_CHARS + 1)
     const { result } = renderHook(() => useChatInput(longInput, setInput))
-    expect(result.current.overLimit).toBeTruthy()
+    expect(result.current.overLimit).toBe(true)
   })
 
   it('charCount reflects input length', () => {

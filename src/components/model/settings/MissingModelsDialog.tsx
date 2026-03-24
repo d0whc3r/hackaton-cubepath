@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-
 import type { SectionDef } from './types'
 
 interface MissingModelsDialogProps {

@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react'
-
 import { appWretch } from '@/lib/http/app-client'
-
 import type { RuntimeModelDetails } from './types'
 
 export function useRuntimeModelDetails(ollamaBaseUrl: string, modelId: string) {

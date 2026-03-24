@@ -1,8 +1,6 @@
 import type { APIRoute } from 'astro'
-
 import { streamText } from 'ai'
 import { z } from 'zod'
-
 import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { DEFAULT_TRANSLATE_MODEL, OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'

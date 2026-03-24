@@ -1,7 +1,5 @@
 import { render, screen } from '@testing-library/react'
-
 import type { RoutingStep } from '../../lib/router/types'
-
 import { RoutingPanel } from '../../components/RoutingPanel'
 
 describe('RoutingPanel', () => {

@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-
 import { appWretch } from '@/lib/http/app-client'
-
 import type { PullState } from './types'
 
 interface PullEvent {

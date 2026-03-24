@@ -1,7 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react'
-
 import type { HistoryItem } from '../../components/HistoryPanel'
-
 import { HistoryPanel } from '../../components/HistoryPanel'
 
 function makeItems(count: number): HistoryItem[] {

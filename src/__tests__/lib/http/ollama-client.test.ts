@@ -1,7 +1,5 @@
 import { WretchError } from 'wretch'
-
 import { ollamaWretch } from '@/lib/http/ollama-client'
-
 import { ollamaErrorHandlers } from '../../msw/handlers/ollama'
 import { server } from '../../msw/server'
 
@@ -37,7 +35,7 @@ describe('ollamaWretch', () => {
 
   it('returns raw Response for streaming calls via .res()', async () => {
     const res = await ollamaWretch.url(`${BASE}/api/pull`).post({ name: 'llama3.2', stream: true }).res()
-    expect(res.ok).toBeTruthy()
+    expect(res.ok).toBe(true)
     expect(res.body).not.toBeNull()
   })
 })

@@ -1,6 +1,5 @@
 import { ChevronDown, Code2, Languages, RotateCcw, X } from 'lucide-react'
 import { useRef, useState } from 'react'
-
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
 import { Button } from '@/components/ui/button'
 import { getTranslateModel, loadModelConfig } from '@/lib/config/model-config'

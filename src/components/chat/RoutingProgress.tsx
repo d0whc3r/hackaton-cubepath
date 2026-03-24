@@ -12,9 +12,7 @@ import {
   Zap,
 } from 'lucide-react'
 import { useState } from 'react'
-
 import type { RoutingStep, RoutingStepName, SpecialistInfo } from '@/lib/schemas/route'
-
 import { Badge } from '@/components/ui/badge'
 
 const STEP_ORDER: RoutingStepName[] = [

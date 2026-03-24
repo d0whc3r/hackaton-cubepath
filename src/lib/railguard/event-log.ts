@@ -1,5 +1,4 @@
 import type { AttackVectorCategory, SecurityMetrics, ValidationEvent, ValidationResult } from './types'
-
 import { sanitise } from './sanitise'
 
 const MAX_BUFFER = 1000

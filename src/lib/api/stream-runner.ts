@@ -1,7 +1,5 @@
 import { streamText } from 'ai'
-
 import type { ollamaClient, SseEmitter } from '@/lib/api/sse'
-
 import { estimateCost } from '@/lib/cost/calculator'
 
 /** 5 min: specialist models on consumer hardware can be slow for large inputs */

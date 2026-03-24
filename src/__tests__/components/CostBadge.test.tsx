@@ -1,7 +1,5 @@
 import { render, screen } from '@testing-library/react'
-
 import type { CostEstimate } from '../../lib/router/types'
-
 import { CostBadge } from '../../components/CostBadge'
 
 const mockCost: CostEstimate = {

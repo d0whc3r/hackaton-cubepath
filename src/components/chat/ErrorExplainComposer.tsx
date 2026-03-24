@@ -1,5 +1,4 @@
 import { useState } from 'react'
-
 import { ComposerSubmitControls } from '@/components/chat/ComposerSubmitControls'
 import { ComposerTextarea } from '@/components/chat/ComposerTextarea'
 import { useSubmitShortcut } from '@/hooks/use-submit-shortcut'

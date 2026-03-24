@@ -1,7 +1,5 @@
 import { useState } from 'react'
-
 import type { UserMessage } from '@/lib/schemas/route'
-
 import { formatTime } from '@/lib/utils/format'
 
 const TASK_COLORS: Record<string, string> = {

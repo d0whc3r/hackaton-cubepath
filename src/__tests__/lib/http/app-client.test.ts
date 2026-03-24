@@ -1,7 +1,5 @@
 import { WretchError } from 'wretch'
-
 import { appWretch } from '@/lib/http/app-client'
-
 import { appErrorHandlers } from '../../msw/handlers/app'
 import { server } from '../../msw/server'
 
@@ -27,7 +25,7 @@ describe('appWretch', () => {
       .url('/api/ollama/pull')
       .post({ baseUrl: 'http://localhost:11434', model: 'llama3.2' })
       .res()
-    expect(res.ok).toBeTruthy()
+    expect(res.ok).toBe(true)
   })
 
   it('throws WretchError on 5xx', async () => {
@@ -42,7 +40,7 @@ describe('appWretch', () => {
 
   it('returns raw Response for streaming calls via .res()', async () => {
     const res = await appWretch.url('/api/route').post({ messages: [] }).res()
-    expect(res.ok).toBeTruthy()
+    expect(res.ok).toBe(true)
     expect(res.body).not.toBeNull()
   })
 })

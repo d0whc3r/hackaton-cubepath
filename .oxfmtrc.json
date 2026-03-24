@@ -38,7 +38,7 @@
       "unknown"
     ],
     "internalPattern": ["@/"],
-    "newlinesBetween": true,
+    "newlinesBetween": false,
     "order": "asc",
     "ignoreCase": true,
     "partitionByNewline": false,

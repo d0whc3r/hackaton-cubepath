@@ -1,13 +1,9 @@
 import { useEffect, useState } from 'react'
-
 import type { ModelConfig } from '@/lib/config/model-config'
-
 import { DEFAULTS, STORAGE_KEY, loadModelConfig } from '@/lib/config/model-config'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 import { removeStorage, writeStorage } from '@/lib/utils/storage'
-
 import type { SectionDef, SectionId } from './types'
-
 import { CUSTOM_VALUE } from './constants'
 import { buildInitialCustomModels, getActiveSection, getDefaultModelId } from './helpers'
 

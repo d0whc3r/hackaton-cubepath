@@ -1,11 +1,8 @@
 import type { ModelConfig } from '@/lib/config/model-config'
-
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-
 import type { PullState, SectionDef } from './types'
-
 import { CONTEXT_DIVISOR, CUSTOM_VALUE } from './constants'
 import { ModelStatusBadge } from './ModelStatusBadge'
 

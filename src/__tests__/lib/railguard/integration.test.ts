@@ -1,5 +1,4 @@
 import type { ValidationResult } from '@/lib/railguard'
-
 import { appendEvent, buildValidationEvent, getEvents, getMetrics, pruneOlderThan } from '@/lib/railguard'
 
 const BLOCKED_RESULT: ValidationResult = {
@@ -28,10 +27,10 @@ describe('railguard integration — semantic pipeline', () => {
     const stored = getEvents().find((e) => e.id === event.id)
     expect(stored).toBeDefined()
     expect(stored?.decision).toBe('blocked')
-    expect(stored?.sanitisedExcerpt).toBeTruthy()
+    expect(stored?.sanitisedExcerpt).toBe(true)
     expect(stored?.matchedRuleId).toBe('semantic-guard-explain')
     expect(stored?.attackVectorCategory).toBe('semantic-check')
-    expect(stored?.blockReason).toBeTruthy()
+    expect(stored?.blockReason).toBe(true)
   })
 
   it('metrics are queryable by time window', () => {

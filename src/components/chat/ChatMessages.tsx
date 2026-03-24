@@ -1,6 +1,5 @@
 import { ArrowDown } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-
 import { AssistantBubble } from '@/components/chat/AssistantBubble'
 import { EmptyState } from '@/components/chat/EmptyState'
 import { UserBubble } from '@/components/chat/UserBubble'

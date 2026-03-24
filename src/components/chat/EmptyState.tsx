@@ -1,5 +1,4 @@
 import { Zap } from 'lucide-react'
-
 import { useChatContext } from '@/lib/context/chat-context'
 
 const TASK_HINTS: Record<string, string> = {

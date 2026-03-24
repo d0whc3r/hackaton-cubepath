@@ -1,8 +1,6 @@
 import { Paperclip, Trash2, X } from 'lucide-react'
 import { useState } from 'react'
-
 import type { TaskType } from '@/lib/schemas/route'
-
 import { ComposerSubmitControls } from '@/components/chat/ComposerSubmitControls'
 import { ComposerTextarea } from '@/components/chat/ComposerTextarea'
 import { Badge } from '@/components/ui/badge'

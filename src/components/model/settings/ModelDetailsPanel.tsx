@@ -1,12 +1,8 @@
 import { CheckCheck, ClipboardCopy, ExternalLink } from 'lucide-react'
-
 import type { ModelConfig } from '@/lib/config/model-config'
-
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-
 import type { PullState, RuntimeModelDetails, SectionDef } from './types'
-
 import { ollamaModelUrl } from './helpers'
 
 interface ModelDetailsPanelProps {

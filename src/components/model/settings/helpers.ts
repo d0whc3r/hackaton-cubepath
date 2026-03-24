@@ -1,9 +1,6 @@
 import type { ModelConfig } from '@/lib/config/model-config'
-
 import { DEFAULTS } from '@/lib/config/model-config'
-
 import type { SectionDef, SectionId } from './types'
-
 import { CUSTOM_VALUE, SECTIONS } from './constants'
 
 export function ollamaModelUrl(modelId: string): string {

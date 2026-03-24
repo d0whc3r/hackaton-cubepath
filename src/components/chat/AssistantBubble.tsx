@@ -1,7 +1,5 @@
-import { Loader2, Zap } from 'lucide-react'
-
+import { Loader2, ShieldAlert, StopCircle, Zap } from 'lucide-react'
 import type { AssistantMessage } from '@/lib/schemas/route'
-
 import { RoutingProgress } from '@/components/chat/RoutingProgress'
 import { TranslateButton } from '@/components/chat/TranslateButton'
 import { CostBadge } from '@/components/cost/CostBadge'
@@ -13,6 +11,24 @@ interface AssistantBubbleProps {
 
 export function AssistantBubble({ msg }: AssistantBubbleProps) {
   const isStreaming = msg.status === 'streaming'
+
+  if (msg.status === 'blocked') {
+    return (
+      <div className="flex justify-start">
+        <div className="max-w-[85%] min-w-0">
+          <div className="flex items-start gap-3 rounded-2xl rounded-tl-sm bg-orange-50 px-4 py-3 dark:bg-orange-950/25">
+            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-orange-500 dark:text-orange-400" />
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Request blocked</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-orange-600/90 dark:text-orange-400/80">
+                {msg.blockReason}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex justify-start">
@@ -33,12 +49,6 @@ export function AssistantBubble({ msg }: AssistantBubbleProps) {
         </div>
 
         <div className="rounded-2xl rounded-tl-sm border border-border/60 bg-card px-4 py-3 shadow-sm">
-          {msg.status === 'interrupted' && !msg.error && (
-            <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-600 dark:text-amber-400">
-              Interrupted — partial output below
-            </div>
-          )}
-
           {msg.error && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
               <p className="font-medium">Error</p>
@@ -46,6 +56,21 @@ export function AssistantBubble({ msg }: AssistantBubbleProps) {
             </div>
           )}
           {!msg.error && msg.content && <MarkdownRenderer content={msg.content} />}
+
+          {msg.status === 'interrupted' && msg.content && (
+            <div className="mt-3 flex items-center gap-1.5 border-t border-dashed border-border/50 pt-2.5">
+              <StopCircle className="h-3 w-3 shrink-0 text-muted-foreground/50" />
+              <span className="text-[11px] text-muted-foreground/50">Response stopped here</span>
+            </div>
+          )}
+
+          {msg.status === 'interrupted' && !msg.content && !msg.error && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <StopCircle className="h-3.5 w-3.5 shrink-0" />
+              Response stopped before generating
+            </div>
+          )}
+
           {!msg.error && !msg.content && isStreaming && (
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="inline-block h-1.5 w-1.5 animate-bounce rounded-full bg-primary [animation-delay:0ms]" />

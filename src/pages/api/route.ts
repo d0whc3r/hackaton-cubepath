@@ -1,9 +1,7 @@
 import type { APIRoute } from 'astro'
-
 import type { SseEmitter } from '@/lib/api/sse'
 import type { DirectTaskType } from '@/lib/router/direct'
 import type { TaskType } from '@/lib/schemas/route'
-
 import { resolveModel } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { runStream } from '@/lib/api/stream-runner'
@@ -168,7 +166,13 @@ export const POST: APIRoute = async ({ request }) => {
   const semanticValidation = await validateInputSemantic(data.input, data.taskType, req.ollamaBaseUrl, req.guardModel)
   appendEvent(buildValidationEvent(semanticValidation, data.input))
   if (semanticValidation.decision === 'blocked') {
-    return Response.json({ error: 'Input blocked by security policy.' }, { status: 400 })
+    return Response.json(
+      {
+        blockReason: semanticValidation.blockReason ?? 'The request does not appear to match the selected task type.',
+        error: 'BLOCKED_BY_SECURITY_POLICY',
+      },
+      { status: 400 },
+    )
   }
 
   return sseResponse(buildSSEStream(req))

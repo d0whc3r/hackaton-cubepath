@@ -4,9 +4,7 @@ import { buildErrorExplainPrompt } from '@/lib/prompts/error-explain'
 import { buildNamingHelperPrompt } from '@/lib/prompts/naming-helper'
 import { buildPerformanceHintPrompt } from '@/lib/prompts/performance-hint'
 import { buildTypeHintsPrompt } from '@/lib/prompts/type-hints'
-
 import type { CodeContext, TaskType } from './types'
-
 import { DEFAULT_MODELS } from './models'
 
 const STUB_CONTEXT: CodeContext = {

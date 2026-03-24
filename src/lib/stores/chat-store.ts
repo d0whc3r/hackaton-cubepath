@@ -1,5 +1,4 @@
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
-
 import { clearHistory, loadHistory, saveHistory } from '@/lib/utils/history'
 
 export type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage

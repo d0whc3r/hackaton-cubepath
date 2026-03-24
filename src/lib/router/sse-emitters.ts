@@ -1,6 +1,5 @@
 import type { SseEmitter } from '@/lib/api/sse'
 import type { TaskType } from '@/lib/schemas/route'
-
 import type { RoutingDecision } from './types'
 
 export function emitLanguageDetection(decision: RoutingDecision, emit: SseEmitter): void {

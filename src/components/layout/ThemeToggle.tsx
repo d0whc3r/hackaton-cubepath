@@ -1,6 +1,5 @@
 import { Moon, Sun } from 'lucide-react'
 import { useEffect, useState } from 'react'
-
 import { Button } from '@/components/ui/button'
 import { writeStorage } from '@/lib/utils/storage'
 

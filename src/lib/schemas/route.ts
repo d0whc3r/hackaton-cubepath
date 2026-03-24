@@ -82,12 +82,13 @@ export const RouteRequestSchema = z.object({
 export type RouteRequest = z.infer<typeof RouteRequestSchema>
 
 export interface AssistantMessage {
+  blockReason: string | null
   content: string
+  cost: CostEstimate | null
+  error: string | null
   routingSteps: RoutingStep[]
   specialist: SpecialistInfo | null
-  cost: CostEstimate | null
-  status: 'streaming' | 'done' | 'error' | 'interrupted'
-  error: string | null
+  status: 'streaming' | 'done' | 'error' | 'interrupted' | 'blocked'
 }
 
 export interface UserMessage {

@@ -1,7 +1,5 @@
 import type { APIRoute } from 'astro'
-
 import { z } from 'zod'
-
 import { ollamaWretch } from '@/lib/http/ollama-client'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 

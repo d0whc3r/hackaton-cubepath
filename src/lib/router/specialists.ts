@@ -2,7 +2,6 @@ import { buildCommitPrompt } from '@/lib/prompts/commit'
 import { buildExplainPrompt } from '@/lib/prompts/explain'
 import { buildRefactorPrompt } from '@/lib/prompts/refactor'
 import { buildTestPrompt } from '@/lib/prompts/test'
-
 import type { CodeContext, SpecialistConfig, TaskType } from './types'
 
 export interface SpecialistEnv {

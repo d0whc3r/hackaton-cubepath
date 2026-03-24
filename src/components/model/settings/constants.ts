@@ -9,7 +9,6 @@ import {
   TRANSLATE_MODELS,
   TYPE_HINTS_MODELS,
 } from '@/lib/router/models'
-
 import type { SectionDef } from './types'
 
 export const CONTEXT_DIVISOR = 1024
