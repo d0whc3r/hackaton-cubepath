@@ -56,10 +56,26 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-rout
     <!-- Apply theme before first paint and re-apply after every SPA navigation -->
     <script is:inline>
       (function () {
+        function readStoredTheme() {
+          const raw = localStorage.getItem('theme');
+          if (raw === 'dark' || raw === 'light') {
+            return raw;
+          }
+          if (raw === null) {
+            return null;
+          }
+          try {
+            const parsed = JSON.parse(raw);
+            return parsed === 'dark' || parsed === 'light' ? parsed : null;
+          } catch {
+            return null;
+          }
+        }
+
         function applyTheme() {
-          const stored = localStorage.getItem('theme');
+          const stored = readStoredTheme();
           const prefersDark = globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-          document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
+          document.documentElement.classList.toggle('dark', stored ? stored === 'dark' : prefersDark);
         }
         applyTheme();
         document.addEventListener('astro:after-swap', applyTheme);
