@@ -1,0 +1,443 @@
+{
+  "__inputs": [
+    { "name": "DS_LOKI", "label": "Loki", "type": "datasource", "pluginId": "loki" },
+    { "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Cubepath — Métricas de respuestas en streaming: duración, tokens, modelos, errores y aborts",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Resumen de Streaming",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Streams completados (1h)",
+      "description": "Respuestas de streaming que finalizaron correctamente (status=done).",
+      "gridPos": { "x": 0, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "background", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cubepath_stream_duration_milliseconds_count{status=\"done\"}[1h])",
+          "legendFormat": "Done",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Streams abortados (1h)",
+      "description": "Respuestas de streaming canceladas por timeout (5min) o por el usuario.",
+      "gridPos": { "x": 4, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "background", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 20 }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cubepath_stream_duration_milliseconds_count{status=\"aborted\"}[1h])",
+          "legendFormat": "Aborted",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Streams con error (1h)",
+      "description": "Respuestas de streaming que terminaron con error (modelo no disponible, etc.).",
+      "gridPos": { "x": 8, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "background", "graphMode": "area" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3 },
+              { "color": "red", "value": 10 }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cubepath_stream_duration_milliseconds_count{status=\"error\"}[1h])",
+          "legendFormat": "Error",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "Total chars de entrada (1h)",
+      "description": "Suma de caracteres de input enviados a los modelos en la última hora.",
+      "gridPos": { "x": 12, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cubepath_stream_input_chars_sum[1h])",
+          "legendFormat": "Input chars",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Total chars de salida (1h)",
+      "description": "Suma de caracteres de output generados por los modelos en la última hora.",
+      "gridPos": { "x": 16, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cubepath_stream_output_chars_sum[1h])",
+          "legendFormat": "Output chars",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Ratio output/input",
+      "description": "Relación entre caracteres de salida y entrada. Indica qué tan 'expansivo' es el modelo.",
+      "gridPos": { "x": 20, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "none" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short",
+          "decimals": 2
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cubepath_stream_output_chars_sum[5m]) / rate(cubepath_stream_input_chars_sum[5m])",
+          "legendFormat": "Output/Input ratio",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Latencia por modelo",
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "Duración Streaming P50 / P90 / P99 por modelo",
+      "description": "Percentiles de duración de respuesta en streaming, desagregados por model.id.",
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 9 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "max"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 5 },
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.50, rate(cubepath_stream_duration_milliseconds_bucket{model_id=~\"$model\"}[5m]))",
+          "legendFormat": "P50 — {{model_id}}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.90, rate(cubepath_stream_duration_milliseconds_bucket{model_id=~\"$model\"}[5m]))",
+          "legendFormat": "P90 — {{model_id}}",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.99, rate(cubepath_stream_duration_milliseconds_bucket{model_id=~\"$model\"}[5m]))",
+          "legendFormat": "P99 — {{model_id}}",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Throughput de caracteres (input vs output) por modelo",
+      "description": "Tasa de caracteres procesados/generados por segundo. Útil para detectar bottlenecks de tokenización.",
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 9 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "table", "placement": "right", "calcs": ["lastNotNull", "mean"] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 5 },
+          "unit": "cps"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cubepath_stream_input_chars_sum{model_id=~\"$model\"}[5m])",
+          "legendFormat": "Input — {{model_id}}",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cubepath_stream_output_chars_sum{model_id=~\"$model\"}[5m])",
+          "legendFormat": "Output — {{model_id}}",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Streams por estado (done / aborted / error)",
+      "description": "Tasa de streams terminados por cada estado a lo largo del tiempo.",
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 8 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "reqps"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cubepath_stream_duration_milliseconds_count[5m])",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "bargauge",
+      "title": "Uso de modelos — distribución",
+      "description": "Número total de streams completados por modelo en el rango de tiempo seleccionado.",
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 },
+      "options": {
+        "reduceOptions": { "calcs": ["sum"] },
+        "orientation": "horizontal",
+        "displayMode": "gradient",
+        "showUnfilled": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(cubepath_stream_duration_milliseconds_count[24h])",
+          "legendFormat": "{{model_id}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Logs de eventos de streaming",
+      "gridPos": { "x": 0, "y": 23, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "type": "logs",
+      "title": "stream.specialist.start",
+      "description": "Inicio de cada streaming: autoContinue, inputSize, modelId, requestId.",
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"stream.specialist.start\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "logs",
+      "title": "stream.specialist.done",
+      "description": "Fin exitoso del stream: durationMs, inputSize, outputSize, modelId.",
+      "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"stream.specialist.done\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "type": "logs",
+      "title": "stream.specialist.aborted",
+      "description": "Streams cancelados: timeout de 5 minutos o abort por el cliente.",
+      "gridPos": { "x": 0, "y": 32, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"stream.specialist.aborted\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "type": "logs",
+      "title": "stream.specialist.error",
+      "description": "Errores durante el streaming: modelo no disponible u otras excepciones.",
+      "gridPos": { "x": 12, "y": 32, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"stream.specialist.error\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["cubepath", "streaming", "ai", "ollama"],
+  "templating": {
+    "list": [
+      {
+        "name": "model",
+        "type": "query",
+        "label": "Modelo",
+        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "query": "label_values(cubepath_stream_duration_milliseconds_count, model_id)",
+        "current": {},
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": true,
+        "hide": 0
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "label": "Environment",
+        "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+        "query": "label_values({service_name=\"cubepath\"}, deployment_environment)",
+        "current": {},
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "hide": 0
+      }
+    ]
+  },
+  "time": { "from": "now-3h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Cubepath — Streaming AI",
+  "uid": "cubepath-streaming",
+  "version": 1
+}

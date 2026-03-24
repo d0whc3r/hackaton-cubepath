@@ -1,0 +1,320 @@
+{
+  "__inputs": [
+    { "name": "DS_LOKI", "label": "Loki", "type": "datasource", "pluginId": "loki" },
+    { "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Cubepath — Ciclo de vida de los requests API: inicio, fin, errores, latencia por ruta",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Métricas de requests",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Request Rate — /api/route",
+      "description": "Tasa de requests aceptados por tipo de tarea (task.type). Fuente: cubepath_route_requests_total.",
+      "gridPos": { "x": 0, "y": 1, "w": 8, "h": 8 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "reqps"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cubepath_route_requests_total{deployment_environment=~\"$environment\"}[5m])",
+          "legendFormat": "{{task_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Requests Bloqueados — Railguard",
+      "description": "Tasa de requests rechazados por el railguard de seguridad, por tipo de tarea.",
+      "gridPos": { "x": 8, "y": 1, "w": 8, "h": 8 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "reqps"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(cubepath_route_blocked_total{deployment_environment=~\"$environment\"}[5m])",
+          "legendFormat": "blocked / {{task_type}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Ratio de Bloqueo (%)",
+      "description": "Porcentaje de requests bloqueados sobre el total de requests recibidos.",
+      "gridPos": { "x": 16, "y": 1, "w": 8, "h": 8 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "percent",
+          "max": 100,
+          "min": 0
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "100 * rate(cubepath_route_blocked_total[5m]) / (rate(cubepath_route_requests_total[5m]) + rate(cubepath_route_blocked_total[5m]))",
+          "legendFormat": "% Bloqueados",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Logs de ciclo de vida de requests",
+      "gridPos": { "x": 0, "y": 9, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "type": "logs",
+      "title": "api.request.start — Inicio de requests",
+      "description": "Log emitido en withApiLogging al recibir cada request. Incluye method, path, requestId, routeId.",
+      "gridPos": { "x": 0, "y": 10, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"api.request.start\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "logs",
+      "title": "api.request.end — Fin de requests",
+      "description": "Log emitido al terminar cada request. Incluye durationMs, status, routeId, requestId.",
+      "gridPos": { "x": 12, "y": 10, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"api.request.end\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "logs",
+      "title": "api.request.unhandled_error — Errores no controlados",
+      "description": "Excepciones no capturadas dentro de los handlers de API. Incluye stack trace.",
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"api.request.unhandled_error\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "type": "logs",
+      "title": "route.validation_error + route.invalid_json",
+      "description": "Errores de validación Zod y JSON malformado en /api/route.",
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message =~ \"route.validation_error|route.invalid_json\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Logs de routing aceptados",
+      "gridPos": { "x": 0, "y": 26, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "type": "logs",
+      "title": "route.accepted — Requests aceptados",
+      "description": "Requests que pasaron validación y railguard. Incluye taskType y requestId.",
+      "gridPos": { "x": 0, "y": 27, "w": 24, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"route.accepted\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "logs",
+      "title": "route.stream.failed — Fallos en streaming",
+      "description": "Errores al iniciar o durante el streaming de respuesta.",
+      "gridPos": { "x": 0, "y": 35, "w": 24, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"route.stream.failed\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Logs de telemetría reenviada desde browser",
+      "gridPos": { "x": 0, "y": 43, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 31,
+      "type": "logs",
+      "title": "client.* — Logs reenviados desde el browser",
+      "description": "Logs originados en el browser (logClient) y reenviados a /api/telemetry/log. forwardedFrom=browser.",
+      "gridPos": { "x": 0, "y": 44, "w": 24, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | forwardedFrom = \"browser\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["cubepath", "api", "requests"],
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "type": "query",
+        "label": "Environment",
+        "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+        "query": "label_values({service_name=\"cubepath\"}, deployment_environment)",
+        "current": {},
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "hide": 0
+      },
+      {
+        "name": "request_id",
+        "type": "textbox",
+        "label": "Request ID (filtrar)",
+        "current": {},
+        "hide": 0
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Cubepath — API Requests",
+  "uid": "cubepath-api",
+  "version": 1
+}

@@ -1,0 +1,280 @@
+{
+  "__inputs": [
+    { "name": "DS_LOKI", "label": "Loki", "type": "datasource", "pluginId": "loki" },
+    { "name": "DS_TEMPO", "label": "Tempo", "type": "datasource", "pluginId": "tempo" }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0" },
+    { "type": "datasource", "id": "tempo", "name": "Tempo", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Cubepath — Trazabilidad HTTP: app-client (wretch) y ollama-client con middleware de tracing. Correlación por x-request-id.",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "App Client — apiTraceMiddleware (browser → /api/*)",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "type": "logs",
+      "title": "api.client.request.start — Inicio de llamadas API",
+      "description": "Log emitido por apiTraceMiddleware al inicio de cada llamada desde el cliente browser. Incluye method, path, requestId.",
+      "gridPos": { "x": 0, "y": 1, "w": 12, "h": 9 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"api.client.request.start\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "logs",
+      "title": "api.client.request.end — Fin de llamadas API",
+      "description": "Log emitido al finalizar cada llamada API. Incluye durationMs, status. Nivel warn si status 4xx.",
+      "gridPos": { "x": 12, "y": 1, "w": 12, "h": 9 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"api.client.request.end\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "logs",
+      "title": "api.client.request.error — Errores en llamadas API",
+      "description": "Errores de red o timeout en llamadas del app-client. Nivel error. Incluye stack trace si disponible.",
+      "gridPos": { "x": 0, "y": 10, "w": 24, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"api.client.request.error\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Ollama Client — ollamaTraceMiddleware (server → Ollama)",
+      "gridPos": { "x": 0, "y": 18, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "type": "logs",
+      "title": "ollama.request.start — Inicio de llamadas a Ollama",
+      "description": "Log emitido por ollamaTraceMiddleware al iniciar cada llamada al servidor Ollama. Incluye method, url, requestId.",
+      "gridPos": { "x": 0, "y": 19, "w": 12, "h": 9 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"ollama.request.start\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "logs",
+      "title": "ollama.request.end — Fin de llamadas a Ollama",
+      "description": "Log emitido al terminar cada llamada a Ollama. Incluye durationMs, status. Nivel varía según código HTTP.",
+      "gridPos": { "x": 12, "y": 19, "w": 12, "h": 9 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"ollama.request.end\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 13,
+      "type": "logs",
+      "title": "ollama.request.error — Errores en llamadas a Ollama",
+      "description": "Errores de red o timeout en llamadas al servidor Ollama. Nivel error.",
+      "gridPos": { "x": 0, "y": 28, "w": 24, "h": 8 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message = \"ollama.request.error\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Correlación por Request ID",
+      "gridPos": { "x": 0, "y": 36, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "type": "logs",
+      "title": "Todos los logs de un Request ID específico",
+      "description": "Filtra todos los logs del ciclo de vida completo de un request concreto usando x-request-id. Útil para debugging.",
+      "gridPos": { "x": 0, "y": 37, "w": 24, "h": 10 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Ascending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | requestId = \"$request_id\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "traces",
+      "title": "Trazas por Request ID — Tempo",
+      "description": "Busca trazas distribuidas en Tempo para el request ID seleccionado.",
+      "gridPos": { "x": 0, "y": 47, "w": 24, "h": 10 },
+      "options": {},
+      "targets": [
+        {
+          "datasource": { "type": "tempo", "uid": "${DS_TEMPO}" },
+          "queryType": "traceql",
+          "query": "{ .requestId = \"$request_id\" }",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Todos los logs HTTP (app + ollama)",
+      "gridPos": { "x": 0, "y": 57, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 31,
+      "type": "logs",
+      "title": "Todos los logs de trazado HTTP",
+      "description": "Todos los logs emitidos por apiTraceMiddleware y ollamaTraceMiddleware. Incluye start, end y error de ambos clientes.",
+      "gridPos": { "x": 0, "y": 58, "w": 24, "h": 10 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | message =~ \"(api\\.client|ollama)\\.request\\.(start|end|error)\"",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["cubepath", "http", "wretch", "ollama", "tracing"],
+  "templating": {
+    "list": [
+      {
+        "name": "request_id",
+        "type": "textbox",
+        "label": "Request ID",
+        "description": "Introduce el x-request-id para ver el ciclo de vida completo de un request",
+        "current": {},
+        "hide": 0
+      },
+      {
+        "name": "environment",
+        "type": "query",
+        "label": "Environment",
+        "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+        "query": "label_values({service_name=\"cubepath\"}, deployment_environment)",
+        "current": {},
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "hide": 0
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Cubepath — HTTP Clients",
+  "uid": "cubepath-http",
+  "version": 1
+}

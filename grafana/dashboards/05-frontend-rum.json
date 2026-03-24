@@ -1,0 +1,375 @@
+{
+  "__inputs": [
+    { "name": "DS_LOKI", "label": "Loki", "type": "datasource", "pluginId": "loki" },
+    { "name": "DS_PROMETHEUS", "label": "Prometheus", "type": "datasource", "pluginId": "prometheus" }
+  ],
+  "__requires": [
+    { "type": "grafana", "id": "grafana", "name": "Grafana", "version": "10.0.0" },
+    { "type": "datasource", "id": "loki", "name": "Loki", "version": "1.0.0" },
+    { "type": "datasource", "id": "prometheus", "name": "Prometheus", "version": "1.0.0" }
+  ],
+  "annotations": { "list": [] },
+  "description": "Cubepath — Frontend RUM: Web Vitals (Grafana Faro), errores JS, logs de browser reenviados al servidor",
+  "editable": true,
+  "graphTooltip": 1,
+  "id": null,
+  "panels": [
+    {
+      "id": 1,
+      "type": "row",
+      "title": "Web Vitals — Core (Grafana Faro)",
+      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "LCP — Largest Contentful Paint (p75)",
+      "description": "Mide el tiempo hasta que el elemento más grande visible en pantalla termina de renderizarse. Objetivo: < 2.5s.",
+      "gridPos": { "x": 0, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 2500 },
+              { "color": "red", "value": 4000 }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_lcp_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "LCP P75",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "FID — First Input Delay (p75)",
+      "description": "Tiempo desde la primera interacción del usuario hasta que el browser puede responder. Objetivo: < 100ms.",
+      "gridPos": { "x": 4, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 300 }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_fid_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "FID P75",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "CLS — Cumulative Layout Shift (p75)",
+      "description": "Mide la estabilidad visual. Un valor bajo indica que no hay saltos de layout inesperados. Objetivo: < 0.1.",
+      "gridPos": { "x": 8, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 0.25 }
+            ]
+          },
+          "unit": "short",
+          "decimals": 3
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_cls_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "CLS P75",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "stat",
+      "title": "FCP — First Contentful Paint (p75)",
+      "description": "Tiempo hasta el primer contenido visible en pantalla. Objetivo: < 1.8s.",
+      "gridPos": { "x": 12, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1800 },
+              { "color": "red", "value": 3000 }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_fcp_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "FCP P75",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "TTFB — Time to First Byte (p75)",
+      "description": "Tiempo hasta recibir el primer byte del servidor. Objetivo: < 800ms.",
+      "gridPos": { "x": 16, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 800 },
+              { "color": "red", "value": 1800 }
+            ]
+          },
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_ttfb_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "TTFB P75",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Errores JS (1h)",
+      "description": "Errores JavaScript capturados automáticamente por Grafana Faro (unhandled rejections incluidos).",
+      "gridPos": { "x": 20, "y": 1, "w": 4, "h": 4 },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 20 }
+            ]
+          },
+          "unit": "short"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "increase(faro_errors_total{app=\"cubepath\"}[1h])",
+          "legendFormat": "JS Errors",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "row",
+      "title": "Web Vitals — Evolución temporal",
+      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "LCP y FCP a lo largo del tiempo",
+      "description": "Evolución de los tiempos de pintado (P75). Ideal para detectar regresiones de rendimiento.",
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "ms"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_lcp_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "LCP P75",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_fcp_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "FCP P75",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "histogram_quantile(0.75, rate(faro_web_vitals_ttfb_bucket{app=\"cubepath\"}[5m]))",
+          "legendFormat": "TTFB P75",
+          "refId": "C"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "timeseries",
+      "title": "Errores JS — tasa en el tiempo",
+      "description": "Tasa de errores JavaScript capturados por Faro. Incluye errores no controlados y promesas rechazadas.",
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
+      "options": {
+        "tooltip": { "mode": "multi" },
+        "legend": { "displayMode": "list", "placement": "bottom" }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 15 },
+          "unit": "reqps"
+        }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "expr": "rate(faro_errors_total{app=\"cubepath\"}[5m])",
+          "legendFormat": "JS Errors",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "type": "row",
+      "title": "Logs de browser reenviados al servidor",
+      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 1 },
+      "collapsed": false
+    },
+    {
+      "id": 21,
+      "type": "logs",
+      "title": "Logs reenviados desde browser (todos los niveles)",
+      "description": "Logs originados en el browser y reenviados via /api/telemetry/log. Incluye forwardedFrom=browser y clientTimestamp.",
+      "gridPos": { "x": 0, "y": 15, "w": 24, "h": 10 },
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | forwardedFrom = \"browser\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "type": "logs",
+      "title": "Errores y Warnings del browser",
+      "description": "Sólo los logs de nivel warn y error reenviados desde el cliente.",
+      "gridPos": { "x": 0, "y": 25, "w": 24, "h": 10 },
+      "options": {
+        "showTime": true,
+        "showLabels": true,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": true,
+        "enableLogDetails": true,
+        "sortOrder": "Descending",
+        "dedupStrategy": "none"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+          "expr": "{service_name=\"cubepath\"} | json | forwardedFrom = \"browser\" | level =~ \"warn|error\"",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 30,
+      "type": "row",
+      "title": "Notas de integración — Grafana Faro",
+      "gridPos": { "x": 0, "y": 35, "w": 24, "h": 1 },
+      "collapsed": true,
+      "panels": [
+        {
+          "id": 31,
+          "type": "text",
+          "title": "Configuración de Grafana Faro",
+          "gridPos": { "x": 0, "y": 36, "w": 24, "h": 8 },
+          "options": {
+            "mode": "markdown",
+            "content": "## Grafana Faro — Configuración\n\nFaro está configurado en `src/lib/observability/faro.ts` y se inicializa en el browser.\n\n### Variables de entorno necesarias\n```\nPUBLIC_GRAFANA_FARO_URL=https://faro-collector-prod-us-west-0.grafana.net/collect/{api-key}\nPUBLIC_APP_ENV=production\n```\n\n### Datos capturados automáticamente\n- **Web Vitals**: LCP, FID, CLS, FCP, TTFB\n- **Errores JS**: excepciones no controladas + promesas rechazadas\n- **Fetch/XHR**: tiempos de red de todas las peticiones\n- **Consola**: logs de consola del browser\n- **Sesiones**: tracking de sesiones de usuario\n\n### Los paneles de métricas de Faro (Web Vitals)\nRequieren que Grafana Cloud Faro esté configurado y enviando a un datasource de Prometheus/Mimir.\nLas métricas siguen el schema `faro_web_vitals_*` y `faro_errors_total`.\n\n### Los paneles de logs del browser\nFuncionan via el sistema propio: `logClient()` → `/api/telemetry/log` → Loki.\nFiltro Loki: `{service_name=\"cubepath\"} | json | forwardedFrom = \"browser\"`"
+          }
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["cubepath", "frontend", "rum", "faro", "web-vitals"],
+  "templating": {
+    "list": [
+      {
+        "name": "environment",
+        "type": "query",
+        "label": "Environment",
+        "datasource": { "type": "loki", "uid": "${DS_LOKI}" },
+        "query": "label_values({service_name=\"cubepath\"}, deployment_environment)",
+        "current": {},
+        "refresh": 2,
+        "includeAll": true,
+        "allValue": ".*",
+        "multi": false,
+        "hide": 0
+      }
+    ]
+  },
+  "time": { "from": "now-3h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Cubepath — Frontend RUM",
+  "uid": "cubepath-faro",
+  "version": 1
+}

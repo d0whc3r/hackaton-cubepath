@@ -14,6 +14,7 @@
  *     Format: https://faro-collector-prod-us-west-0.grafana.net/collect/{api-key}
  */
 import { getWebInstrumentations, initializeFaro } from '@grafana/faro-web-sdk'
+import { TracingInstrumentation } from '@grafana/faro-web-tracing'
 
 const isBrowser = globalThis.window !== undefined
 
@@ -26,9 +27,7 @@ if (isBrowser) {
         name: 'cubepath',
         version: '1.0.0',
       },
-      instrumentations: getWebInstrumentations({
-        captureConsole: true,
-      }),
+      instrumentations: [...getWebInstrumentations({ captureConsole: true }), new TracingInstrumentation()],
       url: faroUrl,
     })
   }
