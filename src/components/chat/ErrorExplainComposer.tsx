@@ -1,8 +1,13 @@
+import { Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { ComposerSubmitControls } from '@/components/chat/ComposerSubmitControls'
 import { ComposerTextarea } from '@/components/chat/ComposerTextarea'
+import { Badge } from '@/components/ui/badge'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { MAX_CHARS } from '@/hooks/use-chat-input'
 import { useSubmitShortcut } from '@/hooks/use-submit-shortcut'
 import { useChatContext } from '@/lib/context/chat-context'
+import { MODELS_BY_TASK } from '@/lib/router/models'
 
 function parsePreviousErrorExplainInput(content: string): { errorMsg: string; codeSnippet: string } {
   const parsed = content.match(/^ERROR:\n([\s\S]*?)(?:\n\nCODE:\n([\s\S]*))?$/)
@@ -17,7 +22,7 @@ function parsePreviousErrorExplainInput(content: string): { errorMsg: string; co
 }
 
 export function ErrorExplainComposer() {
-  const { isLoading, handleSubmit, handleCancel, entries } = useChatContext()
+  const { isLoading, handleSubmit, handleCancel, handleClearHistory, entries, currentModel } = useChatContext()
   const [errorMsg, setErrorMsg] = useState('')
   const [codeSnippet, setCodeSnippet] = useState('')
   const [touched, setTouched] = useState(false)
@@ -104,8 +109,36 @@ export function ErrorExplainComposer() {
         />
       </div>
 
-      <div className="flex justify-end">
-        <ComposerSubmitControls isLoading={isLoading} onCancel={handleCancel} onSubmit={submit} />
+      <div className="mt-2 flex items-center gap-2">
+        <div className="flex flex-1 items-center gap-2">
+          <Badge variant="outline" className="hidden shrink-0 gap-1 font-mono text-[10px] sm:flex">
+            <span className="text-muted-foreground">model</span>
+            <span>{MODELS_BY_TASK['error-explain'].find((m) => m.id === currentModel)?.label ?? currentModel}</span>
+          </Badge>
+          <span className="text-[10px] text-muted-foreground tabular-nums">
+            {(errorMsg.length + codeSnippet.length).toLocaleString()} / {MAX_CHARS.toLocaleString()}
+          </span>
+          {entries.length > 0 && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  onClick={handleClearHistory}
+                  className="ml-1 flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-muted-foreground/60 transition-colors hover:bg-muted hover:text-destructive"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span className="hidden sm:inline">Clear</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top">
+                <p>Clear conversation history</p>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <ComposerSubmitControls isLoading={isLoading} onCancel={handleCancel} onSubmit={submit} />
+        </div>
       </div>
     </div>
   )
