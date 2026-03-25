@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { ModelConfig } from '@/lib/config/model-config'
-import {
-  DEFAULTS,
-  loadModelConfig,
-  loadModelConfigAsync,
-  removeModelConfig,
-  saveModelConfig,
-} from '@/lib/config/model-config'
+import { DEFAULTS, loadModelConfigAsync, removeModelConfig, saveModelConfig } from '@/lib/config/model-config'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 import type { SectionDef, SectionId } from './types'
 import { CUSTOM_VALUE } from './constants'

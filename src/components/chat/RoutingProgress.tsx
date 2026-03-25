@@ -72,11 +72,12 @@ export function RoutingProgress({ steps, specialist, isStreaming }: RoutingProgr
   }
 
   const stepPlural = doneCount !== 1 ? 's' : ''
-  const statusLine = activeStep
-    ? activeStep.label
-    : specialist
-      ? `${specialist.displayName} · ${specialist.language}`
-      : `${doneCount} step${stepPlural} completed`
+  let statusLine = `${doneCount} step${stepPlural} completed`
+  if (activeStep) {
+    statusLine = activeStep.label
+  } else if (specialist) {
+    statusLine = `${specialist.displayName} · ${specialist.language}`
+  }
 
   return (
     <div className="mt-3 border-t border-border/40 pt-2.5">

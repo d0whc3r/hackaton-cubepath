@@ -14,11 +14,14 @@ function SectionCardButton({ section, selected, modelId, installed, onSelectSect
     onSelectSection(section)
   }
 
-  const borderClass = installed
-    ? selected
-      ? 'border-primary'
-      : 'border-border hover:border-primary/40'
-    : 'border-2 border-destructive hover:border-destructive'
+  let borderClass: string
+  if (!installed) {
+    borderClass = 'border-2 border-destructive hover:border-destructive'
+  } else if (selected) {
+    borderClass = 'border-primary'
+  } else {
+    borderClass = 'border-border hover:border-primary/40'
+  }
 
   return (
     <button

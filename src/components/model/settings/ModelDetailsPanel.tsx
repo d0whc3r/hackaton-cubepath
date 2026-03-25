@@ -37,12 +37,12 @@ export function ModelDetailsPanel({
   const activeModel = section.models.find((model) => model.id === activeModelId)
   const copied = copiedModelId === activeModelId
   const canPullFromDetail = !isInstalled && pullState?.status !== 'done'
-  const pullLabel =
-    pullState?.status === 'pulling'
-      ? `Pulling ${pullState.progress ?? ''}`.trim()
-      : pullState?.status === 'error'
-        ? 'Retry pull'
-        : 'Pull model'
+  let pullLabel = 'Pull model'
+  if (pullState?.status === 'pulling') {
+    pullLabel = `Pulling ${pullState.progress ?? ''}`.trim()
+  } else if (pullState?.status === 'error') {
+    pullLabel = 'Retry pull'
+  }
   const modelContext = runtimeDetails?.contextLength ?? activeModel?.contextWindow
   const modelParams = runtimeDetails?.parameterSize ?? activeModel?.params
   const modelFamily = runtimeDetails?.family

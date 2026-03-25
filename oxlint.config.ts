@@ -179,7 +179,7 @@ export default defineConfig({
     'no-map-spread': 'off',
     'no-named-export': 'allow',
     'no-negated-condition': 'off',
-    'no-nested-ternary': 'off',
+    'no-nested-ternary': 'error',
     'no-restricted-syntax': [
       'error',
       {

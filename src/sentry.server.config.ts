@@ -1,5 +1,10 @@
 // oxlint-disable-next-line import/no-namespace
 import * as Sentry from '@sentry/astro'
+import { EventEmitter } from 'node:events'
+// Sentry's OpenTelemetry instrumentation and pino's thread-stream can attach
+// More than 10 listeners to ChildProcess/Worker objects. Raise the limit early
+// To prevent MaxListenersExceededWarning in the standalone server runtime.
+EventEmitter.defaultMaxListeners = 30
 
 const dsn = import.meta.env.SENTRY_DSN
 if (dsn) {

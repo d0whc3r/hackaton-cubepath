@@ -21,7 +21,8 @@ vi.mock(import('@/lib/utils/savings'), () => ({
 }))
 
 vi.mock(import('@/lib/services/route.service'), () => ({
-  BlockedError: class BlockedError extends Error {
+  BlockedError: class extends Error {
+    // oxlint-disable-next-line typescript/parameter-properties
     constructor(public readonly blockReason: string) {
       super('Input blocked by security policy.')
       this.name = 'BlockedError'

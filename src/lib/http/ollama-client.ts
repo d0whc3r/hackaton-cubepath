@@ -2,7 +2,8 @@ import wretch from 'wretch'
 import { REQUEST_ID_HEADER, readHeaderValue, toMethod } from '@/lib/http/request-trace'
 import { logServer, logServerError } from '@/lib/observability/server'
 
-const ollamaTraceMiddleware = ((next: (url: string, options: RequestInit) => Promise<Response>) =>
+const ollamaTraceMiddleware =
+  (next: (url: string, options: RequestInit) => Promise<Response>) =>
   async (url: string, options: RequestInit = {}) => {
     const method = toMethod(options)
     const startedAt = Date.now()
@@ -12,7 +13,12 @@ const ollamaTraceMiddleware = ((next: (url: string, options: RequestInit) => Pro
 
     try {
       const response = await next(url, options)
-      const level = response.status >= 500 ? 'error' : response.status >= 400 ? 'warn' : 'info'
+      let level: 'error' | 'info' | 'warn' = 'info'
+      if (response.status >= 500) {
+        level = 'error'
+      } else if (response.status >= 400) {
+        level = 'warn'
+      }
       logServer(level, 'ollama.request.end', {
         durationMs: Date.now() - startedAt,
         method,
@@ -25,7 +31,7 @@ const ollamaTraceMiddleware = ((next: (url: string, options: RequestInit) => Pro
       logServerError('ollama.request.error', error, { durationMs: Date.now() - startedAt, method, requestId, url })
       throw error
     }
-  }) as any
+  }
 
 /**
  * Server-side wretch instance for calling the Ollama API.
