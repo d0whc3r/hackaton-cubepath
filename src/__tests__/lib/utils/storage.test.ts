@@ -33,7 +33,7 @@ describe('readStorage', () => {
   it('returns { ok: false } for malformed JSON', () => {
     localStorage.setItem('bad', 'not-json{{')
     const result = readStorage('bad')
-    expect(result.ok).toBeFalsy()
+    expect(result.ok).toBe(false)
   })
 
   it('returns { ok: true, value: defaultValue } on SSR (window undefined)', () => {
@@ -59,7 +59,7 @@ describe('readStorage', () => {
       throw new DOMException('SecurityError')
     })
     const result = readStorage('key')
-    expect(result.ok).toBeFalsy()
+    expect(result.ok).toBe(false)
   })
 })
 
@@ -76,7 +76,7 @@ describe('writeStorage', () => {
     delete globalThis.window
     try {
       const result = writeStorage('key', 'value')
-      expect(result.ok).toBeFalsy()
+      expect(result.ok).toBe(false)
     } finally {
       globalThis.window = origWindow
     }
@@ -87,14 +87,14 @@ describe('writeStorage', () => {
       throw new DOMException('QuotaExceededError')
     })
     const result = writeStorage('key', 'val')
-    expect(result.ok).toBeFalsy()
+    expect(result.ok).toBe(false)
   })
 
   it('captures non-serializable value error', () => {
     const circular: Record<string, unknown> = {}
     circular.self = circular
     const result = writeStorage('key', circular)
-    expect(result.ok).toBeFalsy()
+    expect(result.ok).toBe(false)
   })
 })
 
@@ -117,7 +117,7 @@ describe('removeStorage', () => {
     delete globalThis.window
     try {
       const result = removeStorage('key')
-      expect(result.ok).toBeFalsy()
+      expect(result.ok).toBe(false)
     } finally {
       globalThis.window = origWindow
     }
@@ -128,6 +128,6 @@ describe('removeStorage', () => {
       throw new DOMException('SecurityError')
     })
     const result = removeStorage('key')
-    expect(result.ok).toBeFalsy()
+    expect(result.ok).toBe(false)
   })
 })

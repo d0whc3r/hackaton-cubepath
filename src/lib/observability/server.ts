@@ -1,4 +1,7 @@
+import type { LogLayerTransport } from '@loglayer/transport'
+import { Axiom } from '@axiomhq/js'
 import { redactionPlugin } from '@loglayer/plugin-redaction'
+import { AxiomTransport } from '@loglayer/transport-axiom'
 import { PinoTransport } from '@loglayer/transport-pino'
 import { SentryTransport } from '@loglayer/transport-sentry'
 // oxlint-disable-next-line import/no-namespace
@@ -16,7 +19,7 @@ function toLogLevel(level: string | undefined, fallback: LogLevel = 'info'): Log
 }
 
 function createServerTransports() {
-  const transports = [
+  const transports: LogLayerTransport[] = [
     new PinoTransport({
       id: 'pino',
       level: toLogLevel(import.meta.env.LOG_LEVEL, 'info'),
@@ -30,6 +33,20 @@ function createServerTransports() {
       }),
     }),
   ]
+
+  // Axiom transport — active when AXIOM_TOKEN and AXIOM_DATASET are configured.
+  const axiomToken = import.meta.env.AXIOM_TOKEN
+  const axiomDataset = import.meta.env.AXIOM_DATASET
+  if (axiomToken && axiomDataset) {
+    transports.push(
+      new AxiomTransport({
+        dataset: axiomDataset,
+        id: 'axiom',
+        level: toLogLevel(import.meta.env.AXIOM_LOG_LEVEL, 'info'),
+        logger: new Axiom({ token: axiomToken }),
+      }),
+    )
+  }
 
   // Sentry is initialized in sentry.server.config.ts by @sentry/astro.
   // Here we only attach the log transport if the DSN is configured.

@@ -54,6 +54,7 @@ export default defineConfig({
         'typescript/no-explicit-any': 'off',
         'vitest/prefer-called-once': 'off',
         'vitest/prefer-describe-function-title': 'off',
+        'vitest/prefer-to-be-falsy': 'off',
         'vitest/prefer-to-be-truthy': 'off',
       },
     },

@@ -3,32 +3,36 @@ import QueryStringAddon from 'wretch/addons/queryString'
 import { REQUEST_ID_HEADER, readHeaderValue, toMethod, withRequestIdHeader } from '@/lib/http/request-trace'
 import { logClient, logClientError } from '@/lib/observability/client'
 
-function toPath(url: string): string {
+function parseUrl(url: string): { host: string; path: string } {
   try {
     if (url.startsWith('http')) {
-      return new URL(url).pathname
+      const parsed = new URL(url)
+      return { host: parsed.host, path: parsed.pathname }
     }
+    // Relative URL — resolve against the current page origin
+    const parsed = new URL(url, globalThis.location.origin)
+    return { host: parsed.host, path: parsed.pathname }
   } catch {
-    // Ignore URL parsing errors and return raw input
+    return { host: '', path: url }
   }
-  return url
 }
 
 const apiTraceMiddleware =
   (next: (url: string, options: RequestInit) => Promise<Response>) =>
   async (url: string, options: RequestInit = {}) => {
     const method = toMethod(options)
-    const path = toPath(url)
+    const { host, path } = parseUrl(url)
     const startedAt = Date.now()
     const requestId = readHeaderValue(options.headers, REQUEST_ID_HEADER) ?? crypto.randomUUID()
     const optionsWithRequestId = withRequestIdHeader(options, requestId)
 
-    logClient('info', 'api.client.request.start', { method, path, requestId })
+    logClient('info', 'api.client.request.start', { host, method, path, requestId })
 
     try {
       const response = await next(url, optionsWithRequestId)
       logClient(response.status >= 400 ? 'warn' : 'info', 'api.client.request.end', {
         durationMs: Date.now() - startedAt,
+        host,
         method,
         path,
         requestId,
@@ -38,6 +42,7 @@ const apiTraceMiddleware =
     } catch (error) {
       logClientError('api.client.request.error', error, {
         durationMs: Date.now() - startedAt,
+        host,
         method,
         path,
         requestId,

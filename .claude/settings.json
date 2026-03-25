@@ -15,7 +15,11 @@
       "Bash(npx tsc:*)",
       "Bash(npx vitest:*)",
       "Bash(npm test:*)",
-      "Bash(pnpm run:*)"
+      "Bash(pnpm run:*)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:loglayer.dev)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   }
 }

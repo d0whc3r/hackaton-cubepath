@@ -11,12 +11,18 @@ importers:
       '@ai-sdk/openai':
         specifier: 3.0.48
         version: 3.0.48(zod@4.3.6)
+      '@axiomhq/js':
+        specifier: 1.5.0
+        version: 1.5.0
       '@fontsource-variable/inter':
         specifier: 5.2.8
         version: 5.2.8
       '@loglayer/plugin-redaction':
         specifier: 3.0.2
         version: 3.0.2
+      '@loglayer/transport-axiom':
+        specifier: 3.0.2
+        version: 3.0.2(@axiomhq/js@1.5.0)
       '@loglayer/transport-pino':
         specifier: 3.0.2
         version: 3.0.2(pino@10.3.1)
@@ -265,6 +271,10 @@ packages:
 
   '@astrojs/yaml2ts@0.2.3':
     resolution: {integrity: sha512-PJzRmgQzUxI2uwpdX2lXSHtP4G8ocp24/t+bZyf5Fy0SZLSF9f9KXZoMlFM/XCGue+B0nH/2IZ7FpBYQATBsCg==}
+
+  '@axiomhq/js@1.5.0':
+    resolution: {integrity: sha512-7SkfgnrKpjRs86h4TIcoZQ1TltKG0+WcQtMkBa5N3iSuGT5+aIpnbLFrRfbfhwhxzysQkF01qNW4fNUtePqjDg==}
+    engines: {node: '>=20'}
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -1079,6 +1089,12 @@ packages:
   '@loglayer/shared@4.1.0':
     resolution: {integrity: sha512-hGSWhLhMF9L7sB0rXippvKhku9D9dT8imZ5OFpa4VHAVnclY0DQ+3wIPE37rzu0QAiBbyR3/HH03Q1Cgik8zYA==}
     engines: {node: '>=18'}
+
+  '@loglayer/transport-axiom@3.0.2':
+    resolution: {integrity: sha512-Cr/mQxU0A4CJI0DFyFH6OksTQON9vw8PcfFAx4fPKnM+G+r4o1ksyBHh+JDDdk8jL52eXxwtex4B9/a8P0T9Lg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@axiomhq/js': '*'
 
   '@loglayer/transport-pino@3.0.2':
     resolution: {integrity: sha512-JQnYQRctO0nI5L0Mk26uwngK52fMpkRs9qb7N3tCgSoAjFd3DQZyxV2FhcAsgpp45utJzczWNxmlB5788PJEXA==}
@@ -3562,6 +3578,9 @@ packages:
     resolution: {integrity: sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==}
     engines: {node: ^12.20 || >= 14.13}
 
+  fetch-retry@6.0.0:
+    resolution: {integrity: sha512-BUFj1aMubgib37I3v4q78fYo63Po7t4HUPTpQ6/QE6yK6cIQrP+W43FYToeTEyg5m2Y7eFUtijUuAv/PDlWuag==}
+
   figures@6.1.0:
     resolution: {integrity: sha512-d+l3qxjSesT4V7v2fh+QnmFnUWv9lSpjarhShNTgBOfA0ttejbQUAlHLitbjkoRiDulW0OPoQPYIGhIC8ohejg==}
     engines: {node: '>=18'}
@@ -5920,6 +5939,10 @@ snapshots:
     dependencies:
       yaml: 2.8.3
 
+  '@axiomhq/js@1.5.0':
+    dependencies:
+      fetch-retry: 6.0.0
+
   '@babel/code-frame@7.29.0':
     dependencies:
       '@babel/helper-validator-identifier': 7.28.5
@@ -6572,6 +6595,11 @@ snapshots:
       '@loglayer/shared': 4.1.0
 
   '@loglayer/shared@4.1.0': {}
+
+  '@loglayer/transport-axiom@3.0.2(@axiomhq/js@1.5.0)':
+    dependencies:
+      '@axiomhq/js': 1.5.0
+      '@loglayer/transport': 3.0.2
 
   '@loglayer/transport-pino@3.0.2(pino@10.3.1)':
     dependencies:
@@ -9141,6 +9169,8 @@ snapshots:
     dependencies:
       node-domexception: 1.0.0
       web-streams-polyfill: 3.3.3
+
+  fetch-retry@6.0.0: {}
 
   figures@6.1.0:
     dependencies:
