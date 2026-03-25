@@ -82,7 +82,7 @@ export function AssistantBubble({ msg }: AssistantBubbleProps) {
           <RoutingProgress steps={msg.routingSteps} specialist={msg.specialist} isStreaming={isStreaming} />
 
           {msg.cost && (
-            <div className="mt-3 border-t border-border/40 pt-3">
+            <div className="mt-3">
               <CostBadge cost={msg.cost} />
             </div>
           )}

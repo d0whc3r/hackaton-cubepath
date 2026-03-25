@@ -1,3 +1,4 @@
+import type { LucideIcon } from 'lucide-react'
 import type { ModelConfig } from '@/lib/config/model-config'
 import type { ModelOption } from '@/lib/router/types'
 
@@ -19,6 +20,7 @@ export type SectionGroupId = 'infrastructure' | 'analysis' | 'generation' | 'lan
 export interface SectionDef {
   id: SectionId
   group: SectionGroupId
+  icon: LucideIcon
   title: string
   subtitle: string
   selectionHint: string

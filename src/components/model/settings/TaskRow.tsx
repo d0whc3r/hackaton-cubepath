@@ -72,6 +72,7 @@ export function TaskRow({
   onPull,
   onCopyPull,
 }: TaskRowProps) {
+  const Icon = section.icon
   const badge = GROUP_BADGE[section.group]
   const selectedModel = isCustom ? null : section.models.find((model) => model.id === modelId)
   const contextLabel = selectedModel?.contextWindow
@@ -109,6 +110,9 @@ export function TaskRow({
       {/* Left: task info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
+          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/60 bg-muted/60 text-muted-foreground">
+            <Icon className="h-3.5 w-3.5" />
+          </span>
           <span className="text-sm font-semibold text-foreground">{section.title}</span>
           {showGroupBadge && (
             <span
