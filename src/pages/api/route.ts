@@ -113,41 +113,21 @@ function buildSSEStream(req: ValidatedRequest, requestId: string): ReadableStrea
 
 function buildRequest(data: ReturnType<typeof RouteRequestSchema.parse>): ValidatedRequest {
   return {
-    analystModel: resolveModel(data.analystModel, import.meta.env.OLLAMA_ANALYST_MODEL, DEFAULT_ANALYST_MODEL),
-    commitModel: resolveModel(data.commitModel, import.meta.env.OLLAMA_COMMIT_MODEL, DEFAULT_MODELS.commit),
-    deadCodeModel: resolveModel(
-      data.deadCodeModel,
-      import.meta.env.OLLAMA_DEAD_CODE_MODEL,
-      DEFAULT_MODELS['dead-code'],
-    ),
-    docstringModel: resolveModel(data.docstringModel, import.meta.env.OLLAMA_DOCSTRING_MODEL, DEFAULT_MODELS.docstring),
-    errorExplainModel: resolveModel(
-      data.errorExplainModel,
-      import.meta.env.OLLAMA_ERROR_EXPLAIN_MODEL,
-      DEFAULT_MODELS['error-explain'],
-    ),
-    explainModel: resolveModel(data.explainModel, import.meta.env.OLLAMA_EXPLAIN_MODEL, DEFAULT_MODELS.explain),
-    guardModel: resolveModel(data.guardModel, import.meta.env.OLLAMA_GUARD_MODEL, DEFAULT_GUARD_MODEL),
+    analystModel: resolveModel(data.analystModel, DEFAULT_ANALYST_MODEL),
+    commitModel: resolveModel(data.commitModel, DEFAULT_MODELS.commit),
+    deadCodeModel: resolveModel(data.deadCodeModel, DEFAULT_MODELS['dead-code']),
+    docstringModel: resolveModel(data.docstringModel, DEFAULT_MODELS.docstring),
+    errorExplainModel: resolveModel(data.errorExplainModel, DEFAULT_MODELS['error-explain']),
+    explainModel: resolveModel(data.explainModel, DEFAULT_MODELS.explain),
+    guardModel: resolveModel(data.guardModel, DEFAULT_GUARD_MODEL),
     input: data.input,
-    namingHelperModel: resolveModel(
-      data.namingHelperModel,
-      import.meta.env.OLLAMA_NAMING_HELPER_MODEL,
-      DEFAULT_MODELS['naming-helper'],
-    ),
+    namingHelperModel: resolveModel(data.namingHelperModel, DEFAULT_MODELS['naming-helper']),
     ollamaBaseUrl: resolveModel(data.ollamaBaseUrl, import.meta.env.OLLAMA_BASE_URL, OLLAMA_BASE_URL_DEFAULT),
-    performanceHintModel: resolveModel(
-      data.performanceHintModel,
-      import.meta.env.OLLAMA_PERFORMANCE_HINT_MODEL,
-      DEFAULT_MODELS['performance-hint'],
-    ),
-    refactorModel: resolveModel(data.refactorModel, import.meta.env.OLLAMA_REFACTOR_MODEL, DEFAULT_MODELS.refactor),
+    performanceHintModel: resolveModel(data.performanceHintModel, DEFAULT_MODELS['performance-hint']),
+    refactorModel: resolveModel(data.refactorModel, DEFAULT_MODELS.refactor),
     taskType: data.taskType,
-    testModel: resolveModel(data.testModel, import.meta.env.OLLAMA_TEST_MODEL, DEFAULT_MODELS.test),
-    typeHintsModel: resolveModel(
-      data.typeHintsModel,
-      import.meta.env.OLLAMA_TYPE_HINTS_MODEL,
-      DEFAULT_MODELS['type-hints'],
-    ),
+    testModel: resolveModel(data.testModel, DEFAULT_MODELS.test),
+    typeHintsModel: resolveModel(data.typeHintsModel, DEFAULT_MODELS['type-hints']),
   }
 }
 

@@ -1,6 +1,3 @@
-// oxlint-disable-next-line import/no-unassigned-import
-import '@/lib/observability/faro'
-import { FaroErrorBoundary } from '@grafana/faro-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect } from 'react'
@@ -40,11 +37,9 @@ export function AppProviders({ children }: AppProvidersProps) {
   }, [])
 
   return (
-    <FaroErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>{children}</TooltipProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
-    </FaroErrorBoundary>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>{children}</TooltipProvider>
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   )
 }

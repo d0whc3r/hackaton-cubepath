@@ -1,54 +1,13 @@
-/**
- * Application-level OpenTelemetry metrics → Grafana Cloud Mimir (Prometheus).
- *
- * Instruments are created at module load time. When the OTel SDK is not
- * configured the `metrics.getMeter()` returns a no-op provider, so all
- * calls here are safe and silent with no env vars set.
- */
-import { metrics } from '@opentelemetry/api'
+// Metrics stubs — no-ops until a real metrics backend is configured.
 
-const meter = metrics.getMeter('cubepath', '1.0.0')
+export function recordRouteRequest(_taskType: string): void {}
 
-// ── Routing ─────────────────────────────────────────────────────────────────
+export function recordRouteBlocked(_taskType: string): void {}
 
-const routeRequestsCounter = meter.createCounter('cubepath.route.requests', {
-  description: 'Total routing requests by task type',
-})
+export function recordStreamDuration(
+  _modelId: string,
+  _durationMs: number,
+  _status: 'aborted' | 'done' | 'error',
+): void {}
 
-const routeBlockedCounter = meter.createCounter('cubepath.route.blocked', {
-  description: 'Requests blocked by railguard security policy',
-})
-
-// ── Streaming ────────────────────────────────────────────────────────────────
-
-const streamDurationHistogram = meter.createHistogram('cubepath.stream.duration', {
-  description: 'Streaming response duration in milliseconds',
-  unit: 'ms',
-})
-
-const streamInputCharsHistogram = meter.createHistogram('cubepath.stream.input.chars', {
-  description: 'Input character count for streaming requests',
-})
-
-const streamOutputCharsHistogram = meter.createHistogram('cubepath.stream.output.chars', {
-  description: 'Output character count for streaming responses',
-})
-
-// ── Public API ───────────────────────────────────────────────────────────────
-
-export function recordRouteRequest(taskType: string): void {
-  routeRequestsCounter.add(1, { 'task.type': taskType })
-}
-
-export function recordRouteBlocked(taskType: string): void {
-  routeBlockedCounter.add(1, { 'task.type': taskType })
-}
-
-export function recordStreamDuration(modelId: string, durationMs: number, status: 'aborted' | 'done' | 'error'): void {
-  streamDurationHistogram.record(durationMs, { 'model.id': modelId, status })
-}
-
-export function recordStreamChars(modelId: string, inputChars: number, outputChars: number): void {
-  streamInputCharsHistogram.record(inputChars, { 'model.id': modelId })
-  streamOutputCharsHistogram.record(outputChars, { 'model.id': modelId })
-}
+export function recordStreamChars(_modelId: string, _inputChars: number, _outputChars: number): void {}

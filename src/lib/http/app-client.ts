@@ -14,7 +14,8 @@ function toPath(url: string): string {
   return url
 }
 
-const apiTraceMiddleware = ((next: (url: string, options: RequestInit) => Promise<Response>) =>
+const apiTraceMiddleware =
+  (next: (url: string, options: RequestInit) => Promise<Response>) =>
   async (url: string, options: RequestInit = {}) => {
     const method = toMethod(options)
     const path = toPath(url)
@@ -43,7 +44,7 @@ const apiTraceMiddleware = ((next: (url: string, options: RequestInit) => Promis
       })
       throw error
     }
-  }) as any
+  }
 
 /**
  * Client-side wretch instance for calling the app's own API routes.

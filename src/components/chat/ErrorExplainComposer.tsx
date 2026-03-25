@@ -113,7 +113,9 @@ export function ErrorExplainComposer() {
         <div className="flex flex-1 items-center gap-2">
           <Badge variant="outline" className="hidden shrink-0 gap-1 font-mono text-[10px] sm:flex">
             <span className="text-muted-foreground">model</span>
-            <span>{MODELS_BY_TASK['error-explain'].find((m) => m.id === currentModel)?.label ?? currentModel}</span>
+            <span>
+              {MODELS_BY_TASK['error-explain'].find((model) => model.id === currentModel)?.label ?? currentModel}
+            </span>
           </Badge>
           <span className="text-[10px] text-muted-foreground tabular-nums">
             {(errorMsg.length + codeSnippet.length).toLocaleString()} / {MAX_CHARS.toLocaleString()}
