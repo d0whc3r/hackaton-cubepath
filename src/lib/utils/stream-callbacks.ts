@@ -32,7 +32,7 @@ export function buildStreamCallbacks(
   return {
     onCost: (cost) => {
       update(task, (prev) => ({ ...prev, cost }))
-      addSaving(cost.largeModelCostUsd, cost.inputTokens, cost.outputTokens)
+      void addSaving(cost.largeModelCostUsd, cost.inputTokens, cost.outputTokens)
     },
     onDone: () => {
       update(task, (prev) => ({ ...prev, status: 'done' }))

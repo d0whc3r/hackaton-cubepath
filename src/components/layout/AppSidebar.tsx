@@ -35,7 +35,6 @@ import {
 } from '@/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { getServerSnapshot, getSnapshot, subscribe } from '@/lib/stores/chat-store'
-import { formatUsd } from '@/lib/utils/format'
 import { loadSavings, resetSavings } from '@/lib/utils/savings'
 
 const NAV_ITEMS = [{ href: '/', icon: LayoutDashboard, label: 'Overview' }] as const
@@ -84,7 +83,7 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
   useEffect(() => {
     const syncPathname = () => setPathname(normalizePath(globalThis.location.pathname))
     syncPathname()
-    setSavings(loadSavings())
+    void loadSavings().then(setSavings)
 
     const onPageLoad = () => syncPathname()
     const onAfterSwap = () => syncPathname()
@@ -115,7 +114,7 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
     if (!shouldReset) {
       return
     }
-    resetSavings()
+    void resetSavings()
   }
 
   return (
@@ -271,7 +270,7 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
                       <TrendingDown className={hasSavings ? 'shrink-0 text-green-500' : 'shrink-0'} />
                       <div className="flex min-w-0 flex-col">
                         <span className="font-mono text-sm leading-tight font-bold">
-                          {formatUsd(savings.totalSavedUsd)}
+                          {`$${savings.totalSavedUsd.toFixed(2)}`}
                         </span>
                         <span className="text-[10px] font-normal text-muted-foreground">
                           {hasSavings ? `${savings.queryCount} querie/s saved` : 'No savings yet'}
@@ -280,7 +279,7 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
                     </SidebarMenuButton>
                   </TooltipTrigger>
                   <TooltipContent side="right" hidden={!isCollapsed} className="text-xs">
-                    <p className="font-semibold">Saved {formatUsd(savings.totalSavedUsd)} vs cloud</p>
+                    <p className="font-semibold">Saved {`$${savings.totalSavedUsd.toFixed(2)}`} vs cloud</p>
                     <p className="text-muted-foreground">
                       {savings.queryCount} {savings.queryCount === 1 ? 'query' : 'queries'} ·{' '}
                       {savings.totalInputTokens.toLocaleString()}↑ {savings.totalOutputTokens.toLocaleString()}↓ tokens

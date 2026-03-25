@@ -1,5 +1,5 @@
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
-import { clearHistory, loadHistory, saveHistory } from '@/lib/utils/history'
+import { clearHistoryAsync, loadHistoryAsync, saveHistoryAsync } from '@/lib/utils/history'
 
 export type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
 
@@ -79,13 +79,15 @@ export function ensureLoaded(task: TaskType): void {
     return
   }
   loadedTasks.add(task)
-  entries = { ...entries, [task]: loadHistory(task) }
-  notify()
+  void loadHistoryAsync(task).then((loaded) => {
+    entries = { ...entries, [task]: loaded }
+    notify()
+  })
 }
 
 export function appendEntry(task: TaskType, entry: ConversationEntry): void {
   entries = { ...entries, [task]: [...entries[task], entry] }
-  saveHistory(entries[task], task)
+  void saveHistoryAsync(entries[task], task)
   notify()
 }
 
@@ -101,12 +103,12 @@ export function updateLastAssistant(task: TaskType, updater: AssistantUpdater): 
   }
   next[next.length - 1] = { ...last, assistantMessage: updater(last.assistantMessage) }
   entries = { ...entries, [task]: next }
-  saveHistory(entries[task], task)
+  void saveHistoryAsync(entries[task], task)
   notify()
 }
 
 export function clearTask(task: TaskType): void {
-  clearHistory(task)
+  void clearHistoryAsync(task)
   entries = { ...entries, [task]: [] }
   unread = { ...unread, [task]: false }
   notify()

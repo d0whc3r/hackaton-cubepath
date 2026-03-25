@@ -128,6 +128,6 @@ describe('buildValidationEvent', () => {
     expect(event.decision).toBe('blocked')
     expect(event.matchedRuleId).toBe('semantic-guard-explain')
     expect(event.attackVectorCategory).toBe('semantic-check')
-    expect(event.blockReason).toBe(true)
+    expect(event.blockReason).toBe(BLOCKED_RESULT.blockReason)
   })
 })

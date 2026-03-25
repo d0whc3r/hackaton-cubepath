@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react'
 import type { ModelConfig } from '@/lib/config/model-config'
-import { DEFAULTS, STORAGE_KEY, loadModelConfig } from '@/lib/config/model-config'
+import {
+  DEFAULTS,
+  loadModelConfig,
+  loadModelConfigAsync,
+  removeModelConfig,
+  saveModelConfig,
+} from '@/lib/config/model-config'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
-import { removeStorage, writeStorage } from '@/lib/utils/storage'
 import type { SectionDef, SectionId } from './types'
 import { CUSTOM_VALUE } from './constants'
 import { buildInitialCustomModels, getActiveSection, getDefaultModelId } from './helpers'
@@ -22,11 +27,12 @@ export function usePersistedModelConfig() {
   const [savedSnapshot, setSavedSnapshot] = useState<ModelConfig>(DEFAULTS)
 
   useEffect(() => {
-    const loaded = loadModelConfig()
-    setConfig(loaded)
-    setOllamaBaseUrl(loaded.ollamaBaseUrl)
-    setCustomModels(buildInitialCustomModels(loaded))
-    setSavedSnapshot(loaded)
+    void loadModelConfigAsync().then((loaded) => {
+      setConfig(loaded)
+      setOllamaBaseUrl(loaded.ollamaBaseUrl)
+      setCustomModels(buildInitialCustomModels(loaded))
+      setSavedSnapshot(loaded)
+    })
   }, [])
 
   const activeSectionDef = getActiveSection(activeSection)
@@ -61,7 +67,7 @@ export function usePersistedModelConfig() {
 
   function handleSave() {
     const nextSnapshot = { ...config, ollamaBaseUrl }
-    writeStorage(STORAGE_KEY, nextSnapshot)
+    void saveModelConfig(nextSnapshot)
     setSavedSnapshot(nextSnapshot)
     globalThis.history.back()
   }
@@ -70,7 +76,7 @@ export function usePersistedModelConfig() {
     setConfig(DEFAULTS)
     setCustomModels({})
     setOllamaBaseUrl(OLLAMA_BASE_URL_DEFAULT)
-    removeStorage(STORAGE_KEY)
+    void removeModelConfig()
     setSavedSnapshot(DEFAULTS)
   }
 

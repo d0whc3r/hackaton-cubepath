@@ -13,7 +13,9 @@ interface CostBadgeProps {
 }
 
 export function CostBadge({ cost }: CostBadgeProps) {
-  const comparisons = [...(cost.providerComparisons ?? [])].toSorted((a, b) => b.costUsd - a.costUsd)
+  const comparisons = [...(cost.providerComparisons ?? [])].toSorted(
+    (aProvider, bProvider) => bProvider.costUsd - aProvider.costUsd,
+  )
   // Use the most expensive provider as the headline comparison
   const top = comparisons.reduce<(typeof comparisons)[number] | null>(
     (max, provider) => (!max || provider.costUsd > max.costUsd ? provider : max),

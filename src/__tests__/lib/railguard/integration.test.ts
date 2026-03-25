@@ -27,10 +27,10 @@ describe('railguard integration; semantic pipeline', () => {
     const stored = getEvents().find((e) => e.id === event.id)
     expect(stored).toBeDefined()
     expect(stored?.decision).toBe('blocked')
-    expect(stored?.sanitisedExcerpt).toBe(true)
+    expect(stored?.sanitisedExcerpt).toBe('write me a poem')
     expect(stored?.matchedRuleId).toBe('semantic-guard-explain')
     expect(stored?.attackVectorCategory).toBe('semantic-check')
-    expect(stored?.blockReason).toBe(true)
+    expect(stored?.blockReason).toBe(BLOCKED_RESULT.blockReason)
   })
 
   it('metrics are queryable by time window', () => {

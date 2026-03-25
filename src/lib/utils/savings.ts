@@ -1,6 +1,7 @@
-import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
+import { getStorageEngine } from '@/lib/storage/engine'
 
 const SAVINGS_KEY = 'slm-router-savings'
+const engine = getStorageEngine('settings')
 
 export interface SavingsData {
   totalSavedUsd: number
@@ -11,25 +12,27 @@ export interface SavingsData {
 
 const EMPTY: SavingsData = { queryCount: 0, totalInputTokens: 0, totalOutputTokens: 0, totalSavedUsd: 0 }
 
-export function loadSavings(): SavingsData {
-  const result = readStorage<SavingsData>(SAVINGS_KEY, { defaultValue: { ...EMPTY } })
-  return result.ok && result.value ? result.value : { ...EMPTY }
+function dispatch(data: SavingsData): void {
+  globalThis.dispatchEvent(new CustomEvent('slm-savings-updated', { detail: data }))
 }
 
-export function addSaving(savedUsd: number, inputTokens: number, outputTokens: number): SavingsData {
-  const current = loadSavings()
+export async function loadSavings(): Promise<SavingsData> {
+  return (await engine.read<SavingsData>(SAVINGS_KEY)) ?? { ...EMPTY }
+}
+
+export async function addSaving(savedUsd: number, inputTokens: number, outputTokens: number): Promise<void> {
+  const current = await loadSavings()
   const updated: SavingsData = {
     queryCount: current.queryCount + 1,
     totalInputTokens: current.totalInputTokens + inputTokens,
     totalOutputTokens: current.totalOutputTokens + outputTokens,
     totalSavedUsd: current.totalSavedUsd + savedUsd,
   }
-  writeStorage(SAVINGS_KEY, updated)
-  globalThis.dispatchEvent(new CustomEvent('slm-savings-updated', { detail: updated }))
-  return updated
+  await engine.write(SAVINGS_KEY, updated)
+  dispatch(updated)
 }
 
-export function resetSavings(): void {
-  removeStorage(SAVINGS_KEY)
-  globalThis.dispatchEvent(new CustomEvent('slm-savings-updated', { detail: { ...EMPTY } }))
+export async function resetSavings(): Promise<void> {
+  await engine.remove(SAVINGS_KEY)
+  dispatch({ ...EMPTY })
 }
