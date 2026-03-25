@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 import type { SectionDef, SectionGroupId } from './settings/types'
 import { SECTIONS } from './settings/constants'
 import { isModelInstalled } from './settings/helpers'
 import { MissingModelsDialog } from './settings/MissingModelsDialog'
+import { PlatformStatusPanel } from './settings/PlatformStatusPanel'
 import { TaskRow } from './settings/TaskRow'
 import { useModelConfigPage } from './settings/use-model-config-page'
 
@@ -212,45 +210,9 @@ export function ModelConfigPage() {
         </div>
       </div>
 
-      {/* Ollama URL with status indicator */}
-      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        <div className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-          <Label htmlFor="ollama-url" className="shrink-0 font-mono text-xs text-muted-foreground">
-            Ollama endpoint
-          </Label>
-        </div>
-        <Input
-          id="ollama-url"
-          value={ollamaBaseUrl}
-          onChange={(event) => setOllamaBaseUrl(event.target.value)}
-          placeholder={OLLAMA_BASE_URL_DEFAULT}
-          className="max-w-xs font-mono text-xs"
-        />
-      </div>
-      <p className="mb-4 text-xs text-muted-foreground">
-        You can use your own local Ollama server (for example, <code className="font-mono">http://localhost:11434</code>
-        ) or a server-provided Ollama endpoint. Shared server endpoints may have model, concurrency, or uptime
-        limitations.
-      </p>
+      <PlatformStatusPanel config={{ ...config, ollamaBaseUrl }} onEndpointChange={setOllamaBaseUrl} />
 
-      {missingSections.length > 0 &&
-        (() => {
-          const missingModelIds = [
-            ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
-          ]
-          const taskCount = missingSections.length
-          const modelCount = missingModelIds.length
-          return (
-            <p className="mb-4 text-xs text-destructive">
-              {taskCount} {taskCount === 1 ? 'task' : 'tasks'} {taskCount === 1 ? 'has' : 'have'} a model not installed
-              {modelCount < taskCount && ` (${modelCount} unique ${modelCount === 1 ? 'model' : 'models'})`}. Install or
-              change {modelCount === 1 ? 'it' : 'them'} before saving.
-            </p>
-          )
-        })()}
-
-      <Separator className="mb-8" />
+      <Separator className="my-8" />
 
       {/* Groups */}
       <div className="space-y-8">

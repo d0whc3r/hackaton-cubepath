@@ -6,7 +6,7 @@
  *   fromBody → fallback
  *
  * Three-argument form — resolveModel(fromBody, envVar, fallback):
- *   Used for values that vary by deployment environment (e.g. OLLAMA_BASE_URL).
+ *   Used for values that vary by deployment environment (e.g. PUBLIC_OLLAMA_BASE_URL).
  *   fromBody → envVar → fallback
  */
 export function resolveModel(fromBody: string | undefined, fallback: string): string

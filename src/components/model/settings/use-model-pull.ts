@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { toast } from 'sonner'
 import { appWretch } from '@/lib/http/app-client'
+import { copyNotificationDetails, notify } from '@/lib/ui/notifications'
 import type { PullState } from './types'
 
 interface PullEvent {
@@ -38,7 +38,15 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
   )
 
   function applySuccessEvent(modelId: string): void {
-    toast.success(`Model pulled`, { description: modelId })
+    notify.success('Model pull completed', {
+      action: {
+        label: 'Copy model',
+        onClick: () => {
+          void copyNotificationDetails(modelId, 'Model id copied')
+        },
+      },
+      description: modelId,
+    })
     setPullStates((previous) => ({ ...previous, [modelId]: { status: 'done' } }))
     setInstalledModels((previous) => {
       if (!previous) {
@@ -48,7 +56,7 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
     })
   }
 
-  function applyPullEvent(modelId: string, event: PullEvent): boolean {
+  function applyPullEvent(modelId: string, event: PullEvent, onRetry: () => void): boolean {
     if (event.status === 'success') {
       applySuccessEvent(modelId)
       return true
@@ -56,7 +64,10 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
 
     if (event.status === 'error' || event.error) {
       const message = typeof event.error === 'string' ? event.error : 'Pull failed'
-      toast.error(`Pull failed: ${modelId}`, { description: message })
+      notify.error(`Pull failed: ${modelId}`, {
+        action: { label: 'Retry', onClick: onRetry },
+        description: message,
+      })
       setPullStates((previous) => ({ ...previous, [modelId]: { error: message, status: 'error' } }))
       return true
     }
@@ -76,6 +87,13 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
     const abort = new AbortController()
     pullAborts.current[modelId] = abort
     setPullStates((previous) => ({ ...previous, [modelId]: { status: 'pulling' } }))
+    notify.info('Pull started', {
+      action: {
+        label: 'Cancel',
+        onClick: () => pullAborts.current[modelId]?.abort(),
+      },
+      description: modelId,
+    })
 
     appWretch
       .url('/api/ollama/pull')
@@ -103,18 +121,27 @@ export function useModelPull(setInstalledModels: React.Dispatch<React.SetStateAc
 
           for (const line of lines) {
             const event = parsePullEvent(line)
-            if (event && applyPullEvent(modelId, event)) {
+            if (event && applyPullEvent(modelId, event, () => handlePull(modelId, baseUrl))) {
               return
             }
           }
         }
+
+        notify.warning(`Pull ended without final status`, {
+          action: { label: 'Retry', onClick: () => handlePull(modelId, baseUrl) },
+          description: modelId,
+        })
       })
       .catch((error) => {
         if (error instanceof Error && error.name === 'AbortError') {
+          notify.info('Pull canceled', { description: modelId })
           return
         }
 
-        toast.error(`Pull failed: ${modelId}`, { description: 'Connection failed. Is Ollama running?' })
+        notify.error(`Pull failed: ${modelId}`, {
+          action: { label: 'Retry', onClick: () => handlePull(modelId, baseUrl) },
+          description: 'Connection failed. Is Ollama running?',
+        })
         setPullStates((previous) => ({
           ...previous,
           [modelId]: { error: 'Connection failed', status: 'error' },

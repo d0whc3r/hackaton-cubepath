@@ -280,6 +280,75 @@
   font-weight: bold;
 }
 
+/* ── Sonner notifications ────────────────────────────────── */
+.cn-toast {
+  @apply border-l-4 shadow-lg backdrop-blur-sm;
+}
+
+.cn-toast-title {
+  @apply font-semibold tracking-tight;
+}
+
+.cn-toast-description {
+  @apply text-xs opacity-90;
+}
+
+.cn-toast-action {
+  @apply rounded-md border border-transparent px-2.5 py-1 text-xs font-semibold transition-colors;
+}
+
+.cn-toast-cancel {
+  @apply rounded-md border border-border px-2.5 py-1 text-xs font-medium transition-colors hover:bg-muted;
+}
+
+.cn-toast[data-type='success'] {
+  @apply border-emerald-500 bg-emerald-50 text-emerald-950;
+}
+
+.dark .cn-toast[data-type='success'] {
+  @apply bg-emerald-950/40 text-emerald-100;
+}
+
+.cn-toast[data-type='info'] {
+  @apply border-sky-500 bg-sky-50 text-sky-950;
+}
+
+.dark .cn-toast[data-type='info'] {
+  @apply bg-sky-950/40 text-sky-100;
+}
+
+.cn-toast[data-type='warning'] {
+  @apply border-amber-500 bg-amber-50 text-amber-950;
+}
+
+.dark .cn-toast[data-type='warning'] {
+  @apply bg-amber-950/40 text-amber-100;
+}
+
+.cn-toast[data-type='error'] {
+  @apply border-red-500 bg-red-50 text-red-950;
+}
+
+.dark .cn-toast[data-type='error'] {
+  @apply bg-red-950/40 text-red-100;
+}
+
+.cn-toast[data-type='success'] .cn-toast-action {
+  @apply bg-emerald-600 text-white hover:bg-emerald-700;
+}
+
+.cn-toast[data-type='info'] .cn-toast-action {
+  @apply bg-sky-600 text-white hover:bg-sky-700;
+}
+
+.cn-toast[data-type='warning'] .cn-toast-action {
+  @apply bg-amber-500 text-amber-950 hover:bg-amber-400;
+}
+
+.cn-toast[data-type='error'] .cn-toast-action {
+  @apply bg-red-600 text-white hover:bg-red-700;
+}
+
 /* ── View Transitions: persist theme class across navigations ── */
 html {
   color-scheme: light;

@@ -43,7 +43,7 @@ export const POST: APIRoute = withApiLogging('translate.main', async ({ request 
   }
 
   const { text, targetLanguage, model: mBody, ollamaBaseUrl: urlBody } = parsed.data
-  const baseUrl = resolveModel(urlBody, import.meta.env.OLLAMA_BASE_URL, OLLAMA_BASE_URL_DEFAULT)
+  const baseUrl = resolveModel(urlBody, OLLAMA_BASE_URL_DEFAULT)
   const model = resolveModel(mBody, DEFAULT_TRANSLATE_MODEL)
 
   const stream = createSseStream(async (emit) => {

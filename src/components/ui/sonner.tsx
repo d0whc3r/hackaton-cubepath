@@ -20,6 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme}
       className="toaster group"
+      richColors
       icons={{
         error: <OctagonXIcon className="size-4" />,
         info: <InfoIcon className="size-4" />,
@@ -37,6 +38,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
+          actionButton: 'cn-toast-action',
+          cancelButton: 'cn-toast-cancel',
+          description: 'cn-toast-description',
+          title: 'cn-toast-title',
           toast: 'cn-toast',
         },
       }}

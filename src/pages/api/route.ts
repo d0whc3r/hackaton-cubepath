@@ -122,7 +122,7 @@ function buildRequest(data: ReturnType<typeof RouteRequestSchema.parse>): Valida
     guardModel: resolveModel(data.guardModel, DEFAULT_GUARD_MODEL),
     input: data.input,
     namingHelperModel: resolveModel(data.namingHelperModel, DEFAULT_MODELS['naming-helper']),
-    ollamaBaseUrl: resolveModel(data.ollamaBaseUrl, import.meta.env.OLLAMA_BASE_URL, OLLAMA_BASE_URL_DEFAULT),
+    ollamaBaseUrl: resolveModel(data.ollamaBaseUrl, OLLAMA_BASE_URL_DEFAULT),
     performanceHintModel: resolveModel(data.performanceHintModel, DEFAULT_MODELS['performance-hint']),
     refactorModel: resolveModel(data.refactorModel, DEFAULT_MODELS.refactor),
     taskType: data.taskType,

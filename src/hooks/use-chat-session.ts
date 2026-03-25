@@ -1,5 +1,4 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { toast } from 'sonner'
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { DEFAULTS, getAnalystModel, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { BlockedError, buildRouteMutationOptions } from '@/lib/services/route.service'
@@ -15,6 +14,7 @@ import {
   subscribe,
   updateLastAssistant,
 } from '@/lib/stores/chat-store'
+import { copyNotificationDetails, notify } from '@/lib/ui/notifications'
 import { buildStreamCallbacks } from '@/lib/utils/stream-callbacks'
 
 export interface UseChatSessionReturn {
@@ -88,6 +88,9 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
 
     const { mutationFn } = buildRouteMutationOptions()
     if (!mutationFn) {
+      notify.error('Route request unavailable', {
+        description: 'Route mutation is not configured in the current environment.',
+      })
       updateLastAssistant(task, (prev: AssistantMessage) => ({
         ...prev,
         error: 'Route mutation is not configured.',
@@ -121,7 +124,18 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
           return
         }
         if (error instanceof BlockedError) {
-          toast.warning('Request blocked', { description: error.blockReason ?? undefined })
+          const blockReason = error.blockReason ?? undefined
+          notify.warning('Request blocked by policy', {
+            action: blockReason
+              ? {
+                  label: 'Copy details',
+                  onClick: () => {
+                    void copyNotificationDetails(blockReason, 'Block reason copied')
+                  },
+                }
+              : undefined,
+            description: blockReason,
+          })
           updateLastAssistant(task, (prev: AssistantMessage) => ({
             ...prev,
             blockReason: error.blockReason,
@@ -130,7 +144,13 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
           return
         }
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-        toast.error('Request failed', { description: errorMessage })
+        notify.error('Request failed', {
+          action: {
+            label: 'Retry',
+            onClick: () => handleSubmit(input, task, fileName),
+          },
+          description: errorMessage,
+        })
         updateLastAssistant(task, (prev: AssistantMessage) => ({
           ...prev,
           error: errorMessage,
@@ -148,6 +168,9 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   function handleCancel() {
     const task = viewTask
     getAbortController(task)?.abort()
+    notify.info('Request canceled', {
+      description: 'The current generation has been stopped.',
+    })
     setLoading(task, false)
     updateLastAssistant(task, (prev: AssistantMessage) => ({
       ...prev,
