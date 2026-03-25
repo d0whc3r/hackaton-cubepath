@@ -2,6 +2,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { SectionDef } from './types'
+import { formatModelSizeGb } from './helpers'
 
 interface ActiveSectionEditorProps {
   section: SectionDef
@@ -45,7 +46,7 @@ export function ActiveSectionEditor({
                   </span>
                 )}
                 <span className="ml-1.5 text-muted-foreground">
-                  {model.params} · {model.size}
+                  {model.params} · {formatModelSizeGb(model)}
                 </span>
               </SelectItem>
             ))}

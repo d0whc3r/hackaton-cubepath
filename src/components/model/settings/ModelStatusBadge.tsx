@@ -13,9 +13,9 @@ interface ModelStatusBadgeProps {
 export function ModelStatusBadge({ modelId, installed, pullState, ollamaBaseUrl, onPull }: ModelStatusBadgeProps) {
   if (pullState?.status === 'pulling') {
     return (
-      <div className="flex items-center gap-1.5">
+      <div className="flex min-w-0 items-center gap-1.5">
         <Loader2 className="h-3 w-3 animate-spin text-primary" />
-        <span className="max-w-[130px] truncate text-[11px] text-muted-foreground">
+        <span className="max-w-[150px] truncate text-[11px] text-muted-foreground">
           {pullState.progress ?? 'Pulling…'}
         </span>
       </div>
@@ -26,7 +26,7 @@ export function ModelStatusBadge({ modelId, installed, pullState, ollamaBaseUrl,
     return (
       <Badge
         variant="outline"
-        className="h-5 gap-1 rounded-full border-green-500/40 bg-green-500/10 px-1.5 text-[10px] text-green-700 dark:text-green-400"
+        className="h-auto min-h-5 gap-1 rounded-full border-green-500/40 bg-green-500/10 px-1.5 py-0.5 text-[10px] leading-none text-green-700 dark:text-green-400"
       >
         <CheckCircle2 className="h-2.5 w-2.5" />
         Installed
@@ -38,10 +38,11 @@ export function ModelStatusBadge({ modelId, installed, pullState, ollamaBaseUrl,
     return (
       <Badge
         variant="outline"
-        className="h-5 gap-1 rounded-full border-destructive/40 bg-destructive/10 px-1.5 text-[10px] text-destructive"
+        title={pullState.error ?? 'Error'}
+        className="h-auto min-h-5 max-w-[180px] gap-1 overflow-visible rounded-full border-destructive/40 bg-destructive/10 px-1.5 py-0.5 text-[10px] leading-none text-destructive"
       >
         <AlertCircle className="h-2.5 w-2.5" />
-        {pullState.error ?? 'Error'}
+        <span className="truncate">Error</span>
       </Badge>
     )
   }

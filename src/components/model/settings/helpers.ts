@@ -1,4 +1,5 @@
 import type { ModelConfig } from '@/lib/config/model-config'
+import type { ModelOption } from '@/lib/router/types'
 import { DEFAULTS } from '@/lib/config/model-config'
 import type { SectionDef, SectionId } from './types'
 import { CUSTOM_VALUE, SECTIONS } from './constants'
@@ -52,4 +53,45 @@ export function getDefaultModelId(section: SectionDef): string {
 
 export function getActiveSection(activeSection: SectionId): SectionDef {
   return SECTIONS.find((section) => section.id === activeSection) ?? SECTIONS[0]
+}
+
+export function getModelSizeGb(model: ModelOption): number {
+  return model.size
+}
+
+export function buildModelSizeIndex(sections: SectionDef[] = SECTIONS): Map<string, number> {
+  const byId = new Map<string, number>()
+  for (const section of sections) {
+    for (const model of section.models) {
+      const sizeGb = getModelSizeGb(model)
+      if (byId.has(model.id)) {
+        continue
+      }
+      byId.set(model.id, sizeGb)
+    }
+  }
+  return byId
+}
+
+export function getUniqueSelectedModelIds(config: ModelConfig, sections: SectionDef[] = SECTIONS): string[] {
+  return [...new Set(sections.map((section) => config[section.configKey] as string).filter(Boolean))]
+}
+
+export function getUniqueSelectedSizeGb(config: ModelConfig, sections: SectionDef[] = SECTIONS): number {
+  const sizeByModel = buildModelSizeIndex(sections)
+  return getUniqueSelectedModelIds(config, sections).reduce(
+    (total, modelId) => total + (sizeByModel.get(modelId) ?? 0),
+    0,
+  )
+}
+
+export function formatGb(value: number): string {
+  if (value >= 10) {
+    return `${value.toFixed(1)} GB`
+  }
+  return `${value.toFixed(2)} GB`
+}
+
+export function formatModelSizeGb(model: ModelOption): string {
+  return formatGb(getModelSizeGb(model))
 }

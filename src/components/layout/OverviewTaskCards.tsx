@@ -21,7 +21,6 @@ interface TaskCard {
   href: string
   icon: React.ComponentType<{ className?: string }>
   iconBg: string
-  specialist: string
   task: TaskType
   title: string
 }
@@ -34,7 +33,6 @@ const ANALYSIS_TASKS: TaskCard[] = [
     href: '/tasks/explain',
     icon: BookOpen,
     iconBg: 'bg-blue-500/10',
-    specialist: 'Explanation specialist',
     task: 'explain',
     title: 'Explain Code',
   },
@@ -45,7 +43,6 @@ const ANALYSIS_TASKS: TaskCard[] = [
     href: '/tasks/error-explain',
     icon: AlertCircle,
     iconBg: 'bg-rose-500/10',
-    specialist: 'Error explain specialist',
     task: 'error-explain',
     title: 'Error Explain',
   },
@@ -55,7 +52,6 @@ const ANALYSIS_TASKS: TaskCard[] = [
     href: '/tasks/performance-hint',
     icon: Zap,
     iconBg: 'bg-yellow-500/10',
-    specialist: 'Performance hint specialist',
     task: 'performance-hint',
     title: 'Performance Hint',
   },
@@ -65,7 +61,6 @@ const ANALYSIS_TASKS: TaskCard[] = [
     href: '/tasks/dead-code',
     icon: Trash2,
     iconBg: 'bg-red-500/10',
-    specialist: 'Dead code specialist',
     task: 'dead-code',
     title: 'Dead Code',
   },
@@ -75,7 +70,6 @@ const ANALYSIS_TASKS: TaskCard[] = [
     href: '/tasks/naming-helper',
     icon: Tag,
     iconBg: 'bg-amber-500/10',
-    specialist: 'Naming helper specialist',
     task: 'naming-helper',
     title: 'Naming Helper',
   },
@@ -89,7 +83,6 @@ const GENERATION_TASKS: TaskCard[] = [
     href: '/tasks/test',
     icon: TestTube2,
     iconBg: 'bg-green-500/10',
-    specialist: 'Test specialist',
     task: 'test',
     title: 'Generate Tests',
   },
@@ -100,7 +93,6 @@ const GENERATION_TASKS: TaskCard[] = [
     href: '/tasks/refactor',
     icon: RefreshCw,
     iconBg: 'bg-purple-500/10',
-    specialist: 'Refactor specialist',
     task: 'refactor',
     title: 'Refactor Code',
   },
@@ -110,7 +102,6 @@ const GENERATION_TASKS: TaskCard[] = [
     href: '/tasks/commit',
     icon: GitCommitHorizontal,
     iconBg: 'bg-orange-500/10',
-    specialist: 'Commit specialist',
     task: 'commit',
     title: 'Write Commit',
   },
@@ -121,7 +112,6 @@ const GENERATION_TASKS: TaskCard[] = [
     href: '/tasks/docstring',
     icon: FileText,
     iconBg: 'bg-teal-500/10',
-    specialist: 'Docstring specialist',
     task: 'docstring',
     title: 'Docstring',
   },
@@ -131,7 +121,6 @@ const GENERATION_TASKS: TaskCard[] = [
     href: '/tasks/type-hints',
     icon: Type,
     iconBg: 'bg-cyan-500/10',
-    specialist: 'Type hints specialist',
     task: 'type-hints',
     title: 'Type Hints',
   },
@@ -140,7 +129,7 @@ const GENERATION_TASKS: TaskCard[] = [
 function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: ReturnType<typeof loadModelConfig> }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {tasks.map(({ task, href, icon: Icon, iconBg, color, title, description, specialist }) => {
+      {tasks.map(({ task, href, icon: Icon, iconBg, color, title, description }) => {
         const modelId = getModelForTask(modelConfig, task)
         const modelLabel = MODELS_BY_TASK[task].find((model) => model.id === modelId)?.label ?? modelId
 
@@ -163,7 +152,6 @@ function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: 
               <span className="rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 font-mono text-primary">
                 {modelLabel}
               </span>
-              <span className="rounded-full border border-border/70 bg-background/80 px-2.5 py-1">{specialist}</span>
             </div>
           </a>
         )

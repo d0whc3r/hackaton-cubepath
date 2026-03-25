@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { SectionDef, SectionGroupId } from './settings/types'
 import { SECTIONS } from './settings/constants'
-import { isModelInstalled } from './settings/helpers'
+import { formatGb, getUniqueSelectedModelIds, getUniqueSelectedSizeGb, isModelInstalled } from './settings/helpers'
 import { MissingModelsDialog } from './settings/MissingModelsDialog'
 import { PlatformStatusPanel } from './settings/PlatformStatusPanel'
 import { TaskRow } from './settings/TaskRow'
@@ -225,6 +225,13 @@ export function ModelConfigPage() {
                   {group.label}
                 </h2>
                 <p className="mt-0.5 text-xs text-muted-foreground">{group.description}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {(() => {
+                    const uniqueModels = getUniqueSelectedModelIds(config, groupSections)
+                    const sizeGb = getUniqueSelectedSizeGb(config, groupSections)
+                    return `${groupSections.length} tasks · ${uniqueModels.length} unique models · ${formatGb(sizeGb)}`
+                  })()}
+                </p>
               </div>
               <div className="overflow-hidden rounded-xl border border-border bg-card">
                 <div className="divide-y divide-border/60">

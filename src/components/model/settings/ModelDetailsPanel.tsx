@@ -3,7 +3,7 @@ import type { ModelConfig } from '@/lib/config/model-config'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import type { PullState, RuntimeModelDetails, SectionDef } from './types'
-import { ollamaModelUrl } from './helpers'
+import { formatGb, formatModelSizeGb, ollamaModelUrl } from './helpers'
 
 interface ModelDetailsPanelProps {
   section: SectionDef
@@ -48,9 +48,12 @@ export function ModelDetailsPanel({
   const modelFamily = runtimeDetails?.family
   const quantization = runtimeDetails?.quantizationLevel
   const modifiedAt = runtimeDetails?.modifiedAt
-  const modelSize = runtimeDetails?.sizeBytes
-    ? `${(runtimeDetails.sizeBytes / BYTES_IN_GB).toFixed(1)} GB`
-    : activeModel?.size
+  let modelSize: string | null = null
+  if (runtimeDetails?.sizeBytes) {
+    modelSize = `${(runtimeDetails.sizeBytes / BYTES_IN_GB).toFixed(1)} GB`
+  } else if (activeModel) {
+    modelSize = formatGb(activeModel.size)
+  }
 
   return (
     <div className="sticky top-20 rounded-xl border border-border/70 bg-transparent p-5">
@@ -80,6 +83,9 @@ export function ModelDetailsPanel({
           <div className="space-y-4">
             <div>
               <p className="text-lg font-semibold text-foreground">{activeModel.label}</p>
+              <p className="text-xs text-muted-foreground">
+                {activeModel.params} · {formatModelSizeGb(activeModel)}
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
@@ -89,7 +95,7 @@ export function ModelDetailsPanel({
               </div>
               <div className="rounded-md border border-border/70 px-2 py-1.5">
                 <p className="text-[10px] text-muted-foreground">RAM/Disk</p>
-                <p className="text-xs font-semibold text-foreground">{modelSize ?? activeModel.size}</p>
+                <p className="text-xs font-semibold text-foreground">{modelSize ?? 'n/a'}</p>
               </div>
               <div className="rounded-md border border-border/70 px-2 py-1.5">
                 <p className="text-[10px] text-muted-foreground">Context</p>

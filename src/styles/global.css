@@ -282,7 +282,7 @@
 
 /* ── Sonner notifications ────────────────────────────────── */
 .cn-toast {
-  @apply border-l-4 shadow-lg backdrop-blur-sm;
+  @apply w-full max-w-[min(92vw,420px)] rounded-xl border-l-4 p-3 shadow-lg backdrop-blur-sm;
 }
 
 .cn-toast-title {

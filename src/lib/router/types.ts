@@ -14,16 +14,11 @@ export interface ModelOption {
   id: string
   label: string
   params: string
-  size: string
+  /** Model size in GB as float (e.g. 1.3, 0.398). */
+  size: number
   description: string
   /** Context window in tokens (e.g. 8192, 32768, 131072) */
   contextWindow?: number
-  /**
-   * Translation section only; true if the model can reliably translate
-   * code blocks (not just prose). When false/absent, code blocks are always
-   * extracted client-side before sending to the model.
-   */
-  canTranslateCode?: boolean
 }
 
 export interface DetectedLanguage {

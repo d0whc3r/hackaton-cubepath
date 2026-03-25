@@ -1,10 +1,9 @@
-import { ChevronDown, Code2, Languages, RotateCcw, X } from 'lucide-react'
+import { ChevronDown, Languages, RotateCcw, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
 import { Button } from '@/components/ui/button'
 import { getTranslateModel, loadModelConfig } from '@/lib/config/model-config'
 import { appWretch } from '@/lib/http/app-client'
-import { TRANSLATE_MODELS } from '@/lib/router/models'
 
 // When includeCode is false, code blocks are extracted client-side before
 // Sending text to the model, then restored verbatim after translation.
@@ -122,13 +121,7 @@ export function TranslateButton({ content }: TranslateButtonProps) {
   const [selectedLang, setSelectedLang] = useState<LangCode | null>(null)
   const [translatedText, setTranslatedText] = useState('')
   const [translateError, setTranslateError] = useState<string | null>(null)
-  const [includeCode, setIncludeCode] = useState(false)
   const abortRef = useRef<AbortController | null>(null)
-
-  // Resolve whether the active translate model supports code block translation
-  const config = loadModelConfig()
-  const currentModelId = getTranslateModel(config)
-  const modelCanTranslateCode = TRANSLATE_MODELS.find((model) => model.id === currentModelId)?.canTranslateCode === true
 
   async function translate(langCode: LangCode) {
     const language = LANGUAGES.find((lang) => lang.code === langCode)
@@ -146,9 +139,8 @@ export function TranslateButton({ content }: TranslateButtonProps) {
     setTranslateError(null)
     setOpen(false)
 
-    // Extract code blocks unless the model can handle them AND user opted in
-    const shouldExtract = !(includeCode && modelCanTranslateCode)
-    const { stripped, blocks } = shouldExtract ? extractCodeBlocks(content) : { blocks: [], stripped: content }
+    // Keep code blocks untouched by extracting/restoring them around translation.
+    const { stripped, blocks } = extractCodeBlocks(content)
 
     const cfg = loadModelConfig()
     const model = getTranslateModel(cfg)
@@ -176,7 +168,7 @@ export function TranslateButton({ content }: TranslateButtonProps) {
         raw += chunk
       }
 
-      setTranslatedText(shouldExtract ? restoreCodeBlocks(raw, blocks) : raw)
+      setTranslatedText(restoreCodeBlocks(raw, blocks))
       setStatus('done')
     } catch (fetchError) {
       if (fetchError instanceof Error && fetchError.name === 'AbortError') {
@@ -235,24 +227,6 @@ export function TranslateButton({ content }: TranslateButtonProps) {
             </div>
           )}
         </div>
-
-        {/* Code-block toggle; only shown when the active model supports it */}
-        {modelCanTranslateCode && (
-          <button
-            type="button"
-            onClick={() => setIncludeCode((prev) => !prev)}
-            title={includeCode ? 'Code blocks will be translated' : 'Code blocks are skipped (click to include)'}
-            className={[
-              'flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] transition-colors',
-              includeCode
-                ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400'
-                : 'text-muted-foreground/50 hover:text-muted-foreground',
-            ].join(' ')}
-          >
-            <Code2 className="h-2.5 w-2.5" />
-            {includeCode ? 'Code on' : 'Code off'}
-          </button>
-        )}
 
         {/* Re-translate / dismiss controls */}
         {(status === 'done' || status === 'error') && selectedLang && (

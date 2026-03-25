@@ -15,6 +15,7 @@ import {
   updateLastAssistant,
 } from '@/lib/stores/chat-store'
 import { copyNotificationDetails, notify } from '@/lib/ui/notifications'
+import { getHistoryHintCount } from '@/lib/utils/history'
 import { buildStreamCallbacks } from '@/lib/utils/stream-callbacks'
 
 export interface UseChatSessionReturn {
@@ -24,6 +25,7 @@ export interface UseChatSessionReturn {
   handleCancel: () => void
   handleClearHistory: () => void
   handleSubmit: (input: string, taskType: TaskType, fileName?: string) => void
+  hasPersistedHistory: boolean
   isHydrated: boolean
   isLoading: boolean
   setActiveTask: (task: TaskType) => void
@@ -32,14 +34,13 @@ export interface UseChatSessionReturn {
 export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   const defaultTask = fixedTaskType ?? 'explain'
 
-  const { entries: entriesByTask, loading: loadingByTask } = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot,
-  )
+  const {
+    entries: entriesByTask,
+    loaded: loadedByTask,
+    loading: loadingByTask,
+  } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   const [activeTask, setActiveTaskState] = useState<TaskType>(defaultTask)
-  const [isHydrated, setIsHydrated] = useState(false)
   const [currentModel, setCurrentModel] = useState(() => getModelForTask(DEFAULTS, defaultTask))
 
   const viewTask = fixedTaskType ?? activeTask
@@ -48,7 +49,6 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   useEffect(() => {
     ensureLoaded(defaultTask)
     setCurrentModel(getModelForTask(loadModelConfig(), defaultTask))
-    setIsHydrated(true)
   }, [defaultTask])
 
   // Load history lazily when switching visible task and sync model badge
@@ -185,6 +185,8 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     clearTask(viewTask)
   }
 
+  const hasPersistedHistory = getHistoryHintCount(viewTask) > 0
+
   return {
     activeTask: viewTask,
     currentModel,
@@ -192,7 +194,8 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     handleCancel,
     handleClearHistory,
     handleSubmit,
-    isHydrated,
+    hasPersistedHistory,
+    isHydrated: loadedByTask[viewTask],
     isLoading: loadingByTask[viewTask],
     setActiveTask: (task: TaskType) => {
       if (fixedTaskType) {

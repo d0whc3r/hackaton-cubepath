@@ -1,3 +1,5 @@
+// oxlint-disable-next-line import/no-unassigned-import
+import 'sonner/dist/styles.css'
 import type { ToasterProps } from 'sonner'
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -20,6 +22,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme}
       className="toaster group"
+      position="top-right"
+      offset={16}
       richColors
       icons={{
         error: <OctagonXIcon className="size-4" />,

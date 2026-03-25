@@ -1,46 +1,50 @@
 import type { ModelOption } from '../types'
 
+// ── Naming helper ─────────────────────────────────────────────────────────────
+// Code-specialist models for convention-aware rename suggestions. Code-tuned
+// Models understand naming patterns (camelCase, snake_case, domain prefixes)
+// From their training corpus better than general chat models.
 export const NAMING_HELPER_MODELS: ModelOption[] = [
   {
-    contextWindow: 262_144,
-    description: 'Alibaba · best default for semantic rename suggestions with long surrounding context',
-    id: 'qwen3:4b',
-    label: 'Qwen 3 4B',
-    params: '4B',
-    size: '2.5 GB',
-  },
-  {
-    contextWindow: 131_072,
-    description: 'IBM · compact naming fallback with strong instruction following and list formatting',
-    id: 'granite3.3:2b',
-    label: 'Granite 3.3 2B',
-    params: '2B',
-    size: '1.5 GB',
-  },
-  {
-    contextWindow: 131_072,
-    description: 'Google · 128K ctx, strong at user-friendly rationale for naming choices',
-    id: 'gemma3:4b',
-    label: 'Gemma 3 4B',
-    params: '4B',
-    size: '3.3 GB',
+    contextWindow: 32_768,
+    description: 'Alibaba · code-specialist default for convention-aware rename suggestions in context',
+    id: 'qwen2.5-coder:3b',
+    label: 'Qwen2.5 Coder',
+    params: '3B',
+    size: 1.9,
   },
   {
     contextWindow: 32_768,
-    description: 'Alibaba · reliable fallback when you want convention-aware rename suggestions',
-    id: 'qwen2.5:3b',
-    label: 'Qwen 2.5 3B',
-    params: '3B',
-    size: '1.9 GB',
+    description: 'Alibaba · higher-quality naming for complex APIs and domain-specific identifiers',
+    id: 'qwen2.5-coder:7b',
+    label: 'Qwen2.5 Coder',
+    params: '7B',
+    size: 4.7,
+  },
+  {
+    contextWindow: 128_000,
+    description: 'IBM · 125K ctx, useful when naming depends on reading broader surrounding file context',
+    id: 'granite-code:8b',
+    label: 'Granite Code',
+    params: '8B',
+    size: 4.6,
   },
   {
     contextWindow: 131_072,
-    description: 'Meta · plain-language fallback for low-RAM naming and API label work',
-    id: 'llama3.2:3b',
-    label: 'Llama 3.2 3B',
+    description: 'Microsoft · 128K ctx, strong instruction following for well-formatted rename candidate lists',
+    id: 'phi4-mini:3.8b',
+    label: 'Phi 4 Mini',
+    params: '3.8B',
+    size: 2.5,
+  },
+  {
+    contextWindow: 128_000,
+    description: 'IBM · compact long-context fallback for reading broader context on low-RAM machines',
+    id: 'granite-code:3b',
+    label: 'Granite Code',
     params: '3B',
-    size: '2.0 GB',
+    size: 2,
   },
 ]
 
-export const DEFAULT_NAMING_HELPER_MODEL = 'qwen3:4b'
+export const DEFAULT_NAMING_HELPER_MODEL = NAMING_HELPER_MODELS[0].id

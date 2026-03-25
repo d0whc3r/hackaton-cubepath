@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import type { PullState, SectionDef, SectionGroupId } from './types'
 import { CUSTOM_VALUE } from './constants'
-import { ollamaModelUrl } from './helpers'
+import { formatModelSizeGb, ollamaModelUrl } from './helpers'
 import { ModelStatusBadge } from './ModelStatusBadge'
 
 const CONTEXT_DIVISOR = 1000
@@ -109,7 +109,7 @@ export function TaskRow({
     >
       {/* Left: task info */}
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/60 bg-muted/60 text-muted-foreground">
             <Icon className="h-3.5 w-3.5" />
           </span>
@@ -127,13 +127,27 @@ export function TaskRow({
         </div>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{section.subtitle}</p>
         <p className="mt-1.5 text-[11px] text-muted-foreground/70 italic">{section.selectionHint}</p>
+        {installedModelsReady && (
+          <div className="mt-2 flex items-center">
+            {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, sx_a11y/no-static-element-interactions */}
+            <div onClick={(event) => event.stopPropagation()}>
+              <ModelStatusBadge
+                modelId={modelId}
+                installed={isInstalled}
+                pullState={pullState}
+                ollamaBaseUrl={ollamaBaseUrl}
+                onPull={onPull}
+              />
+            </div>
+          </div>
+        )}
       </div>
 
       {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, jsx_a11y/no-static-element-interactions
       Right: select + model details */}
       <div className="flex w-full shrink-0 flex-col gap-3 sm:w-104" onClick={(event) => event.stopPropagation()}>
-        {/* Select + status */}
-        <div className="flex items-center gap-2">
+        {/* Select */}
+        <div className="flex min-w-0 items-center gap-2">
           <Select value={selectValue} onValueChange={onModelChange}>
             <SelectTrigger className="h-9 flex-1 text-xs">
               <SelectValue />
@@ -148,7 +162,7 @@ export function TaskRow({
                     </span>
                   )}
                   <span className="ml-1.5 text-muted-foreground">
-                    {model.params} · {model.size}
+                    {model.params} · {formatModelSizeGb(model)}
                   </span>
                 </SelectItem>
               ))}
@@ -157,16 +171,6 @@ export function TaskRow({
               </SelectItem>
             </SelectContent>
           </Select>
-
-          {installedModelsReady && (
-            <ModelStatusBadge
-              modelId={modelId}
-              installed={isInstalled}
-              pullState={pullState}
-              ollamaBaseUrl={ollamaBaseUrl}
-              onPull={onPull}
-            />
-          )}
         </div>
 
         {/* Custom model input */}
@@ -204,16 +208,11 @@ export function TaskRow({
                     {selectedModel.params}
                   </Badge>
                   <Badge variant="outline" className="text-[10px]">
-                    {selectedModel.size}
+                    {formatModelSizeGb(selectedModel)}
                   </Badge>
                   {contextLabel && (
                     <Badge variant="outline" className="text-[10px]">
                       {contextLabel}
-                    </Badge>
-                  )}
-                  {selectedModel.canTranslateCode && (
-                    <Badge variant="outline" className="text-[10px] text-blue-600 dark:text-blue-400">
-                      code-aware
                     </Badge>
                   )}
                 </div>

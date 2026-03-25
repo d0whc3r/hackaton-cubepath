@@ -1,6 +1,5 @@
 ---
 import OverviewHero from '@/components/layout/OverviewHero.astro'
-import { OllamaStatusBadge } from '@/components/layout/OllamaStatusBadge'
 import { OverviewTaskCards } from '@/components/layout/OverviewTaskCards'
 import NonTaskLayout from '@/layouts/NonTaskLayout.astro'
 
@@ -161,7 +160,6 @@ const workflowSteps = [
         <p class="text-sm text-muted-foreground">Live model labels reflect your current local configuration.</p>
       </div>
       <div class="flex items-center gap-3">
-        <OllamaStatusBadge client:load />
         <a href="/settings" class="text-sm font-medium text-primary hover:underline">Adjust model assignments</a>
       </div>
     </div>

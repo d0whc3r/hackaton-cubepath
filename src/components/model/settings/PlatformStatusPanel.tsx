@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label'
 import { useOllamaHealth } from '@/hooks/use-ollama-health'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 import { SECTIONS } from './constants'
+import { buildModelSizeIndex, formatGb, getUniqueSelectedModelIds, getUniqueSelectedSizeGb } from './helpers'
 
 type CheckStatus = 'ok' | 'warn' | 'error' | 'loading' | 'stale'
 
@@ -106,14 +107,24 @@ function ModelPill({ label, modelId, status }: { label: string; modelId: string;
 }
 
 function ModelHealthGrid({ health, config }: { health: OllamaHealth; config: ModelConfig }) {
+  const sizeByModel = buildModelSizeIndex(SECTIONS)
+
   return (
     <div className="space-y-3">
       {(['infrastructure', 'analysis', 'generation', 'language'] as const).map((group) => {
         const groupSections = SECTIONS.filter((section) => section.group === group)
+        const uniqueModelIds = [
+          ...new Set(groupSections.map((section) => config[section.configKey] as string).filter(Boolean)),
+        ]
+        const totalSizeGb = uniqueModelIds.reduce((total, modelId) => total + (sizeByModel.get(modelId) ?? 0), 0)
+
         return (
           <div key={group}>
-            <p className="mb-1.5 text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
+            <p className="text-[10px] font-semibold tracking-widest text-muted-foreground uppercase">
               {GROUP_LABELS[group]}
+            </p>
+            <p className="mb-1.5 text-[10px] text-muted-foreground">
+              {uniqueModelIds.length} unique models · {formatGb(totalSizeGb)}
             </p>
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
               {groupSections.map((section) => {
@@ -145,6 +156,8 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
   const [triggerKey, setTriggerKey] = useState(0)
   const health = useOllamaHealth(config, triggerKey)
   const [detailOpen, setDetailOpen] = useState(false)
+  const selectedUniqueModels = getUniqueSelectedModelIds(config, SECTIONS)
+  const selectedUniqueSizeGb = getUniqueSelectedSizeGb(config, SECTIONS)
 
   const cfg = STATUS_CONFIG[health.status]
   const connStatus = connectionStatus(health.status)
@@ -162,7 +175,8 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
     }
     const taskPart = `${health.readyTasks}/${health.totalTasks} tasks`
     const modelPart = `${health.installedUniqueModels}/${health.totalUniqueModels} models`
-    return `${taskPart} · ${modelPart} ready`
+    const sizePart = `${formatGb(selectedUniqueSizeGb)} selected`
+    return `${taskPart} · ${modelPart} ready · ${sizePart}`
   }
 
   function handleRefresh() {

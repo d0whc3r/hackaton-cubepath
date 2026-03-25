@@ -24,6 +24,7 @@ export function ChatContainer({ fixedTaskType, pageTitle, pageDescription, compo
         handleCancel: session.handleCancel,
         handleClearHistory: session.handleClearHistory,
         handleSubmit: session.handleSubmit,
+        hasPersistedHistory: session.hasPersistedHistory,
         isHydrated: session.isHydrated,
         isLoading: session.isLoading,
         setActiveTask: session.setActiveTask,

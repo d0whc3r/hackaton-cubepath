@@ -3,6 +3,7 @@ import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
 
 export interface ChatContextValue {
   entries: ConversationEntry[]
+  hasPersistedHistory: boolean
   isLoading: boolean
   isHydrated: boolean
   activeTask: TaskType

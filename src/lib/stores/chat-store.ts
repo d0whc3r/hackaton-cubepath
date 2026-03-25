@@ -6,6 +6,7 @@ export type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
 type EntriesByTask = Record<TaskType, ConversationEntry[]>
 type LoadingByTask = Record<TaskType, boolean>
 type UnreadByTask = Record<TaskType, boolean>
+type LoadedByTask = Record<TaskType, boolean>
 
 export const TASK_TYPES: TaskType[] = [
   'commit',
@@ -32,10 +33,15 @@ function emptyUnread(): UnreadByTask {
   return Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as UnreadByTask
 }
 
+function emptyLoaded(): LoadedByTask {
+  return Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as LoadedByTask
+}
+
 // --- Singleton state (persists across Astro page navigations) ---
 let entries: EntriesByTask = emptyEntries()
 let loading: LoadingByTask = emptyLoading()
 let unread: UnreadByTask = emptyUnread()
+let loaded: LoadedByTask = emptyLoaded()
 const loadedTasks = new Set<TaskType>()
 const abortControllers: Partial<Record<TaskType, AbortController>> = {}
 
@@ -45,15 +51,21 @@ const listeners = new Set<Listener>()
 
 export interface StoreSnapshot {
   entries: EntriesByTask
+  loaded: LoadedByTask
   loading: LoadingByTask
   unread: UnreadByTask
 }
 
-let snapshot: StoreSnapshot = { entries, loading, unread }
-const serverSnapshot: StoreSnapshot = { entries: emptyEntries(), loading: emptyLoading(), unread: emptyUnread() }
+let snapshot: StoreSnapshot = { entries, loaded, loading, unread }
+const serverSnapshot: StoreSnapshot = {
+  entries: emptyEntries(),
+  loaded: emptyLoaded(),
+  loading: emptyLoading(),
+  unread: emptyUnread(),
+}
 
 function notify(): void {
-  snapshot = { entries, loading, unread }
+  snapshot = { entries, loaded, loading, unread }
   listeners.forEach((fn) => fn())
 }
 
@@ -79,10 +91,16 @@ export function ensureLoaded(task: TaskType): void {
     return
   }
   loadedTasks.add(task)
-  void loadHistoryAsync(task).then((loaded) => {
-    entries = { ...entries, [task]: loaded }
-    notify()
-  })
+  void loadHistoryAsync(task)
+    .then((loadedEntries) => {
+      entries = { ...entries, [task]: loadedEntries }
+    })
+    .finally(() => {
+      // Per-task hydration status for UI gating.
+      // This lets the UI distinguish "still loading history" from "loaded and empty".
+      loaded = { ...loaded, [task]: true }
+      notify()
+    })
 }
 
 export function appendEntry(task: TaskType, entry: ConversationEntry): void {
@@ -145,6 +163,7 @@ export function setAbortController(task: TaskType, controller: AbortController |
 /** Resets all store state. Intended for use in tests only. */
 export function resetStore(): void {
   entries = emptyEntries()
+  loaded = emptyLoaded()
   loading = emptyLoading()
   unread = emptyUnread()
   loadedTasks.clear()

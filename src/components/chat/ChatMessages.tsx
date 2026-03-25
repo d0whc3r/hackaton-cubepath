@@ -33,7 +33,7 @@ function ChatSkeleton() {
 const BOTTOM_THRESHOLD = 80 // Px from bottom considered "at bottom"
 
 export function ChatMessages() {
-  const { entries, isLoading, isHydrated, activeTask } = useChatContext()
+  const { entries, hasPersistedHistory, isLoading, isHydrated, activeTask } = useChatContext()
   const { unread } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   const scrollRef = useRef<HTMLDivElement>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -129,7 +129,8 @@ export function ChatMessages() {
     markRead(activeTask)
   }
 
-  if (!isHydrated) {
+  // Show skeleton only when we actually expect persisted history to appear.
+  if (!isHydrated && hasPersistedHistory) {
     return (
       <div className="relative min-h-0 flex-1 overflow-hidden">
         <div className="h-full overflow-y-auto">
@@ -139,7 +140,7 @@ export function ChatMessages() {
     )
   }
 
-  if (entries.length === 0) {
+  if (!isHydrated || entries.length === 0) {
     return <EmptyState />
   }
 

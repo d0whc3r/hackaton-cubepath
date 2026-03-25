@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { PullState, SectionDef } from './types'
 import { CONTEXT_DIVISOR, CUSTOM_VALUE } from './constants'
+import { formatModelSizeGb } from './helpers'
 import { ModelStatusBadge } from './ModelStatusBadge'
 
 interface ModelSectionCardProps {
@@ -89,16 +90,11 @@ export function ModelSectionCard({
               {selectedModel.params}
             </Badge>
             <Badge variant="outline" className="text-[10px]">
-              {selectedModel.size}
+              {formatModelSizeGb(selectedModel)}
             </Badge>
             <Badge variant="outline" className="text-[10px]">
               {contextLabel}
             </Badge>
-            {selectedModel.canTranslateCode && (
-              <Badge variant="outline" className="text-[10px] text-blue-700 dark:text-blue-400">
-                code-aware
-              </Badge>
-            )}
           </>
         )}
       </div>
@@ -112,7 +108,7 @@ export function ModelSectionCard({
             <SelectItem key={model.id} value={model.id} className="text-xs">
               <span className="font-medium">{model.label}</span>
               <span className="ml-1.5 text-muted-foreground">
-                {model.params} · {model.size}
+                {model.params} · {formatModelSizeGb(model)}
               </span>
               {model.id === defaultModelId && (
                 <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">
