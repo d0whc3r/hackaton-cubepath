@@ -1,4 +1,5 @@
-import { defineMiddleware } from 'astro:middleware'
+import { wrapRequestHandler } from '@sentry/cloudflare'
+import { defineMiddleware, sequence } from 'astro:middleware'
 import { DEFAULT_GUARD_MODEL } from '@/lib/railguard/guard-models'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
@@ -82,7 +83,29 @@ async function ensureGuardReady(baseUrl: string, modelId: string): Promise<boole
   }
 }
 
-export const onRequest = defineMiddleware(async (context, next) => {
+const sentryMiddleware = defineMiddleware(async (context, next) => {
+  const dsn = import.meta.env.SENTRY_DSN as string | undefined
+  if (!dsn) {
+    return next()
+  }
+  return wrapRequestHandler(
+    {
+      context: context.locals.cfContext,
+      options: {
+        dsn,
+        enableLogs: true,
+        environment: import.meta.env.APP_ENV ?? import.meta.env.MODE,
+        release: import.meta.env.APP_VERSION as string | undefined,
+        sendDefaultPii: true,
+        tracesSampleRate: Number(import.meta.env.SENTRY_TRACES_SAMPLE_RATE ?? '0'),
+      },
+      request: context.request,
+    },
+    () => next(),
+  )
+})
+
+const guardMiddleware = defineMiddleware(async (context, next) => {
   const { pathname } = context.url
   if (!isHtmlRequest(context.request, pathname)) {
     return next()
@@ -139,3 +162,5 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   return next()
 })
+
+export const onRequest = sequence(sentryMiddleware, guardMiddleware)

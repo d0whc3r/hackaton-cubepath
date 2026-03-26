@@ -133,12 +133,12 @@ export function ModelConfigPage() {
     }
 
     globalThis.addEventListener('beforeunload', onBeforeUnload)
-    document.addEventListener('click', onDocumentClickCapture, true)
+    document.addEventListener('click', onDocumentClickCapture, false)
     globalThis.addEventListener('popstate', onPopState)
 
     return () => {
       globalThis.removeEventListener('beforeunload', onBeforeUnload)
-      document.removeEventListener('click', onDocumentClickCapture, true)
+      document.removeEventListener('click', onDocumentClickCapture, false)
       globalThis.removeEventListener('popstate', onPopState)
     }
   }, [isDirty])

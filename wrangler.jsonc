@@ -1,13 +1,30 @@
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "hackaton-cubepath",
-  "compatibility_date": "2026-03-17",
-  "compatibility_flags": ["global_fetch_strictly_public"],
   "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-03-17",
+  // nodejs_compat_v2 — required for pino, @sentry/node, and node:events used server-side.
+  // global_fetch_strictly_public — prevents fetch() to private/loopback IPs in production;
+  //   Ollama must be reachable via a public URL (configure PUBLIC_OLLAMA_BASE_URL as a secret).
+  "compatibility_flags": ["nodejs_compat_v2", "global_fetch_strictly_public"],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
   },
   "observability": {
     "enabled": true,
+  },
+  // Non-sensitive defaults — override per environment or via wrangler secret put for secrets.
+  // Secrets (not committed): SENTRY_DSN, PUBLIC_SENTRY_DSN, SENTRY_AUTH_TOKEN,
+  //                          AXIOM_TOKEN, PUBLIC_OLLAMA_BASE_URL (if pointing to a real server)
+  "vars": {
+    "LOG_LEVEL": "info",
+    "AXIOM_DATASET": "slm-router",
+    "AXIOM_LOG_LEVEL": "info",
+    "SENTRY_LOG_LEVEL": "warn",
+    "SENTRY_TRACES_SAMPLE_RATE": "1",
+    "PUBLIC_LOG_LEVEL": "info",
+    "PUBLIC_SENTRY_LOG_LEVEL": "warn",
+    "PUBLIC_SENTRY_TRACES_SAMPLE_RATE": "1",
   },
 }

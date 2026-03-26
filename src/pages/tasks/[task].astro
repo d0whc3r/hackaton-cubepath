@@ -19,7 +19,7 @@ if (!config) {
 
 <TaskPageLayout title={config.title} description={config.description}>
   <TaskApp
-    client:load
+    client:only="react"
     fixedTaskType={config.fixedTaskType}
     pageTitle={config.pageTitle}
     pageDescription={config.pageDescription}

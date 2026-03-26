@@ -19,3 +19,4 @@ coverage/
 worker-configuration.d.ts
 *.tsbuildinfo
 ollama_data/
+.dev.vars

@@ -85,6 +85,6 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-rout
   </head>
   <body class:list={[fullScreen ? 'h-screen overflow-hidden' : 'min-h-screen', 'bg-background text-foreground']}>
     <slot />
-    <Toaster client:load />
+    <Toaster client:only="react" />
   </body>
 </html>

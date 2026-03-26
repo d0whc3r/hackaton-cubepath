@@ -1,10 +1,10 @@
-import { redactionPlugin } from '@loglayer/plugin-redaction'
 import { SentryTransport } from '@loglayer/transport-sentry'
 // oxlint-disable-next-line import/no-namespace
 import * as Sentry from '@sentry/browser'
 import { ConsoleTransport, LogLayer } from 'loglayer'
 import { serializeError } from 'serialize-error'
 import type { LogContext, LogLevel } from '@/lib/observability/types'
+import { redactionPlugin } from '@/lib/observability/redact'
 
 const isBrowser = globalThis.window !== undefined
 
@@ -48,7 +48,7 @@ const clientLog = new LogLayer({
   plugins: [
     redactionPlugin({
       censor: '[REDACTED]',
-      paths: ['authorization', 'password', 'token', '*.authorization', '*.password', '*.token'],
+      paths: ['authorization', 'password', 'token'],
     }),
   ],
   transport: createClientTransports(),
