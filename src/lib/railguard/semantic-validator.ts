@@ -9,7 +9,7 @@ import { GUARD_PROMPTS } from './guard-prompts'
  * Maximum time (ms) to wait for the guard model to respond.
  * Fail-open on timeout; static rules already ran and caught obvious attacks.
  */
-const GUARD_TIMEOUT_MS = 3000
+const GUARD_TIMEOUT_MS = 5000
 
 /**
  * Semantic guard: asks a small, fast AI model whether the input is a legitimate
@@ -37,12 +37,17 @@ export async function validateInputSemantic(
   try {
     const ollama = ollamaClient(ollamaBaseUrl)
 
+    // Prefix the input with the task label so the model has explicit context,
+    // Even if the system prompt is partially ignored by very small models.
+    const prompt = `[Task: ${taskType}]\n${input}`
+
     const { text } = await generateText({
       abortSignal: AbortSignal.timeout(GUARD_TIMEOUT_MS),
-      maxTokens: 1000,
+      maxTokens: 10,
       model: ollama(guardModel),
-      prompt: input,
+      prompt,
       system: GUARD_PROMPTS[taskType],
+      temperature: 0,
     })
 
     // Parse the binary answer from the model output.
