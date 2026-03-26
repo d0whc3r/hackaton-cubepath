@@ -68,13 +68,20 @@ export function detectLanguage(input: string): DetectedLanguage {
     return { confidence: 'low', language: 'unknown' }
   }
 
+  // Sample only the first 2000 chars — language markers appear early and
+  // Keeping the slice small makes regex scans faster on large inputs.
+  const sample = input.slice(0, 2000)
   const scores = new Map<string, number>()
 
   for (const rule of RULES) {
     let matchCount = 0
     for (const pattern of rule.patterns) {
-      if (pattern.test(input)) {
+      if (pattern.test(sample)) {
         matchCount++
+        // Early exit once high confidence is reached — no need to test more patterns.
+        if (matchCount >= 3) {
+          break
+        }
       }
     }
     if (matchCount > 0) {

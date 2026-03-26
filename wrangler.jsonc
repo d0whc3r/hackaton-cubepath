@@ -22,9 +22,9 @@
     "AXIOM_DATASET": "slm-router",
     "AXIOM_LOG_LEVEL": "info",
     "SENTRY_LOG_LEVEL": "warn",
-    "SENTRY_TRACES_SAMPLE_RATE": "1",
+    "SENTRY_TRACES_SAMPLE_RATE": "0.1",
     "PUBLIC_LOG_LEVEL": "info",
     "PUBLIC_SENTRY_LOG_LEVEL": "warn",
-    "PUBLIC_SENTRY_TRACES_SAMPLE_RATE": "1",
+    "PUBLIC_SENTRY_TRACES_SAMPLE_RATE": "0.1",
   },
 }

@@ -96,7 +96,7 @@ const sentryMiddleware = defineMiddleware(async (context, next) => {
         enableLogs: true,
         environment: import.meta.env.APP_ENV ?? import.meta.env.MODE,
         release: import.meta.env.APP_VERSION as string | undefined,
-        sendDefaultPii: true,
+        sendDefaultPii: false,
         tracesSampleRate: Number(import.meta.env.SENTRY_TRACES_SAMPLE_RATE ?? '0'),
       },
       request: context.request,
@@ -116,20 +116,26 @@ const guardMiddleware = defineMiddleware(async (context, next) => {
   const key = cacheKey(baseUrl, modelId)
   const now = Date.now()
 
+  const secure = import.meta.env.PROD
+
   const persisted = parseReadyCookie(context.cookies.get(READY_COOKIE_NAME)?.value)
   if (persisted && persisted.key === key && now - persisted.timestamp < READY_CACHE_TTL_MS) {
     context.cookies.set(STATE_COOKIE_NAME, 'ready', {
+      httpOnly: true,
       maxAge: READY_COOKIE_MAX_AGE_SECONDS,
       path: '/',
       sameSite: 'lax',
+      secure,
     })
     return next()
   }
 
   context.cookies.set(STATE_COOKIE_NAME, 'loading', {
+    httpOnly: true,
     maxAge: READY_COOKIE_MAX_AGE_SECONDS,
     path: '/',
     sameSite: 'lax',
+    secure,
   })
 
   let inflight = inflightByKey.get(key)
@@ -143,20 +149,26 @@ const guardMiddleware = defineMiddleware(async (context, next) => {
   const ready = await inflight
   if (ready) {
     context.cookies.set(READY_COOKIE_NAME, encodeURIComponent(JSON.stringify({ key, timestamp: Date.now() })), {
+      httpOnly: true,
       maxAge: READY_COOKIE_MAX_AGE_SECONDS,
       path: '/',
       sameSite: 'lax',
+      secure,
     })
     context.cookies.set(STATE_COOKIE_NAME, 'ready', {
+      httpOnly: true,
       maxAge: READY_COOKIE_MAX_AGE_SECONDS,
       path: '/',
       sameSite: 'lax',
+      secure,
     })
   } else {
     context.cookies.set(STATE_COOKIE_NAME, 'error', {
+      httpOnly: true,
       maxAge: READY_COOKIE_MAX_AGE_SECONDS,
       path: '/',
       sameSite: 'lax',
+      secure,
     })
   }
 

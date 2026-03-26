@@ -8,7 +8,7 @@ import { runStream } from '@/lib/api/stream-runner'
 import { withApiLogging } from '@/lib/observability/api'
 import { recordRouteBlocked, recordRouteRequest } from '@/lib/observability/metrics'
 import { logServer, logServerError } from '@/lib/observability/server'
-import { appendEvent, buildValidationEvent, DEFAULT_GUARD_MODEL, validateInputSemantic } from '@/lib/railguard'
+import { appendEvent, buildValidationEvent, validateInputSemantic } from '@/lib/railguard'
 import { detectLanguage } from '@/lib/router/detector'
 import { isDirectTask, routeDirect } from '@/lib/router/direct'
 import { routeWithAnalyst } from '@/lib/router/index'
@@ -24,7 +24,6 @@ interface ValidatedRequest {
   docstringModel: string
   errorExplainModel: string
   explainModel: string
-  guardModel: string
   input: string
   namingHelperModel: string
   ollamaBaseUrl: string
@@ -119,7 +118,6 @@ function buildRequest(data: ReturnType<typeof RouteRequestSchema.parse>): Valida
     docstringModel: resolveModel(data.docstringModel, DEFAULT_MODELS.docstring),
     errorExplainModel: resolveModel(data.errorExplainModel, DEFAULT_MODELS['error-explain']),
     explainModel: resolveModel(data.explainModel, DEFAULT_MODELS.explain),
-    guardModel: resolveModel(data.guardModel, DEFAULT_GUARD_MODEL),
     input: data.input,
     namingHelperModel: resolveModel(data.namingHelperModel, DEFAULT_MODELS['naming-helper']),
     ollamaBaseUrl: resolveModel(data.ollamaBaseUrl, OLLAMA_BASE_URL_DEFAULT),
@@ -152,7 +150,7 @@ export const POST: APIRoute = withApiLogging('route.main', async ({ request }, r
   const req = buildRequest(data)
 
   // [railguard] semantic validation; task-aware AI check
-  const semanticValidation = await validateInputSemantic(data.input, data.taskType, req.ollamaBaseUrl, req.guardModel)
+  const semanticValidation = await validateInputSemantic(data.input, data.taskType, req.ollamaBaseUrl)
   appendEvent(buildValidationEvent(semanticValidation, data.input))
   if (semanticValidation.decision === 'blocked') {
     logServer('warn', 'route.blocked_by_railguard', {

@@ -95,6 +95,10 @@ export function ensureLoaded(task: TaskType): void {
     .then((loadedEntries) => {
       entries = { ...entries, [task]: loadedEntries }
     })
+    .catch((error: unknown) => {
+      // History load failure is recoverable — the user starts with an empty list.
+      console.error('[chat-store] Failed to load history for task:', task, error)
+    })
     .finally(() => {
       // Per-task hydration status for UI gating.
       // This lets the UI distinguish "still loading history" from "loaded and empty".

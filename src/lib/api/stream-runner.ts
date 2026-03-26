@@ -7,6 +7,12 @@ import { logServer, logServerError } from '@/lib/observability/server'
 /** 5 min: specialist models on consumer hardware can be slow for large inputs */
 const SPECIALIST_TIMEOUT_MS = 300_000
 
+/** Guard against unbounded continuation payloads on very long outputs. */
+const MAX_OUTPUT_CHARS = 50_000
+
+/** How many chars of prior output to include as context for the continuation request. */
+const CONTINUATION_CONTEXT_CHARS = 2000
+
 interface StreamRunnerParams {
   emit: SseEmitter
   input: string
@@ -33,7 +39,7 @@ export async function runStream({
 }: StreamRunnerParams): Promise<void> {
   const abortController = new AbortController()
   const timeout = setTimeout(() => abortController.abort(), SPECIALIST_TIMEOUT_MS)
-  let outputText = ''
+  const outputChunks: string[] = []
   const startedAt = Date.now()
 
   logServer('info', 'stream.specialist.start', { autoContinue, inputSize: input.length, modelId })
@@ -47,16 +53,26 @@ export async function runStream({
     })
 
     for await (const chunk of result.textStream) {
-      outputText += chunk
+      outputChunks.push(chunk)
       emit('response_chunk', { text: chunk })
     }
 
-    if (autoContinue && (await result.finishReason) === 'length' && !abortController.signal.aborted) {
+    const outputText = outputChunks.join('')
+
+    if (
+      autoContinue &&
+      outputText.length < MAX_OUTPUT_CHARS &&
+      (await result.finishReason) === 'length' &&
+      !abortController.signal.aborted
+    ) {
+      // Truncate prior output to the last N chars so the continuation payload
+      // Stays bounded regardless of how long the initial response was.
+      const contextForContinuation = outputText.slice(-CONTINUATION_CONTEXT_CHARS)
       const continuation = streamText({
         abortSignal: abortController.signal,
         messages: [
           { content: input, role: 'user' },
-          { content: outputText, role: 'assistant' },
+          { content: contextForContinuation, role: 'assistant' },
           {
             content: 'Continue exactly from where you left off. Do not repeat anything already written.',
             role: 'user',
@@ -67,23 +83,24 @@ export async function runStream({
       })
 
       for await (const chunk of continuation.textStream) {
-        outputText += chunk
+        outputChunks.push(chunk)
         emit('response_chunk', { text: chunk })
       }
     }
 
     clearTimeout(timeout)
+    const totalOutputChars = outputChunks.reduce((sum, c) => sum + c.length, 0)
     const durationMs = Date.now() - startedAt
     logServer('info', 'stream.specialist.done', {
       durationMs,
       inputSize: input.length,
       modelId,
-      outputSize: outputText.length,
+      outputSize: totalOutputChars,
     })
     recordStreamDuration(modelId, durationMs, 'done')
-    recordStreamChars(modelId, input.length, outputText.length)
+    recordStreamChars(modelId, input.length, totalOutputChars)
     emit('routing_step', { label: 'Response generated', status: 'done', step: 'generating_response' })
-    emit('cost', estimateCost(input.length, outputText.length))
+    emit('cost', estimateCost(input.length, totalOutputChars))
     emit('done', {})
   } catch (error) {
     clearTimeout(timeout)

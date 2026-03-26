@@ -39,7 +39,9 @@ export async function validateInputSemantic(
 
     // Prefix the input with the task label so the model has explicit context,
     // Even if the system prompt is partially ignored by very small models.
-    const prompt = `[Task: ${taskType}]\n${input}`
+    // Truncate to 500 chars to limit prompt-injection surface area.
+    const guardInput = input.slice(0, 500)
+    const prompt = `[Task: ${taskType}]\n${guardInput}`
 
     const { text } = await generateText({
       abortSignal: AbortSignal.timeout(GUARD_TIMEOUT_MS),

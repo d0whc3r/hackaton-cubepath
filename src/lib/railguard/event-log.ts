@@ -3,9 +3,11 @@ import { sanitise } from './sanitise'
 
 const MAX_BUFFER = 1000
 const RETENTION_DAYS = 30
+const PRUNE_INTERVAL_MS = 60_000
 
 /** Module-level in-memory circular buffer. */
 const eventBuffer: ValidationEvent[] = []
+let lastPruneAt = 0
 
 /**
  * Removes all ValidationEvents older than the specified number of days.
@@ -24,13 +26,17 @@ export function pruneOlderThan(days: number): void {
 
 /**
  * Appends a ValidationEvent to the in-memory event log.
- * - Prunes events older than 30 days before appending.
+ * - Prunes events older than 30 days at most once per minute (not on every call).
  * - Caps the buffer at 1,000 entries, dropping the oldest on overflow.
  * - Never throws.
  */
 export function appendEvent(event: ValidationEvent): void {
   try {
-    pruneOlderThan(RETENTION_DAYS)
+    const now = Date.now()
+    if (now - lastPruneAt > PRUNE_INTERVAL_MS) {
+      pruneOlderThan(RETENTION_DAYS)
+      lastPruneAt = now
+    }
     eventBuffer.push(event)
     if (eventBuffer.length > MAX_BUFFER) {
       eventBuffer.splice(0, eventBuffer.length - MAX_BUFFER)

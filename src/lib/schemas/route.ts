@@ -61,23 +61,27 @@ export const SpecialistInfoSchema = z.object({
 })
 export type SpecialistInfo = z.infer<typeof SpecialistInfoSchema>
 
+/** Validates a model ID: alphanumeric, dots, dashes, colons, slashes, at-signs. Max 100 chars. */
+const ModelIdSchema = z
+  .string()
+  .regex(/^[\w][\w.\-:/@]{0,99}$/, 'Invalid model ID format')
+  .optional()
+
 export const RouteRequestSchema = z.object({
-  analystModel: z.string().optional(),
-  commitModel: z.string().optional(),
-  deadCodeModel: z.string().optional(),
-  docstringModel: z.string().optional(),
-  errorExplainModel: z.string().optional(),
-  explainModel: z.string().optional(),
-  /** Small/fast guard model used for semantic input validation. Defaults to qwen2.5:0.5b. */
-  guardModel: z.string().optional(),
+  analystModel: ModelIdSchema,
+  commitModel: ModelIdSchema,
+  deadCodeModel: ModelIdSchema,
+  docstringModel: ModelIdSchema,
+  errorExplainModel: ModelIdSchema,
+  explainModel: ModelIdSchema,
   input: z.string().min(1).max(15_000),
-  namingHelperModel: z.string().optional(),
-  ollamaBaseUrl: z.string().optional(),
-  performanceHintModel: z.string().optional(),
-  refactorModel: z.string().optional(),
+  namingHelperModel: ModelIdSchema,
+  ollamaBaseUrl: z.string().url().optional(),
+  performanceHintModel: ModelIdSchema,
+  refactorModel: ModelIdSchema,
   taskType: TaskTypeSchema,
-  testModel: z.string().optional(),
-  typeHintsModel: z.string().optional(),
+  testModel: ModelIdSchema,
+  typeHintsModel: ModelIdSchema,
 })
 export type RouteRequest = z.infer<typeof RouteRequestSchema>
 
