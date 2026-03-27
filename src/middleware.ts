@@ -1,5 +1,6 @@
 import { wrapRequestHandler } from '@sentry/cloudflare'
 import { defineMiddleware, sequence } from 'astro:middleware'
+import { parseReadyCookie } from '@/lib/guard/ready-cookie'
 import { DEFAULT_GUARD_MODEL } from '@/lib/railguard/guard-models'
 import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
@@ -10,6 +11,11 @@ const READY_COOKIE_MAX_AGE_SECONDS = READY_CACHE_TTL_MS / 1000
 const CHECK_TIMEOUT_MS = 5000
 const PULL_TIMEOUT_MS = 600_000
 
+/**
+ * Deduplicates concurrent guard-model checks only within this Worker isolate.
+ * Cloudflare may run multiple isolates, so cross-isolate deduplication is not guaranteed.
+ * That trade-off is acceptable for the current single-user / low-scale bootstrap flow.
+ */
 const inflightByKey = new Map<string, Promise<boolean>>()
 
 interface OllamaTagsResponse {
@@ -18,21 +24,6 @@ interface OllamaTagsResponse {
 
 function cacheKey(baseUrl: string, modelId: string): string {
   return `${baseUrl}::${modelId}`
-}
-
-function parseReadyCookie(raw: string | undefined): { key: string; timestamp: number } | null {
-  if (!raw) {
-    return null
-  }
-  try {
-    const parsed = JSON.parse(decodeURIComponent(raw)) as { key?: string; timestamp?: number }
-    if (typeof parsed.key !== 'string' || typeof parsed.timestamp !== 'number') {
-      return null
-    }
-    return { key: parsed.key, timestamp: parsed.timestamp }
-  } catch {
-    return null
-  }
 }
 
 function isHtmlRequest(request: Request, pathname: string): boolean {

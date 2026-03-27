@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react'
 import { appWretch } from '@/lib/http/app-client'
 
-export function useInstalledModels(ollamaBaseUrl: string) {
+export function useInstalledModels(ollamaBaseUrl: string, enabled: boolean) {
   const [installedModels, setInstalledModels] = useState<string[] | null>(null)
 
   useEffect(() => {
+    if (!enabled) {
+      setInstalledModels([])
+      return
+    }
+
     const abort = new AbortController()
 
     setInstalledModels(null)
@@ -23,7 +28,7 @@ export function useInstalledModels(ollamaBaseUrl: string) {
       })
 
     return () => abort.abort()
-  }, [ollamaBaseUrl])
+  }, [enabled, ollamaBaseUrl])
 
   return { installedModels, setInstalledModels }
 }

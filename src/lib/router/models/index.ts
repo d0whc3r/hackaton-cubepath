@@ -1,5 +1,13 @@
-import type { ModelOption, TaskType } from '../types'
+import type { ModelOption, ModelRuntime, TaskType } from '../types'
 import { ANALYST_MODELS, DEFAULT_ANALYST_MODEL } from './analyst'
+import {
+  ANALYST_MODELS_CLOUD,
+  DEFAULT_ANALYST_MODEL_CLOUD,
+  DEFAULT_MODELS_CLOUD,
+  DEFAULT_TRANSLATE_MODEL_CLOUD,
+  MODELS_BY_TASK_CLOUD,
+  TRANSLATE_MODELS_CLOUD,
+} from './cloud'
 import { COMMIT_MODELS, DEFAULT_COMMIT_MODEL } from './commit'
 import { DEAD_CODE_MODELS, DEFAULT_DEAD_CODE_MODEL } from './dead-code'
 import { DEFAULT_DOCSTRING_MODEL, DOCSTRING_MODELS } from './docstring'
@@ -16,6 +24,7 @@ export type { ModelOption } from '../types'
 
 export {
   ANALYST_MODELS,
+  ANALYST_MODELS_CLOUD,
   COMMIT_MODELS,
   DEAD_CODE_MODELS,
   DOCSTRING_MODELS,
@@ -27,10 +36,12 @@ export {
   TEST_MODELS,
   TRANSLATE_MODELS,
   TYPE_HINTS_MODELS,
+  TRANSLATE_MODELS_CLOUD,
 }
 
 export {
   DEFAULT_ANALYST_MODEL,
+  DEFAULT_ANALYST_MODEL_CLOUD,
   DEFAULT_COMMIT_MODEL,
   DEFAULT_DEAD_CODE_MODEL,
   DEFAULT_DOCSTRING_MODEL,
@@ -41,6 +52,7 @@ export {
   DEFAULT_REFACTOR_MODEL,
   DEFAULT_TEST_MODEL,
   DEFAULT_TRANSLATE_MODEL,
+  DEFAULT_TRANSLATE_MODEL_CLOUD,
   DEFAULT_TYPE_HINTS_MODEL,
 }
 
@@ -68,6 +80,36 @@ export const DEFAULT_MODELS: Record<TaskType, string> = {
   refactor: DEFAULT_REFACTOR_MODEL,
   test: DEFAULT_TEST_MODEL,
   'type-hints': DEFAULT_TYPE_HINTS_MODEL,
+}
+
+export const MODELS_BY_TASK_BY_RUNTIME: Record<ModelRuntime, Record<TaskType, ModelOption[]>> = {
+  cloud: MODELS_BY_TASK_CLOUD,
+  local: MODELS_BY_TASK,
+}
+
+export const DEFAULT_MODELS_BY_RUNTIME: Record<ModelRuntime, Record<TaskType, string>> = {
+  cloud: DEFAULT_MODELS_CLOUD,
+  local: DEFAULT_MODELS,
+}
+
+export const ANALYST_MODELS_BY_RUNTIME: Record<ModelRuntime, ModelOption[]> = {
+  cloud: ANALYST_MODELS_CLOUD,
+  local: ANALYST_MODELS,
+}
+
+export const DEFAULT_ANALYST_MODEL_BY_RUNTIME: Record<ModelRuntime, string> = {
+  cloud: DEFAULT_ANALYST_MODEL_CLOUD,
+  local: DEFAULT_ANALYST_MODEL,
+}
+
+export const TRANSLATE_MODELS_BY_RUNTIME: Record<ModelRuntime, ModelOption[]> = {
+  cloud: TRANSLATE_MODELS_CLOUD,
+  local: TRANSLATE_MODELS,
+}
+
+export const DEFAULT_TRANSLATE_MODEL_BY_RUNTIME: Record<ModelRuntime, string> = {
+  cloud: DEFAULT_TRANSLATE_MODEL_CLOUD,
+  local: DEFAULT_TRANSLATE_MODEL,
 }
 
 /**

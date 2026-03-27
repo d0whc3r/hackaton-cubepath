@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro'
 import type { SseEmitter } from '@/lib/api/sse'
 import type { DirectTaskType } from '@/lib/router/direct'
 import type { TaskType } from '@/lib/schemas/route'
-import { resolveModel } from '@/lib/api/resolve-model'
+import { resolveModel, resolveValue } from '@/lib/api/resolve-model'
 import { createSseStream, ollamaClient, sseResponse } from '@/lib/api/sse'
 import { runStream } from '@/lib/api/stream-runner'
 import { withApiLogging } from '@/lib/observability/api'
@@ -48,7 +48,12 @@ async function buildDirectStream(req: ValidatedRequest, emit: SseEmitter): Promi
     return
   }
 
-  const resolvedModelId = req[DIRECT_TASK_MODEL_KEY[req.taskType]] as string
+  const modelKey = DIRECT_TASK_MODEL_KEY[req.taskType]
+  const resolvedModelId = req[modelKey]
+  if (!resolvedModelId) {
+    emit('error', { code: 'INTERNAL', message: 'No model configured for this task.' })
+    return
+  }
   const { displayName, modelId, systemPrompt } = routeDirect(req.taskType, resolvedModelId)
   const { language } = detectLanguage(req.input)
 
@@ -120,7 +125,7 @@ function buildRequest(data: ReturnType<typeof RouteRequestSchema.parse>): Valida
     explainModel: resolveModel(data.explainModel, DEFAULT_MODELS.explain),
     input: data.input,
     namingHelperModel: resolveModel(data.namingHelperModel, DEFAULT_MODELS['naming-helper']),
-    ollamaBaseUrl: resolveModel(data.ollamaBaseUrl, OLLAMA_BASE_URL_DEFAULT),
+    ollamaBaseUrl: resolveValue(data.ollamaBaseUrl, OLLAMA_BASE_URL_DEFAULT),
     performanceHintModel: resolveModel(data.performanceHintModel, DEFAULT_MODELS['performance-hint']),
     refactorModel: resolveModel(data.refactorModel, DEFAULT_MODELS.refactor),
     taskType: data.taskType,

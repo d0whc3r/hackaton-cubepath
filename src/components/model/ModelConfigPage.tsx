@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import type { SectionDef, SectionGroupId } from './settings/types'
-import { SECTIONS } from './settings/constants'
+import type { SectionGroupId } from './settings/types'
 import { formatGb, getUniqueSelectedModelIds, getUniqueSelectedSizeGb, isModelInstalled } from './settings/helpers'
 import { MissingModelsDialog } from './settings/MissingModelsDialog'
 import { PlatformStatusPanel } from './settings/PlatformStatusPanel'
@@ -32,10 +31,6 @@ const GROUPS: { id: SectionGroupId; label: string; description: string }[] = [
   },
 ]
 
-function getGroupSections(groupId: SectionGroupId): SectionDef[] {
-  return SECTIONS.filter((section) => section.group === groupId)
-}
-
 export function ModelConfigPage() {
   const {
     activeSection,
@@ -47,14 +42,17 @@ export function ModelConfigPage() {
     handleCopyPull,
     handleCustomModelChange,
     handleModelChange,
+    handleModelRuntimeChange,
     handlePull,
     handleReset,
     handleSave,
     installedModels,
     isCustom,
     isDirty,
+    modelRuntime,
     ollamaBaseUrl,
     pullStates,
+    sections,
     setActiveSection,
     setOllamaBaseUrl,
   } = useModelConfigPage()
@@ -63,10 +61,11 @@ export function ModelConfigPage() {
   const isConfirmingNavigationRef = useRef(false)
   const allowNavigationRef = useRef(false)
 
-  const missingSections = SECTIONS.filter(
-    (section) => !isModelInstalled(installedModels, config[section.configKey] as string),
-  )
-  const canSave = installedModels !== null && missingSections.length === 0
+  const isLocalRuntime = modelRuntime === 'local'
+  const missingSections = isLocalRuntime
+    ? sections.filter((section) => !isModelInstalled(installedModels, config[section.configKey] as string))
+    : []
+  const canSave = !isLocalRuntime || (installedModels !== null && missingSections.length === 0)
 
   useEffect(() => {
     if (!isDirty) {
@@ -183,7 +182,30 @@ export function ModelConfigPage() {
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {missingSections.length > 0 &&
+          <div className="inline-flex rounded-md border border-border bg-background p-0.5">
+            <Button
+              type="button"
+              variant={modelRuntime === 'local' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 px-3 text-xs"
+              onClick={() => handleModelRuntimeChange('local')}
+            >
+              Local
+            </Button>
+            <Button
+              type="button"
+              variant={modelRuntime === 'cloud' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 px-3 text-xs"
+              onClick={() => handleModelRuntimeChange('cloud')}
+            >
+              Cloud
+            </Button>
+          </div>
+
+          {isLocalRuntime &&
+            installedModels !== null &&
+            missingSections.length > 0 &&
             (() => {
               const missingModelIds = [
                 ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
@@ -204,20 +226,25 @@ export function ModelConfigPage() {
           <Button type="button" variant="outline" size="sm" onClick={handleReset}>
             Reset
           </Button>
-          <Button type="button" size="sm" onClick={handleSaveClick} disabled={installedModels === null}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={handleSaveClick}
+            disabled={isLocalRuntime && installedModels === null}
+          >
             Save
           </Button>
         </div>
       </div>
 
-      <PlatformStatusPanel config={{ ...config, ollamaBaseUrl }} onEndpointChange={setOllamaBaseUrl} />
+      <PlatformStatusPanel config={{ ...config, modelRuntime, ollamaBaseUrl }} onEndpointChange={setOllamaBaseUrl} />
 
       <Separator className="my-8" />
 
       {/* Groups */}
       <div className="space-y-8">
         {GROUPS.map((group) => {
-          const groupSections = getGroupSections(group.id)
+          const groupSections = sections.filter((section) => section.group === group.id)
           return (
             <section key={group.id} aria-labelledby={`group-heading-${group.id}`}>
               <div className="mb-4">
@@ -250,6 +277,7 @@ export function ModelConfigPage() {
                         isInstalled={isModelInstalled(installedModels, modelId)}
                         installedModelsReady={installedModels !== null}
                         pullState={pullStates[modelId]}
+                        modelRuntime={modelRuntime}
                         ollamaBaseUrl={ollamaBaseUrl}
                         copiedModelId={copiedModelId}
                         onActivate={() => setActiveSection(section.id)}

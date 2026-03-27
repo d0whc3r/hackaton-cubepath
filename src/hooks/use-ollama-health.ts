@@ -95,11 +95,21 @@ function computeHealth(response: OllamaHealthResponse, config: ModelConfig): Oll
  * clicks the refresh button). URL changes alone do NOT trigger a new request —
  * they transition the status to 'stale' so the UI can prompt the user to verify.
  */
-export function useOllamaHealth(config: ModelConfig, triggerKey: number): OllamaHealth {
+export function useOllamaHealth(config: ModelConfig, triggerKey: number, enabled: boolean): OllamaHealth {
   const [health, setHealth] = useState<OllamaHealth>(INITIAL_HEALTH)
   const triggeredUrlRef = useRef<string>(config.ollamaBaseUrl)
 
   useEffect(() => {
+    if (!enabled) {
+      setHealth((previous) => ({
+        ...previous,
+        checkedAt: new Date().toISOString(),
+        checkedUrl: config.ollamaBaseUrl,
+        status: 'healthy',
+      }))
+      return
+    }
+
     const abort = new AbortController()
     const urlToCheck = config.ollamaBaseUrl
     triggeredUrlRef.current = urlToCheck
@@ -142,7 +152,7 @@ export function useOllamaHealth(config: ModelConfig, triggerKey: number): Ollama
       abort.abort()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerKey])
+  }, [config.ollamaBaseUrl, enabled, triggerKey])
 
   const isStale =
     health.status !== 'loading' && health.checkedUrl !== null && config.ollamaBaseUrl !== health.checkedUrl

@@ -154,16 +154,22 @@ interface PlatformStatusPanelProps {
 
 export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatusPanelProps) {
   const [triggerKey, setTriggerKey] = useState(0)
-  const health = useOllamaHealth(config, triggerKey)
+  const isLocalRuntime = config.modelRuntime === 'local'
+  const health = useOllamaHealth(config, triggerKey, isLocalRuntime)
   const [detailOpen, setDetailOpen] = useState(false)
   const selectedUniqueModels = getUniqueSelectedModelIds(config, SECTIONS)
   const selectedUniqueSizeGb = getUniqueSelectedSizeGb(config, SECTIONS)
 
-  const cfg = STATUS_CONFIG[health.status]
-  const connStatus = connectionStatus(health.status)
+  const cfg = isLocalRuntime
+    ? STATUS_CONFIG[health.status]
+    : { dot: 'bg-blue-500', label: 'Cloud mode', labelClass: 'text-blue-600 dark:text-blue-400' }
+  const connStatus = isLocalRuntime ? connectionStatus(health.status) : ('ok' as const)
   const isLoaded = health.status !== 'loading'
-  const hasDetail = health.status !== 'unreachable' && health.status !== 'stale'
+  const hasDetail = isLocalRuntime && health.status !== 'unreachable' && health.status !== 'stale'
   function buildModelSummary(): string {
+    if (!isLocalRuntime) {
+      return `Cloud runtime · ${selectedUniqueModels.length} selected models · no local pull required`
+    }
     if (health.status === 'loading') {
       return 'Checking…'
     }
@@ -201,14 +207,16 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
               placeholder={OLLAMA_BASE_URL_DEFAULT}
               className="max-w-sm font-mono text-xs"
             />
-            {isLoaded && health.status !== 'stale' && health.ollamaVersion && (
+            {isLocalRuntime && isLoaded && health.status !== 'stale' && health.ollamaVersion && (
               <span className="shrink-0 rounded border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                 v{health.ollamaVersion}
               </span>
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            Local Ollama (<code className="font-mono">http://localhost:11434</code>) or a shared server endpoint.
+            {isLocalRuntime
+              ? 'Local Ollama (http://localhost:11434) or a shared server endpoint.'
+              : 'Cloud mode: models are hosted remotely, so local downloads are skipped.'}
           </p>
         </div>
 
@@ -221,7 +229,7 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
           <button
             type="button"
             onClick={handleRefresh}
-            disabled={health.status === 'loading'}
+            disabled={!isLocalRuntime || health.status === 'loading'}
             className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground disabled:opacity-40"
             title="Verify connection"
           >
@@ -231,7 +239,7 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
       </div>
 
       {/* Model health summary — always visible once first check completes */}
-      {isLoaded && (
+      {(isLoaded || !isLocalRuntime) && (
         <div className="border-t border-border/60">
           <button
             type="button"

@@ -9,7 +9,8 @@ import { clearHistoryAsync, loadHistoryAsync } from '@/lib/utils/history'
 
 // --- Mocks ---
 vi.mock(import('@/lib/utils/history'), () => ({
-  clearHistoryAsync: vi.fn(),
+  clearHistoryAsync: vi.fn(() => Promise.resolve()),
+  getHistoryHintCount: vi.fn(() => 0),
   loadHistory: vi.fn(() => []),
   loadHistoryAsync: vi.fn(() => Promise.resolve([])),
   saveHistory: vi.fn(),
@@ -52,6 +53,7 @@ vi.mock(import('@/lib/config/model-config'), () => ({
     docstringModel: 'docstring-model',
     errorExplainModel: 'error-explain-model',
     explainModel: 'explain-model',
+    modelRuntime: 'local',
     namingHelperModel: 'naming-helper-model',
     ollamaBaseUrl: 'http://localhost:11434',
     performanceHintModel: 'performance-hint-model',
@@ -65,11 +67,18 @@ vi.mock(import('@/lib/config/model-config'), () => ({
   loadModelConfig: vi.fn(() => ({
     analystModel: 'analyst-model',
     commitModel: 'commit-model',
+    deadCodeModel: 'dead-code-model',
+    docstringModel: 'docstring-model',
+    errorExplainModel: 'error-explain-model',
     explainModel: 'explain-model',
+    modelRuntime: 'local',
+    namingHelperModel: 'naming-helper-model',
     ollamaBaseUrl: 'http://localhost:11434',
+    performanceHintModel: 'performance-hint-model',
     refactorModel: 'refactor-model',
     testModel: 'test-model',
     translateModel: 'translate-model',
+    typeHintsModel: 'type-hints-model',
   })),
 }))
 
@@ -77,6 +86,7 @@ describe('useChatSession', () => {
   beforeEach(() => {
     resetStore()
     vi.clearAllMocks()
+    vi.mocked(clearHistoryAsync).mockResolvedValue()
     vi.mocked(loadHistoryAsync).mockResolvedValue([])
     vi.mocked(getModelForTask).mockReturnValue('test-model')
     vi.mocked(loadModelConfig).mockReturnValue({

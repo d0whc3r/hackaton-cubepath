@@ -18,14 +18,14 @@ describe('estimateCost', () => {
     expect(result.specialistCostUsd).toBeCloseTo(0.0002, 7)
   })
 
-  it('calculates large model cost at $0.000015/token', () => {
-    const result = estimateCost(400, 400) // 100+100 = 200 tokens
-    expect(result.largeModelCostUsd).toBeCloseTo(0.003, 7)
+  it('uses the highest representative cloud comparison for the large-model estimate', () => {
+    const result = estimateCost(400, 400) // 100 in + 100 out
+    expect(result.largeModelCostUsd).toBeCloseTo(0.0018, 7)
   })
 
-  it('calculates savings percentage approximately 93%', () => {
+  it('calculates savings percentage from the selected cloud comparison', () => {
     const result = estimateCost(1000, 1000)
-    expect(result.savingsPct).toBe(93)
+    expect(result.savingsPct).toBe(89)
   })
 
   it('handles 0-token edge case without division errors', () => {

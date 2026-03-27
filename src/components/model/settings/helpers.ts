@@ -1,6 +1,6 @@
 import type { ModelConfig } from '@/lib/config/model-config'
 import type { ModelOption } from '@/lib/router/types'
-import { DEFAULTS } from '@/lib/config/model-config'
+import { DEFAULTS, buildDefaultsForRuntime } from '@/lib/config/model-config'
 import type { SectionDef, SectionId } from './types'
 import { CUSTOM_VALUE, SECTIONS } from './constants'
 
@@ -25,10 +25,13 @@ export function isModelInstalled(installedModels: string[] | null, modelId: stri
   )
 }
 
-export function buildInitialCustomModels(config: ModelConfig): Record<string, string> {
+export function buildInitialCustomModels(
+  config: ModelConfig,
+  sections: SectionDef[] = SECTIONS,
+): Record<string, string> {
   const custom: Record<string, string> = {}
 
-  for (const section of SECTIONS) {
+  for (const section of sections) {
     const value = config[section.configKey] as string
     const isKnown = section.models.some((model) => model.id === value)
     if (!isKnown && value) {
@@ -51,8 +54,12 @@ export function getDefaultModelId(section: SectionDef): string {
   return DEFAULTS[section.configKey] as string
 }
 
-export function getActiveSection(activeSection: SectionId): SectionDef {
-  return SECTIONS.find((section) => section.id === activeSection) ?? SECTIONS[0]
+export function getDefaultModelIdForRuntime(section: SectionDef, modelRuntime: ModelConfig['modelRuntime']): string {
+  return buildDefaultsForRuntime(modelRuntime)[section.configKey] as string
+}
+
+export function getActiveSection(activeSection: SectionId, sections: SectionDef[] = SECTIONS): SectionDef {
+  return sections.find((section) => section.id === activeSection) ?? sections[0]
 }
 
 export function getModelSizeGb(model: ModelOption): number {
@@ -93,5 +100,8 @@ export function formatGb(value: number): string {
 }
 
 export function formatModelSizeGb(model: ModelOption): string {
+  if (model.size <= 0) {
+    return 'Cloud'
+  }
   return formatGb(getModelSizeGb(model))
 }

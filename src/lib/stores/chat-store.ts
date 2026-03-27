@@ -21,20 +21,28 @@ export const TASK_TYPES: TaskType[] = [
   'type-hints',
 ]
 
+function buildTaskRecord<T>(createValue: (task: TaskType) => T): Record<TaskType, T> {
+  const result = {} as Record<TaskType, T>
+  for (const task of TASK_TYPES) {
+    result[task] = createValue(task)
+  }
+  return result
+}
+
 function emptyEntries(): EntriesByTask {
-  return Object.fromEntries(TASK_TYPES.map((task) => [task, []])) as unknown as EntriesByTask
+  return buildTaskRecord(() => [])
 }
 
 function emptyLoading(): LoadingByTask {
-  return Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as LoadingByTask
+  return buildTaskRecord(() => false)
 }
 
 function emptyUnread(): UnreadByTask {
-  return Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as UnreadByTask
+  return buildTaskRecord(() => false)
 }
 
 function emptyLoaded(): LoadedByTask {
-  return Object.fromEntries(TASK_TYPES.map((task) => [task, false])) as LoadedByTask
+  return buildTaskRecord(() => false)
 }
 
 // --- Singleton state (persists across Astro page navigations) ---
@@ -67,6 +75,10 @@ const serverSnapshot: StoreSnapshot = {
 function notify(): void {
   snapshot = { entries, loaded, loading, unread }
   listeners.forEach((fn) => fn())
+}
+
+function reportPersistenceError(action: 'clear' | 'save', task: TaskType, error: unknown): void {
+  console.error(`[chat-store] Failed to ${action} history for task:`, task, error)
 }
 
 export function subscribe(listener: Listener): () => void {
@@ -109,7 +121,9 @@ export function ensureLoaded(task: TaskType): void {
 
 export function appendEntry(task: TaskType, entry: ConversationEntry): void {
   entries = { ...entries, [task]: [...entries[task], entry] }
-  void saveHistoryAsync(entries[task], task)
+  void saveHistoryAsync(entries[task], task).catch((error: unknown) => {
+    reportPersistenceError('save', task, error)
+  })
   notify()
 }
 
@@ -125,12 +139,16 @@ export function updateLastAssistant(task: TaskType, updater: AssistantUpdater): 
   }
   next[next.length - 1] = { ...last, assistantMessage: updater(last.assistantMessage) }
   entries = { ...entries, [task]: next }
-  void saveHistoryAsync(entries[task], task)
+  void saveHistoryAsync(entries[task], task).catch((error: unknown) => {
+    reportPersistenceError('save', task, error)
+  })
   notify()
 }
 
 export function clearTask(task: TaskType): void {
-  void clearHistoryAsync(task)
+  void clearHistoryAsync(task).catch((error: unknown) => {
+    reportPersistenceError('clear', task, error)
+  })
   entries = { ...entries, [task]: [] }
   unread = { ...unread, [task]: false }
   notify()

@@ -5,6 +5,8 @@ interface LanguageRule {
   patterns: RegExp[]
 }
 
+// Ordered from more specific to more general so equal-score ties pick the
+// More specific language: TypeScript before JavaScript, C++ before C, etc.
 const RULES: LanguageRule[] = [
   {
     language: 'TypeScript',

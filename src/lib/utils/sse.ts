@@ -52,6 +52,13 @@ export async function parseSSEStream(
   if (buffer) {
     processLine(buffer)
   }
+  if (eventType && dataLine) {
+    try {
+      dispatchSSEEvent(eventType, JSON.parse(dataLine) as Record<string, unknown>, callbacks)
+    } catch {
+      /* Ignore malformed */
+    }
+  }
 }
 
 function dispatchSSEEvent(event: string, data: Record<string, unknown>, callbacks: SSECallbacks): void {

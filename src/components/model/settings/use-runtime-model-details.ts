@@ -2,13 +2,13 @@ import { useEffect, useState } from 'react'
 import { appWretch } from '@/lib/http/app-client'
 import type { RuntimeModelDetails } from './types'
 
-export function useRuntimeModelDetails(ollamaBaseUrl: string, modelId: string) {
+export function useRuntimeModelDetails(ollamaBaseUrl: string, modelId: string, enabled: boolean) {
   const [cache, setCache] = useState<Record<string, RuntimeModelDetails>>({})
   const cacheKey = `${ollamaBaseUrl}::${modelId}`
   const runtimeModelDetails = cache[cacheKey] ?? null
 
   useEffect(() => {
-    if (!modelId.trim() || cache[cacheKey]) {
+    if (!enabled || !modelId.trim() || cache[cacheKey]) {
       return
     }
 
@@ -30,7 +30,7 @@ export function useRuntimeModelDetails(ollamaBaseUrl: string, modelId: string) {
       })
 
     return () => abort.abort()
-  }, [cache, cacheKey, modelId, ollamaBaseUrl])
+  }, [cache, cacheKey, enabled, modelId, ollamaBaseUrl])
 
   return { runtimeModelDetails }
 }

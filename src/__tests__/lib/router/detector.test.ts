@@ -67,12 +67,36 @@ describe('detectLanguage', () => {
   })
 
   it('returns unknown for empty input', () => {
-    const result = detectLanguage('')
-    expect(result.language).toBe('unknown')
+    expect(detectLanguage('')).toEqual({ confidence: 'low', language: 'unknown' })
   })
 
   it('returns a valid confidence level', () => {
     const result = detectLanguage('const x: number = 1;')
     expect(['high', 'medium', 'low']).toContain(result.confidence)
+  })
+
+  it('breaks ties toward the more specific language rule', () => {
+    const result = detectLanguage('const value = input as string')
+    expect(result.language).toBe('TypeScript')
+  })
+
+  it('returns low confidence for plain English prose', () => {
+    expect(detectLanguage('This is a paragraph about programming concepts.')).toEqual({
+      confidence: 'low',
+      language: 'unknown',
+    })
+  })
+
+  it('prefers TypeScript over JavaScript for mixed TS and JS signals', () => {
+    const result = detectLanguage(`
+      const x = 1
+      interface Foo { bar: string }
+      function baz(): void {}
+    `)
+    expect(result.language).toBe('TypeScript')
+  })
+
+  it('handles very long input without throwing', () => {
+    expect(() => detectLanguage('x'.repeat(15_000))).not.toThrow()
   })
 })

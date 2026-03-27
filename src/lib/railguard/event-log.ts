@@ -1,3 +1,4 @@
+import { logServer } from '@/lib/observability/server'
 import type { AttackVectorCategory, SecurityMetrics, ValidationEvent, ValidationResult } from './types'
 import { sanitise } from './sanitise'
 
@@ -5,7 +6,10 @@ const MAX_BUFFER = 1000
 const RETENTION_DAYS = 30
 const PRUNE_INTERVAL_MS = 60_000
 
-/** Module-level in-memory circular buffer. */
+/**
+ * Module-level in-memory circular buffer used for local inspection and tests.
+ * Durable retention comes from structured server logs emitted in appendEvent().
+ */
 const eventBuffer: ValidationEvent[] = []
 let lastPruneAt = 0
 
@@ -16,7 +20,11 @@ let lastPruneAt = 0
 export function pruneOlderThan(days: number): void {
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
   let i = 0
-  while (i < eventBuffer.length && eventBuffer[i]!.timestamp < cutoff) {
+  while (i < eventBuffer.length) {
+    const event = eventBuffer[i]
+    if (!event || event.timestamp >= cutoff) {
+      break
+    }
     i++
   }
   if (i > 0) {
@@ -32,6 +40,16 @@ export function pruneOlderThan(days: number): void {
  */
 export function appendEvent(event: ValidationEvent): void {
   try {
+    logServer(event.decision === 'blocked' ? 'warn' : 'info', 'security.event', {
+      attackVectorCategory: event.attackVectorCategory ?? 'none',
+      blockReason: event.blockReason,
+      decision: event.decision,
+      eventId: event.id,
+      matchedRuleId: event.matchedRuleId ?? 'none',
+      sanitisedExcerpt: event.sanitisedExcerpt,
+      timestamp: event.timestamp.toISOString(),
+    })
+
     const now = Date.now()
     if (now - lastPruneAt > PRUNE_INTERVAL_MS) {
       pruneOlderThan(RETENTION_DAYS)

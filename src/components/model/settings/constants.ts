@@ -12,30 +12,31 @@ import {
   Type,
   Zap,
 } from 'lucide-react'
-import {
-  ANALYST_MODELS,
-  DEAD_CODE_MODELS,
-  DOCSTRING_MODELS,
-  ERROR_EXPLAIN_MODELS,
-  MODELS_BY_TASK,
-  NAMING_HELPER_MODELS,
-  PERFORMANCE_HINT_MODELS,
-  TRANSLATE_MODELS,
-  TYPE_HINTS_MODELS,
-} from '@/lib/router/models'
+import type { ModelRuntime } from '@/lib/router/types'
+import { ANALYST_MODELS_BY_RUNTIME, MODELS_BY_TASK_BY_RUNTIME, TRANSLATE_MODELS_BY_RUNTIME } from '@/lib/router/models'
 import type { SectionDef } from './types'
 
 export const CONTEXT_DIVISOR = 1024
 export const CUSTOM_VALUE = '__custom__'
 
-export const SECTIONS: SectionDef[] = [
+interface SectionTemplate {
+  accent: string
+  configKey: SectionDef['configKey']
+  group: SectionDef['group']
+  icon: SectionDef['icon']
+  id: SectionDef['id']
+  selectionHint: string
+  subtitle: string
+  title: string
+}
+
+const SECTION_TEMPLATES: SectionTemplate[] = [
   {
     accent: 'border-primary/40',
     configKey: 'analystModel',
     group: 'infrastructure',
     icon: Bot,
     id: 'analyst',
-    models: ANALYST_MODELS,
     selectionHint: 'Pick fast + reliable JSON output. Analyst runs on every request.',
     subtitle: 'Runs first: language detection, framework detection, and diff analysis.',
     title: 'Analyst',
@@ -46,7 +47,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'analysis',
     icon: BookOpen,
     id: 'explain',
-    models: MODELS_BY_TASK.explain,
     selectionHint: 'Prioritize instruction following and long context for full-file explanations.',
     subtitle: 'Code explanation and technical documentation.',
     title: 'Explain Code',
@@ -57,7 +57,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'analysis',
     icon: AlertCircle,
     id: 'error-explain',
-    models: ERROR_EXPLAIN_MODELS,
     selectionHint: 'Prioritize instruction-following models for clear root-cause explanations.',
     subtitle: 'Root-cause analysis and numbered fix steps for error messages.',
     title: 'Error Explain',
@@ -68,7 +67,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'analysis',
     icon: Zap,
     id: 'performance-hint',
-    models: PERFORMANCE_HINT_MODELS,
     selectionHint: 'Prefer coder models with larger context for thorough optimization analysis.',
     subtitle: 'Advisory bullet list of non-breaking performance optimization suggestions.',
     title: 'Performance Hint',
@@ -79,7 +77,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'analysis',
     icon: Trash2,
     id: 'dead-code',
-    models: DEAD_CODE_MODELS,
     selectionHint: 'Prefer coder models for accurate detection of unused symbols.',
     subtitle: 'Identifies unused imports, unreachable code, and redundant variables.',
     title: 'Dead Code',
@@ -90,7 +87,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'analysis',
     icon: Tag,
     id: 'naming-helper',
-    models: NAMING_HELPER_MODELS,
     selectionHint: 'Instruction-following models produce cleaner before → after rename lists.',
     subtitle: 'Structured before → after rename list with one-line rationale per entry.',
     title: 'Naming Helper',
@@ -101,7 +97,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'generation',
     icon: TestTube2,
     id: 'test',
-    models: MODELS_BY_TASK.test,
     selectionHint: 'Prioritize code-specialist models for stronger edge-case coverage.',
     subtitle: 'Unit and integration test generation.',
     title: 'Generate Tests',
@@ -112,7 +107,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'generation',
     icon: RefreshCw,
     id: 'refactor',
-    models: MODELS_BY_TASK.refactor,
     selectionHint: 'Prefer coder models with larger context to avoid truncating full files.',
     subtitle: 'Cleanup, idiomatic rewrites, and structural code changes.',
     title: 'Refactor',
@@ -123,7 +117,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'generation',
     icon: GitCommitHorizontal,
     id: 'commit',
-    models: MODELS_BY_TASK.commit,
     selectionHint: 'Small instruction-following models are usually enough for commit summaries.',
     subtitle: 'Conventional commit message generation from diffs.',
     title: 'Write Commit',
@@ -134,7 +127,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'generation',
     icon: FileText,
     id: 'docstring',
-    models: DOCSTRING_MODELS,
     selectionHint: 'Instruction-following models produce accurate, complete documentation.',
     subtitle: 'Add or update documentation comments without changing any logic.',
     title: 'Docstring',
@@ -145,7 +137,6 @@ export const SECTIONS: SectionDef[] = [
     group: 'generation',
     icon: Type,
     id: 'type-hints',
-    models: TYPE_HINTS_MODELS,
     selectionHint: 'Prefer coder models for accurate type inference without logic changes.',
     subtitle: 'Add type annotations to parameters and return values without changing logic.',
     title: 'Type Hints',
@@ -156,9 +147,28 @@ export const SECTIONS: SectionDef[] = [
     group: 'language',
     icon: Languages,
     id: 'translate',
-    models: TRANSLATE_MODELS,
     selectionHint: 'Use dedicated translation models unless you need in-block code translation.',
     subtitle: 'Translation to 37 languages. Code blocks remain unchanged by default.',
     title: 'Translation',
   },
 ]
+
+function modelsForSection(id: SectionDef['id'], modelRuntime: ModelRuntime): SectionDef['models'] {
+  if (id === 'analyst') {
+    return ANALYST_MODELS_BY_RUNTIME[modelRuntime]
+  }
+  if (id === 'translate') {
+    return TRANSLATE_MODELS_BY_RUNTIME[modelRuntime]
+  }
+
+  return MODELS_BY_TASK_BY_RUNTIME[modelRuntime][id]
+}
+
+export function getSectionsForRuntime(modelRuntime: ModelRuntime): SectionDef[] {
+  return SECTION_TEMPLATES.map((template) => ({
+    ...template,
+    models: modelsForSection(template.id, modelRuntime),
+  }))
+}
+
+export const SECTIONS: SectionDef[] = getSectionsForRuntime('local')

@@ -6,11 +6,16 @@ import { useRuntimeModelDetails } from './use-runtime-model-details'
 
 export function useModelConfigPage() {
   const persisted = usePersistedModelConfig()
-  const { installedModels, setInstalledModels } = useInstalledModels(persisted.ollamaBaseUrl)
+  const isLocalRuntime = persisted.modelRuntime === 'local'
+  const { installedModels, setInstalledModels } = useInstalledModels(persisted.ollamaBaseUrl, isLocalRuntime)
   const { pullStates, handlePull } = useModelPull(setInstalledModels)
-  const { runtimeModelDetails } = useRuntimeModelDetails(persisted.ollamaBaseUrl, persisted.activeModelId)
+  const { runtimeModelDetails } = useRuntimeModelDetails(
+    persisted.ollamaBaseUrl,
+    persisted.activeModelId,
+    isLocalRuntime,
+  )
 
-  const activeModelInstalled = isModelInstalled(installedModels, persisted.activeModelId)
+  const activeModelInstalled = !isLocalRuntime || isModelInstalled(installedModels, persisted.activeModelId)
 
   return {
     ...persisted,

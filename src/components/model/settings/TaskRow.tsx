@@ -1,4 +1,5 @@
 import { CheckCheck, ClipboardCopy, ExternalLink } from 'lucide-react'
+import type { ModelRuntime } from '@/lib/router/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -41,6 +42,7 @@ interface TaskRowProps {
   isCustom: boolean
   isInstalled: boolean
   installedModelsReady: boolean
+  modelRuntime: ModelRuntime
   pullState?: PullState
   ollamaBaseUrl: string
   copiedModelId: string | null
@@ -62,6 +64,7 @@ export function TaskRow({
   isCustom,
   isInstalled,
   installedModelsReady,
+  modelRuntime,
   pullState,
   ollamaBaseUrl,
   copiedModelId,
@@ -79,7 +82,9 @@ export function TaskRow({
     ? `${Math.round(selectedModel.contextWindow / CONTEXT_DIVISOR)}K ctx`
     : null
   const copied = copiedModelId === modelId
-  const canPull = installedModelsReady && !isInstalled && pullState?.status !== 'done'
+  const isCloudModel = selectedModel ? selectedModel.size <= 0 : false
+  const canPull =
+    modelRuntime === 'local' && installedModelsReady && !isInstalled && !isCloudModel && pullState?.status !== 'done'
   let pullLabel = 'Pull model'
   if (pullState?.status === 'pulling') {
     pullLabel = `Pulling ${pullState.progress ?? ''}`.trim()
@@ -127,7 +132,7 @@ export function TaskRow({
         </div>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{section.subtitle}</p>
         <p className="mt-1.5 text-[11px] text-muted-foreground/70 italic">{section.selectionHint}</p>
-        {installedModelsReady && (
+        {modelRuntime === 'local' && installedModelsReady && (
           <div className="mt-2 flex items-center">
             {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, sx_a11y/no-static-element-interactions */}
             <div onClick={(event) => event.stopPropagation()}>
@@ -236,25 +241,27 @@ export function TaskRow({
                     View on Ollama
                   </a>
 
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-auto gap-1 px-0 py-0 text-xs text-muted-foreground hover:text-foreground"
-                    onClick={() => onCopyPull(selectedModel.id)}
-                  >
-                    {copied ? (
-                      <>
-                        <CheckCheck className="h-3 w-3 text-green-500" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <ClipboardCopy className="h-3 w-3" />
-                        Copy pull command
-                      </>
-                    )}
-                  </Button>
+                  {modelRuntime === 'local' && !isCloudModel && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-auto gap-1 px-0 py-0 text-xs text-muted-foreground hover:text-foreground"
+                      onClick={() => onCopyPull(selectedModel.id)}
+                    >
+                      {copied ? (
+                        <>
+                          <CheckCheck className="h-3 w-3 text-green-500" />
+                          Copied
+                        </>
+                      ) : (
+                        <>
+                          <ClipboardCopy className="h-3 w-3" />
+                          Copy pull command
+                        </>
+                      )}
+                    </Button>
+                  )}
 
                   {canPull && (
                     <Button

@@ -21,6 +21,8 @@ export interface Provider {
   id: string
   label: string
   models: ProviderModel[]
+  /** ISO date for the source pricing snapshot used in this table. */
+  pricesLastUpdated: string
   /** The model shown in cost comparisons (a popular/representative option) */
   representativeModelId: string
 }
@@ -101,25 +103,28 @@ export const PROVIDERS: Provider[] = [
     id: 'openai',
     label: 'OpenAI',
     models: OPENAI_MODELS,
+    pricesLastUpdated: '2026-03-01',
     representativeModelId: 'gpt-4o',
   },
   {
     id: 'google',
     label: 'Google',
     models: GEMINI_MODELS,
+    pricesLastUpdated: '2026-03-01',
     representativeModelId: 'gemini-2.0-flash',
   },
   {
     id: 'anthropic',
     label: 'Anthropic',
     models: CLAUDE_MODELS,
+    pricesLastUpdated: '2026-03-01',
     representativeModelId: 'claude-sonnet-4-6',
   },
 ]
 
 /**
- * Specialist (local SLM via Ollama) cost; effectively free, but we assign
- * a tiny electricity/infra estimate so comparisons still make sense.
+ * Specialist (local SLM via Ollama) cost estimate.
+ * This is a rough electricity + amortized-hardware proxy, not a billing-grade number.
  * ~$0.00; used only to show "you ran this locally".
  */
 export const SPECIALIST_LOCAL_COST_PER_TOKEN = 0

@@ -6,16 +6,13 @@ function charsToTokens(chars: number): number {
   return Math.ceil(chars / 4)
 }
 
-/** Local SLM electricity/infra estimate: ~$1 per million tokens */
-const SPECIALIST_COST_PER_TOKEN = 0.000_001
-
-/** Representative large cloud model rate: ~$15 per million tokens */
-const LARGE_MODEL_COST_PER_TOKEN = 0.000_015
+/** Local SLM electricity/infra estimate: ~$1 per million tokens for input/output. */
+const SPECIALIST_INPUT_COST_PER_TOKEN = 0.000_001
+const SPECIALIST_OUTPUT_COST_PER_TOKEN = 0.000_001
 
 export function estimateCost(inputChars: number, outputChars: number): CostEstimate {
   const inputTokens = charsToTokens(inputChars)
   const outputTokens = charsToTokens(outputChars)
-  const totalTokens = inputTokens + outputTokens
 
   const providerComparisons = PROVIDERS.map((provider) => {
     const model = getRepresentativeModel(provider)
@@ -31,8 +28,9 @@ export function estimateCost(inputChars: number, outputChars: number): CostEstim
     }
   }).filter((prov): prov is NonNullable<typeof prov> => prov !== null)
 
-  const specialistCostUsd = totalTokens * SPECIALIST_COST_PER_TOKEN
-  const largeModelCostUsd = totalTokens * LARGE_MODEL_COST_PER_TOKEN
+  const specialistCostUsd =
+    inputTokens * SPECIALIST_INPUT_COST_PER_TOKEN + outputTokens * SPECIALIST_OUTPUT_COST_PER_TOKEN
+  const largeModelCostUsd = providerComparisons.reduce((maxCost, provider) => Math.max(maxCost, provider.costUsd), 0)
   const savingsPct = largeModelCostUsd === 0 ? 0 : Math.round((1 - specialistCostUsd / largeModelCostUsd) * 100)
 
   return {

@@ -23,6 +23,22 @@ interface StreamRunnerParams {
   autoContinue?: boolean
 }
 
+async function emitTruncationWarningIfNeeded(
+  emit: SseEmitter,
+  finishReason: PromiseLike<string | null | undefined>,
+): Promise<void> {
+  if ((await finishReason) !== 'length') {
+    return
+  }
+
+  emit('routing_step', {
+    detail: 'Response was truncated after the continuation. Try a shorter input.',
+    label: 'Response truncated',
+    status: 'error',
+    step: 'generating_response',
+  })
+}
+
 /**
  * Streams a model response with a 5-minute abort timeout.
  *
@@ -86,6 +102,8 @@ export async function runStream({
         outputChunks.push(chunk)
         emit('response_chunk', { text: chunk })
       }
+
+      await emitTruncationWarningIfNeeded(emit, continuation.finishReason)
     }
 
     clearTimeout(timeout)
