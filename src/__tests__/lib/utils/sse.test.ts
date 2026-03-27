@@ -53,6 +53,6 @@ describe('parseSSEStream', () => {
 
     await parseSSEStream(reader, cbs)
 
-    expect(cbs.onError).toHaveBeenCalledWith('boom')
+    expect(cbs.onError).toHaveBeenCalledWith({ code: 'UNKNOWN', message: 'boom' })
   })
 })

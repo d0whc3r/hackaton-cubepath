@@ -61,7 +61,7 @@ export function ModelConfigPage() {
   const isConfirmingNavigationRef = useRef(false)
   const allowNavigationRef = useRef(false)
 
-  const isLocalRuntime = modelRuntime === 'local'
+  const isLocalRuntime = modelRuntime === 'local' || modelRuntime === 'small'
   const missingSections = isLocalRuntime
     ? sections.filter((section) => !isModelInstalled(installedModels, config[section.configKey] as string))
     : []
@@ -148,7 +148,7 @@ export function ModelConfigPage() {
       return
     }
     allowNavigationRef.current = true
-    handleSave()
+    void handleSave()
   }
 
   function handleInstallMissingModels() {
@@ -191,6 +191,16 @@ export function ModelConfigPage() {
               onClick={() => handleModelRuntimeChange('local')}
             >
               Local
+            </Button>
+            <Button
+              type="button"
+              variant={modelRuntime === 'small' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 px-3 text-xs"
+              title="Optimised for machines with 4 GB RAM — all models ≤ 2.5 GB"
+              onClick={() => handleModelRuntimeChange('small')}
+            >
+              Small PC
             </Button>
             <Button
               type="button"

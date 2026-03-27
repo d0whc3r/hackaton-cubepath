@@ -16,6 +16,14 @@ import { DEFAULT_EXPLAIN_MODEL, EXPLAIN_MODELS } from './explain'
 import { DEFAULT_NAMING_HELPER_MODEL, NAMING_HELPER_MODELS } from './naming-helper'
 import { DEFAULT_PERFORMANCE_HINT_MODEL, PERFORMANCE_HINT_MODELS } from './performance-hint'
 import { DEFAULT_REFACTOR_MODEL, REFACTOR_MODELS } from './refactor'
+import {
+  ANALYST_MODELS_SMALL,
+  DEFAULT_ANALYST_MODEL_SMALL,
+  DEFAULT_MODELS_SMALL,
+  DEFAULT_TRANSLATE_MODEL_SMALL,
+  MODELS_BY_TASK_SMALL,
+  TRANSLATE_MODELS_SMALL,
+} from './small'
 import { DEFAULT_TEST_MODEL, TEST_MODELS } from './test'
 import { DEFAULT_TRANSLATE_MODEL, TRANSLATE_MODELS } from './translate'
 import { DEFAULT_TYPE_HINTS_MODEL, TYPE_HINTS_MODELS } from './type-hints'
@@ -85,31 +93,37 @@ export const DEFAULT_MODELS: Record<TaskType, string> = {
 export const MODELS_BY_TASK_BY_RUNTIME: Record<ModelRuntime, Record<TaskType, ModelOption[]>> = {
   cloud: MODELS_BY_TASK_CLOUD,
   local: MODELS_BY_TASK,
+  small: MODELS_BY_TASK_SMALL,
 }
 
 export const DEFAULT_MODELS_BY_RUNTIME: Record<ModelRuntime, Record<TaskType, string>> = {
   cloud: DEFAULT_MODELS_CLOUD,
   local: DEFAULT_MODELS,
+  small: DEFAULT_MODELS_SMALL,
 }
 
 export const ANALYST_MODELS_BY_RUNTIME: Record<ModelRuntime, ModelOption[]> = {
   cloud: ANALYST_MODELS_CLOUD,
   local: ANALYST_MODELS,
+  small: ANALYST_MODELS_SMALL,
 }
 
 export const DEFAULT_ANALYST_MODEL_BY_RUNTIME: Record<ModelRuntime, string> = {
   cloud: DEFAULT_ANALYST_MODEL_CLOUD,
   local: DEFAULT_ANALYST_MODEL,
+  small: DEFAULT_ANALYST_MODEL_SMALL,
 }
 
 export const TRANSLATE_MODELS_BY_RUNTIME: Record<ModelRuntime, ModelOption[]> = {
   cloud: TRANSLATE_MODELS_CLOUD,
   local: TRANSLATE_MODELS,
+  small: TRANSLATE_MODELS_SMALL,
 }
 
 export const DEFAULT_TRANSLATE_MODEL_BY_RUNTIME: Record<ModelRuntime, string> = {
   cloud: DEFAULT_TRANSLATE_MODEL_CLOUD,
   local: DEFAULT_TRANSLATE_MODEL,
+  small: DEFAULT_TRANSLATE_MODEL_SMALL,
 }
 
 /**

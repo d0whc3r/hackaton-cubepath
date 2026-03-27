@@ -77,6 +77,7 @@ export function TaskRow({
 }: TaskRowProps) {
   const Icon = section.icon
   const badge = GROUP_BADGE[section.group]
+  const isLocalRuntime = modelRuntime === 'local' || modelRuntime === 'small'
   const selectedModel = isCustom ? null : section.models.find((model) => model.id === modelId)
   const contextLabel = selectedModel?.contextWindow
     ? `${Math.round(selectedModel.contextWindow / CONTEXT_DIVISOR)}K ctx`
@@ -84,7 +85,7 @@ export function TaskRow({
   const copied = copiedModelId === modelId
   const isCloudModel = selectedModel ? selectedModel.size <= 0 : false
   const canPull =
-    modelRuntime === 'local' && installedModelsReady && !isInstalled && !isCloudModel && pullState?.status !== 'done'
+    isLocalRuntime && installedModelsReady && !isInstalled && !isCloudModel && pullState?.status !== 'done'
   let pullLabel = 'Pull model'
   if (pullState?.status === 'pulling') {
     pullLabel = `Pulling ${pullState.progress ?? ''}`.trim()
@@ -132,7 +133,7 @@ export function TaskRow({
         </div>
         <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{section.subtitle}</p>
         <p className="mt-1.5 text-[11px] text-muted-foreground/70 italic">{section.selectionHint}</p>
-        {modelRuntime === 'local' && installedModelsReady && (
+        {isLocalRuntime && installedModelsReady && (
           <div className="mt-2 flex items-center">
             {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, sx_a11y/no-static-element-interactions */}
             <div onClick={(event) => event.stopPropagation()}>
@@ -241,7 +242,7 @@ export function TaskRow({
                     View on Ollama
                   </a>
 
-                  {modelRuntime === 'local' && !isCloudModel && (
+                  {isLocalRuntime && !isCloudModel && (
                     <Button
                       type="button"
                       variant="ghost"

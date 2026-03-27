@@ -1,4 +1,4 @@
-import { streamText } from 'ai'
+import { APICallError, streamText } from 'ai'
 import type { ollamaClient, SseEmitter } from '@/lib/api/sse'
 import { estimateCost } from '@/lib/cost/calculator'
 import { recordStreamChars, recordStreamDuration } from '@/lib/observability/metrics'
@@ -6,6 +6,58 @@ import { logServer, logServerError } from '@/lib/observability/server'
 
 /** 5 min: specialist models on consumer hardware can be slow for large inputs */
 const SPECIALIST_TIMEOUT_MS = 300_000
+
+function parseOllamaError(error: unknown, modelId: string): { code: string; message: string } {
+  // AI SDK HTTP-level errors (model not found, server errors, etc.)
+  if (APICallError.isInstance(error)) {
+    if (error.statusCode === 404) {
+      try {
+        const body = JSON.parse(error.responseBody ?? '{}') as { error?: string }
+        if (body.error) {
+          return { code: 'MODEL_NOT_FOUND', message: body.error }
+        }
+      } catch {
+        /* Ignore malformed body */
+      }
+      return {
+        code: 'MODEL_NOT_FOUND',
+        message: `Model "${modelId}" not found. Run: ollama pull ${modelId}`,
+      }
+    }
+    if (error.statusCode === 400 || error.statusCode === 500) {
+      try {
+        const body = JSON.parse(error.responseBody ?? '{}') as { error?: string }
+        if (body.error) {
+          return { code: 'OLLAMA_ERROR', message: body.error }
+        }
+      } catch {
+        /* Ignore malformed body */
+      }
+    }
+  }
+
+  // Network-level errors (Ollama not running, port refused, DNS failure)
+  if (error instanceof Error) {
+    const combined =
+      `${error.message} ${error.cause instanceof Error ? error.cause.message : String(error.cause ?? '')}`.toLowerCase()
+    if (
+      combined.includes('econnrefused') ||
+      combined.includes('fetch failed') ||
+      combined.includes('connection refused') ||
+      combined.includes('enotfound')
+    ) {
+      return {
+        code: 'OLLAMA_UNREACHABLE',
+        message: "Cannot connect to Ollama. Make sure it's running on your machine.",
+      }
+    }
+  }
+
+  return {
+    code: 'SPECIALIST_UNAVAILABLE',
+    message: 'The specialist model is unavailable. Check Ollama is running.',
+  }
+}
 
 /** Guard against unbounded continuation payloads on very long outputs. */
 const MAX_OUTPUT_CHARS = 50_000
@@ -131,10 +183,7 @@ export async function runStream({
     } else {
       logServerError('stream.specialist.error', error, { durationMs, modelId })
       recordStreamDuration(modelId, durationMs, 'error')
-      emit('error', {
-        code: 'SPECIALIST_UNAVAILABLE',
-        message: 'The specialist model is unavailable. Check Ollama is running.',
-      })
+      emit('error', parseOllamaError(error, modelId))
     }
   }
 }

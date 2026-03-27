@@ -77,6 +77,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
         content: '',
         cost: null,
         error: null,
+        errorCode: null,
         routingSteps: [],
         specialist: null,
         status: 'streaming',

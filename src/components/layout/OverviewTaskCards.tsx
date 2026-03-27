@@ -12,7 +12,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { TaskType } from '@/lib/schemas/route'
-import { getModelForTask, loadModelConfig } from '@/lib/config/model-config'
+import { MODEL_CONFIG_UPDATED_EVENT, STORAGE_KEY, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { MODELS_BY_TASK } from '@/lib/router/models'
 
 interface TaskCard {
@@ -164,9 +164,19 @@ export function OverviewTaskCards() {
   const [modelConfig, setModelConfig] = useState(loadModelConfig)
 
   useEffect(() => {
-    const handler = () => setModelConfig(loadModelConfig())
-    globalThis.addEventListener('storage', handler)
-    return () => globalThis.removeEventListener('storage', handler)
+    const refresh = () => setModelConfig(loadModelConfig())
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) {
+        return
+      }
+      refresh()
+    }
+    globalThis.addEventListener('storage', onStorage)
+    globalThis.addEventListener(MODEL_CONFIG_UPDATED_EVENT, refresh)
+    return () => {
+      globalThis.removeEventListener('storage', onStorage)
+      globalThis.removeEventListener(MODEL_CONFIG_UPDATED_EVENT, refresh)
+    }
   }, [])
 
   return (

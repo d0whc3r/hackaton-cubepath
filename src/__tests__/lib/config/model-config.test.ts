@@ -1,10 +1,13 @@
 import type { TaskType } from '@/lib/schemas/route'
 import {
   DEFAULTS,
+  MODEL_CONFIG_UPDATED_EVENT,
   getAnalystModel,
   getModelForTask,
   getTranslateModel,
   loadModelConfig,
+  removeModelConfig,
+  saveModelConfig,
   STORAGE_KEY,
 } from '@/lib/config/model-config'
 
@@ -43,6 +46,26 @@ describe('loadModelConfig', () => {
     const spy = vi.spyOn(localStorage, 'getItem').mockReturnValue(null)
     loadModelConfig()
     expect(spy).toHaveBeenCalledWith(STORAGE_KEY)
+  })
+})
+
+describe('config persistence events', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
+  it('dispatches MODEL_CONFIG_UPDATED_EVENT after saveModelConfig', async () => {
+    const dispatchSpy = vi.spyOn(globalThis, 'dispatchEvent')
+    await saveModelConfig({ ...DEFAULTS, explainModel: 'custom-model' })
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: MODEL_CONFIG_UPDATED_EVENT }))
+  })
+
+  it('dispatches MODEL_CONFIG_UPDATED_EVENT after removeModelConfig', async () => {
+    const dispatchSpy = vi.spyOn(globalThis, 'dispatchEvent')
+    await removeModelConfig()
+
+    expect(dispatchSpy).toHaveBeenCalledWith(expect.objectContaining({ type: MODEL_CONFIG_UPDATED_EVENT }))
   })
 })
 

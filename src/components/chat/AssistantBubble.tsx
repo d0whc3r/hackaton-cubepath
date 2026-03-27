@@ -1,4 +1,4 @@
-import { Loader2, ShieldAlert, StopCircle, Zap } from 'lucide-react'
+import { AlertCircle, Loader2, ShieldAlert, StopCircle, Zap } from 'lucide-react'
 import type { AssistantMessage } from '@/lib/schemas/route'
 import { RoutingProgress } from '@/components/chat/RoutingProgress'
 import { TranslateButton } from '@/components/chat/TranslateButton'
@@ -7,6 +7,25 @@ import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
 
 interface AssistantBubbleProps {
   msg: AssistantMessage
+}
+
+const ERROR_TITLES: Record<string, string> = {
+  MODEL_NOT_FOUND: 'Model not installed',
+  OLLAMA_ERROR: 'Ollama error',
+  OLLAMA_UNREACHABLE: 'Ollama unreachable',
+  SPECIALIST_UNAVAILABLE: 'Model unavailable',
+}
+
+const ERROR_HINTS: Record<string, string> = {
+  OLLAMA_UNREACHABLE: 'ollama serve',
+}
+
+function getErrorTitle(code: string | null | undefined): string {
+  return (code && ERROR_TITLES[code]) ?? 'Generation error'
+}
+
+function getErrorHint(code: string | null | undefined): string | null {
+  return (code && ERROR_HINTS[code]) ?? null
 }
 
 export function AssistantBubble({ msg }: AssistantBubbleProps) {
@@ -50,9 +69,17 @@ export function AssistantBubble({ msg }: AssistantBubbleProps) {
 
         <div className="rounded-2xl rounded-tl-sm border border-border/60 bg-card px-4 py-3 shadow-sm">
           {msg.error && (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-              <p className="font-medium">Error</p>
-              <p className="opacity-80">{msg.error}</p>
+            <div className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-red-50 px-4 py-3 dark:bg-red-950/20">
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
+              <div className="min-w-0 space-y-1">
+                <p className="text-sm font-semibold text-destructive">{getErrorTitle(msg.errorCode)}</p>
+                <p className="text-xs leading-relaxed text-destructive/80">{msg.error}</p>
+                {getErrorHint(msg.errorCode) && (
+                  <p className="text-[10px] text-destructive/60">
+                    Run: <code className="font-mono">{getErrorHint(msg.errorCode)}</code>
+                  </p>
+                )}
+              </div>
             </div>
           )}
           {!msg.error && msg.content && <MarkdownRenderer content={msg.content} />}

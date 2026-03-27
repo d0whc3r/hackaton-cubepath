@@ -1,9 +1,13 @@
 import { streamText } from 'ai'
 import { runStream } from '@/lib/api/stream-runner'
 
-vi.mock(import('ai'), () => ({
-  streamText: vi.fn(),
-}))
+vi.mock(import('ai'), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    streamText: vi.fn(),
+  }
+})
 
 vi.mock(import('@/lib/observability/metrics'), () => ({
   recordStreamChars: vi.fn(),
@@ -110,8 +114,8 @@ describe('runStream', () => {
     })
 
     expect(emit).toHaveBeenCalledWith('error', {
-      code: 'SPECIALIST_UNAVAILABLE',
-      message: 'The specialist model is unavailable. Check Ollama is running.',
+      code: 'OLLAMA_UNREACHABLE',
+      message: "Cannot connect to Ollama. Make sure it's running on your machine.",
     })
   })
 

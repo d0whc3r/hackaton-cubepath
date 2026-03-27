@@ -7,7 +7,7 @@ export interface SSECallbacks {
   onCost: (cost: CostEstimate) => void
   onDone: () => void
   onInterrupted: () => void
-  onError: (message: string) => void
+  onError: (payload: { code: string; message: string }) => void
 }
 
 export async function parseSSEStream(
@@ -88,7 +88,7 @@ function dispatchSSEEvent(event: string, data: Record<string, unknown>, callback
       break
     }
     case 'error': {
-      callbacks.onError(data.message as string)
+      callbacks.onError({ code: (data.code as string) ?? 'UNKNOWN', message: data.message as string })
       break
     }
   }

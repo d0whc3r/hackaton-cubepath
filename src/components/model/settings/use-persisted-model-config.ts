@@ -81,9 +81,9 @@ export function usePersistedModelConfig() {
     setActiveSection('analyst')
   }
 
-  function handleSave() {
+  async function handleSave() {
     const nextSnapshot = { ...config, modelRuntime, ollamaBaseUrl }
-    void saveModelConfig(nextSnapshot)
+    await saveModelConfig(nextSnapshot)
     setSavedSnapshot(nextSnapshot)
     setSavedModelRuntime(modelRuntime)
     globalThis.history.back()

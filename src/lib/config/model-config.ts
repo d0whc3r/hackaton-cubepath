@@ -71,6 +71,7 @@ export function buildDefaultsForRuntime(modelRuntime: ModelRuntime): ModelConfig
 
 // Prefixed with the app slug so it doesn't collide with other keys on shared origins
 export const STORAGE_KEY = 'slm-router-model-config'
+export const MODEL_CONFIG_UPDATED_EVENT = 'slm-router-model-config:updated'
 
 const engine = getStorageEngine('settings')
 
@@ -112,17 +113,19 @@ function diffFromDefaults(config: ModelConfig): Partial<ModelConfig> {
  */
 export async function saveModelConfig(config: ModelConfig): Promise<void> {
   const delta = diffFromDefaults(config)
-  await engine.write(STORAGE_KEY, delta)
-  // Write-through: localStorage keeps sync callers (loadModelConfig) up to date
+  // Keep sync readers current immediately (same-tab UI updates depend on this).
   writeStorage(STORAGE_KEY, delta)
+  globalThis.dispatchEvent(new Event(MODEL_CONFIG_UPDATED_EVENT))
+  await engine.write(STORAGE_KEY, delta)
 }
 
 /**
  * Removes the persisted config from IDB and localStorage, reverting to DEFAULTS.
  */
 export async function removeModelConfig(): Promise<void> {
-  await engine.remove(STORAGE_KEY)
   removeStorage(STORAGE_KEY)
+  globalThis.dispatchEvent(new Event(MODEL_CONFIG_UPDATED_EVENT))
+  await engine.remove(STORAGE_KEY)
 }
 
 /**

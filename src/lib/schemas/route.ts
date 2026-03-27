@@ -90,6 +90,7 @@ export interface AssistantMessage {
   content: string
   cost: CostEstimate | null
   error: string | null
+  errorCode: string | null
   routingSteps: RoutingStep[]
   specialist: SpecialistInfo | null
   status: 'streaming' | 'done' | 'error' | 'interrupted' | 'blocked'

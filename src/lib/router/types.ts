@@ -10,7 +10,7 @@ export type TaskType =
   | 'naming-helper'
   | 'dead-code'
 
-export type ModelRuntime = 'local' | 'cloud'
+export type ModelRuntime = 'local' | 'cloud' | 'small'
 
 export interface ModelOption {
   id: string

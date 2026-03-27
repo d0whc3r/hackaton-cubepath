@@ -1,8 +1,8 @@
 import { AlertTriangle, CheckCircle2, CircleDashed, Loader2, XCircle } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import type { OllamaHealth, OllamaHealthStatus } from '@/hooks/use-ollama-health'
 import { useOllamaHealth } from '@/hooks/use-ollama-health'
-import { loadModelConfig } from '@/lib/config/model-config'
+import { MODEL_CONFIG_UPDATED_EVENT, STORAGE_KEY, loadModelConfig } from '@/lib/config/model-config'
 
 interface StatusEntry {
   label: (health: OllamaHealth) => string
@@ -40,12 +40,29 @@ const STATUS_CONFIG: Record<OllamaHealthStatus, StatusEntry> = {
   },
 }
 
-// Fixed trigger: badge checks once on mount. URL edits happen only in settings, not here.
-const TRIGGER_KEY = 0
-
 function OllamaStatusBadgeInner() {
-  const config = useMemo(() => loadModelConfig(), [])
-  const health = useOllamaHealth(config, TRIGGER_KEY)
+  const [config, setConfig] = useState(loadModelConfig)
+  const [triggerKey, setTriggerKey] = useState(0)
+  const health = useOllamaHealth(config, triggerKey, config.modelRuntime === 'local' || config.modelRuntime === 'small')
+
+  useEffect(() => {
+    const refresh = () => {
+      setConfig(loadModelConfig())
+      setTriggerKey((previous) => previous + 1)
+    }
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) {
+        return
+      }
+      refresh()
+    }
+    globalThis.addEventListener('storage', onStorage)
+    globalThis.addEventListener(MODEL_CONFIG_UPDATED_EVENT, refresh)
+    return () => {
+      globalThis.removeEventListener('storage', onStorage)
+      globalThis.removeEventListener(MODEL_CONFIG_UPDATED_EVENT, refresh)
+    }
+  }, [])
 
   const cfg = STATUS_CONFIG[health.status]
   const Icon = cfg.icon

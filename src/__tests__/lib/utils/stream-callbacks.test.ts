@@ -22,6 +22,7 @@ function baseAssistant(overrides: Partial<AssistantMessage> = {}): AssistantMess
     content: '',
     cost: null,
     error: null,
+    errorCode: null,
     routingSteps: [],
     specialist: null,
     status: 'streaming',
@@ -67,12 +68,13 @@ describe('buildStreamCallbacks', () => {
       language: 'typescript',
       specialistId: 'explain',
     })
-    callbacks.onError?.('stream failed')
+    callbacks.onError?.({ code: 'SPECIALIST_UNAVAILABLE', message: 'stream failed' })
     expect(current.routingSteps).toContainEqual(GENERATION_FAILED)
     callbacks.onDone?.()
 
     expect(current.content).toBe('hello world')
     expect(current.error).toBe('stream failed')
+    expect(current.errorCode).toBe('SPECIALIST_UNAVAILABLE')
     expect(current.specialist?.specialistId).toBe('explain')
     expect(current.status).toBe('done')
     expect(markTaskDone).toHaveBeenCalledWith('explain')

@@ -38,10 +38,11 @@ export function buildStreamCallbacks(
       update(task, (prev) => ({ ...prev, status: 'done' }))
       markTaskDone(task)
     },
-    onError: (message) =>
+    onError: ({ code, message }) =>
       update(task, (prev) => ({
         ...prev,
         error: message,
+        errorCode: code,
         routingSteps: mergeRoutingStep(prev.routingSteps, GENERATION_FAILED),
         status: 'error',
       })),
