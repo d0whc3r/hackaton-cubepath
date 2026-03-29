@@ -2,15 +2,8 @@ import type { ModelRuntime } from '@/lib/router/types'
 import type { TaskType } from '@/lib/schemas/route'
 import {
   DEFAULT_ANALYST_MODEL_BY_RUNTIME,
-  DEFAULT_DEAD_CODE_MODEL,
-  DEFAULT_DOCSTRING_MODEL,
-  DEFAULT_ERROR_EXPLAIN_MODEL,
-  DEFAULT_MODELS,
   DEFAULT_MODELS_BY_RUNTIME,
-  DEFAULT_NAMING_HELPER_MODEL,
-  DEFAULT_PERFORMANCE_HINT_MODEL,
   DEFAULT_TRANSLATE_MODEL_BY_RUNTIME,
-  DEFAULT_TYPE_HINTS_MODEL,
   OLLAMA_BASE_URL_DEFAULT,
 } from '@/lib/router/models'
 import { getStorageEngine } from '@/lib/storage/engine'
@@ -34,20 +27,20 @@ export interface ModelConfig {
 }
 
 export const DEFAULTS: ModelConfig = {
-  analystModel: DEFAULT_ANALYST_MODEL_BY_RUNTIME.local,
-  commitModel: DEFAULT_MODELS.commit,
-  deadCodeModel: DEFAULT_DEAD_CODE_MODEL,
-  docstringModel: DEFAULT_DOCSTRING_MODEL,
-  errorExplainModel: DEFAULT_ERROR_EXPLAIN_MODEL,
-  explainModel: DEFAULT_MODELS.explain,
-  modelRuntime: 'local',
-  namingHelperModel: DEFAULT_NAMING_HELPER_MODEL,
+  analystModel: DEFAULT_ANALYST_MODEL_BY_RUNTIME.small,
+  commitModel: DEFAULT_MODELS_BY_RUNTIME.small.commit,
+  deadCodeModel: DEFAULT_MODELS_BY_RUNTIME.small['dead-code'],
+  docstringModel: DEFAULT_MODELS_BY_RUNTIME.small.docstring,
+  errorExplainModel: DEFAULT_MODELS_BY_RUNTIME.small['error-explain'],
+  explainModel: DEFAULT_MODELS_BY_RUNTIME.small.explain,
+  modelRuntime: 'small',
+  namingHelperModel: DEFAULT_MODELS_BY_RUNTIME.small['naming-helper'],
   ollamaBaseUrl: OLLAMA_BASE_URL_DEFAULT,
-  performanceHintModel: DEFAULT_PERFORMANCE_HINT_MODEL,
-  refactorModel: DEFAULT_MODELS.refactor,
-  testModel: DEFAULT_MODELS.test,
-  translateModel: DEFAULT_TRANSLATE_MODEL_BY_RUNTIME.local,
-  typeHintsModel: DEFAULT_TYPE_HINTS_MODEL,
+  performanceHintModel: DEFAULT_MODELS_BY_RUNTIME.small['performance-hint'],
+  refactorModel: DEFAULT_MODELS_BY_RUNTIME.small.refactor,
+  testModel: DEFAULT_MODELS_BY_RUNTIME.small.test,
+  translateModel: DEFAULT_TRANSLATE_MODEL_BY_RUNTIME.small,
+  typeHintsModel: DEFAULT_MODELS_BY_RUNTIME.small['type-hints'],
 }
 
 export function buildDefaultsForRuntime(modelRuntime: ModelRuntime): ModelConfig {

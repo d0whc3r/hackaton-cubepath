@@ -17,13 +17,13 @@ const COPY_TIMEOUT_MS = 2000
 
 export function usePersistedModelConfig() {
   const [config, setConfig] = useState<ModelConfig>(DEFAULTS)
-  const [modelRuntime, setModelRuntime] = useState<ModelRuntime>('local')
+  const [modelRuntime, setModelRuntime] = useState<ModelRuntime>(DEFAULTS.modelRuntime)
   const [customModels, setCustomModels] = useState<Record<string, string>>({})
   const [activeSection, setActiveSection] = useState<SectionId>('analyst')
   const [ollamaBaseUrl, setOllamaBaseUrl] = useState(OLLAMA_BASE_URL_DEFAULT)
   const [copiedModelId, setCopiedModelId] = useState<string | null>(null)
   const [savedSnapshot, setSavedSnapshot] = useState<ModelConfig>(DEFAULTS)
-  const [savedModelRuntime, setSavedModelRuntime] = useState<ModelRuntime>('local')
+  const [savedModelRuntime, setSavedModelRuntime] = useState<ModelRuntime>(DEFAULTS.modelRuntime)
   const sections = getSectionsForRuntime(modelRuntime)
 
   useEffect(() => {
