@@ -135,25 +135,28 @@ cp .env.example .env
 
 Key variables:
 
-| Variable                | Description                                         |
-| ----------------------- | --------------------------------------------------- |
-| `OLLAMA_BASE_URL`       | Ollama endpoint (default: `http://localhost:11434`) |
-| `OLLAMA_EXPLAIN_MODEL`  | Model for the `explain` task                        |
-| `OLLAMA_TEST_MODEL`     | Model for the `test` task                           |
-| `OLLAMA_REFACTOR_MODEL` | Model for the `refactor` task                       |
-| `OLLAMA_COMMIT_MODEL`   | Model for the `commit` task                         |
-| `OLLAMA_CODE_MODEL`     | Fallback for any task without a specific model set  |
+| Variable                 | Description                                         |
+| ------------------------ | --------------------------------------------------- |
+| `PUBLIC_OLLAMA_BASE_URL` | Ollama endpoint (default: `http://localhost:11434`) |
+| `HOST`                   | Astro server bind address (default: `0.0.0.0`)      |
+| `PORT`                   | Astro server port (default: `4321`)                 |
+| `PUBLIC_SENTRY_DSN`      | Browser-side Sentry DSN for error tracking          |
+| `SENTRY_AUTH_TOKEN`      | Sentry Auth Token for sourcemap uploads             |
+| `AXIOM_TOKEN`            | Axiom API token for cloud logging                   |
 
-Model selection can also be managed at runtime from the `/settings` page.
+Model selection is managed entirely at runtime via the `/settings` page and their default configurations live in `src/lib/router/models/`.
 
-### 3. Pull models and run
+### 3. Run the application
+
+You **do not** need to manually pull the Ollama models (`qwen2.5:0.5b`, `qwen2.5-coder:7b`, etc.). The application includes an auto-pull mechanism that will seamlessly download any required model the first time it is requested.
+
+Just ensure the Ollama service is running:
 
 ```bash
 ollama serve
-ollama pull qwen2.5:0.5b      # analyst + guard (tiny, fast)
-ollama pull qwen2.5-coder:7b  # specialist tasks
-ollama pull phi3.5             # alternative specialist
 ```
+
+Then start the application:
 
 ```bash
 pnpm dev
@@ -197,7 +200,6 @@ docker compose up --build
 | `pnpm preview`    | Preview production build   |
 | `pnpm type-check` | Run Astro type diagnostics |
 | `pnpm test`       | Run Vitest once            |
-| `pnpm test:watch` | Run Vitest in watch mode   |
 | `pnpm lint`       | Run oxlint                 |
 | `pnpm format`     | Run oxfmt                  |
 
