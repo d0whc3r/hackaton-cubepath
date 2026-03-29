@@ -213,7 +213,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: https://hackaton-cubepath.d0w.dev
+      url: ${{ env.PUBLIC_SITE_URL }}
     permissions:
       pages: write
       id-token: write

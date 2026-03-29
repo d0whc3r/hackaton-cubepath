@@ -8,7 +8,7 @@ import {
   RefreshCw,
   XCircle,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { OllamaHealth, OllamaHealthStatus } from '@/hooks/use-ollama-health'
 import type { ModelConfig } from '@/lib/config/model-config'
 import { Input } from '@/components/ui/input'
@@ -154,6 +154,38 @@ interface PlatformStatusPanelProps {
 
 export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatusPanelProps) {
   const [triggerKey, setTriggerKey] = useState(0)
+  const [localEndpoint, setLocalEndpoint] = useState(config.ollamaBaseUrl)
+
+  // Sync with config if it changes externally
+  useEffect(() => {
+    setLocalEndpoint(config.ollamaBaseUrl)
+  }, [config.ollamaBaseUrl])
+
+  // Debounce and validate
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const trimmed = localEndpoint.trim()
+      if (trimmed === config.ollamaBaseUrl) {
+        return
+      }
+
+      // If empty, it's valid (will fallback to default)
+      if (trimmed === '') {
+        onEndpointChange(trimmed)
+        return
+      }
+
+      // Check if it's a valid URL
+      try {
+        new URL(trimmed)
+        onEndpointChange(trimmed)
+      } catch {
+        // Not a valid URL yet, do nothing
+      }
+    }, 800)
+
+    return () => clearTimeout(timer)
+  }, [localEndpoint, config.ollamaBaseUrl, onEndpointChange])
 
   const isLocalRuntime = config.modelRuntime === 'local' || config.modelRuntime === 'small'
   const health = useOllamaHealth(config, triggerKey, isLocalRuntime)
@@ -201,9 +233,9 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
           <div className="flex items-center gap-2">
             <Input
               id="ollama-url"
-              value={config.ollamaBaseUrl}
+              value={localEndpoint}
               onChange={(event) => {
-                onEndpointChange(event.target.value)
+                setLocalEndpoint(event.target.value)
               }}
               placeholder={OLLAMA_BASE_URL_DEFAULT}
               className="max-w-sm font-mono text-xs"

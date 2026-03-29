@@ -25,7 +25,7 @@ export default defineConfig({
     }),
   ],
   output: 'static',
-  site: 'https://hackaton-cubepath.d0w.dev',
+  site: process.env.PUBLIC_SITE_URL || 'https://hackaton-cubepath.d0w.dev',
   vite: {
     optimizeDeps: {
       // React/compiler-runtime must share the same React instance as react-dom.

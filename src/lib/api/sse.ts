@@ -70,5 +70,20 @@ export function sseResponse(stream: ReadableStream): Response {
  * as a drop-in driver; no separate Ollama SDK dependency required.
  */
 export function ollamaClient(baseUrl: string) {
-  return createOpenAI({ apiKey: 'ollama', baseURL: `${baseUrl}/v1` })
+  return createOpenAI({
+    apiKey: 'ollama',
+    baseURL: `${baseUrl}/v1`,
+    fetch: async (url, options) => {
+      // Force keep-alive for streaming
+      const headers = new Headers(options?.headers)
+      headers.set('Connection', 'keep-alive')
+
+      return fetch(url, {
+        ...options,
+        headers,
+        // Optional: Keep connection alive
+        keepalive: true,
+      })
+    },
+  })
 }

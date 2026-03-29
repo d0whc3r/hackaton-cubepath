@@ -37,11 +37,10 @@ export async function validateInputSemantic(
   try {
     const ollama = ollamaClient(ollamaBaseUrl)
 
-    // Prefix the input with the task label so the model has explicit context,
-    // Even if the system prompt is partially ignored by very small models.
+    // Format the input exactly like the few-shot examples in the system prompt.
     // Truncate to 500 chars to limit prompt-injection surface area.
     const guardInput = input.slice(0, 500)
-    const prompt = `[Task: ${taskType}]\n${guardInput}`
+    const prompt = `User: "${guardInput}"\nAnswer:`
 
     const { text } = await generateText({
       abortSignal: AbortSignal.timeout(GUARD_TIMEOUT_MS),

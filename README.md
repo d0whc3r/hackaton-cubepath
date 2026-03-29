@@ -146,7 +146,23 @@ Key variables:
 
 Model selection is managed entirely at runtime via the `/settings` page and their default configurations live in `src/lib/router/models/`.
 
-### 3. Run the application
+### 3. Run the application (with portless)
+
+This project uses [portless](https://port1355.dev/) to provide a stable local development URL instead of dealing with random port numbers.
+
+First, install the tool globally if you haven't already:
+
+```bash
+npm install -g portless
+```
+
+Then, you can start the development server:
+
+```bash
+pnpm dev
+```
+
+The application will be accessible at: **http://cubepath.localhost:1355** (or via HTTPS if you configure portless with `portless proxy start --https`).
 
 You **do not** need to manually pull the Ollama models (`qwen2.5:0.5b`, `qwen2.5-coder:7b`, etc.). The application includes an auto-pull mechanism that will seamlessly download any required model the first time it is requested.
 
