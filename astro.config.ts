@@ -41,14 +41,5 @@ export default defineConfig({
         '@': fileURLToPath(new URL('src', import.meta.url)),
       },
     },
-    ssr: {
-      // Keep compiler-runtime out of the SSR bundle — components compiled with
-      // Babel-plugin-react-compiler call useMemoCache which requires a live
-      // Client dispatcher (H).  On the server H is always null, so any
-      // Server-side invocation would throw.  client:only islands never render
-      // Server-side, but bundling the runtime into the SSR chunk can still
-      // Cause the wrong React instance to be captured at import time.
-      noExternal: ['react/compiler-runtime'],
-    },
   },
 })

@@ -50,7 +50,8 @@ jobs:
         id: test
         run: >-
           pnpm vitest run
-          --reporter=verbose
+          --silent
+          --reporter=dot
           --reporter=json
           --outputFile.json=vitest-results.json
           --coverage
