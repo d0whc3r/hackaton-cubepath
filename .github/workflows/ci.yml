@@ -2,20 +2,24 @@ name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  pages: write
+  id-token: write
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build-and-test:
+  ci:
+    name: Build & Test
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,8 +33,187 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Build
-        run: pnpm build
+      # ─── Type check ─────────────────────────────────────────────────────────
+      - name: Type check
+        run: pnpm run type-check
 
+      # ─── Lint (inline PR annotations via --format github) ───────────────────
+      - name: Lint
+        run: pnpm run lint --format github
+
+      # ─── Tests + coverage ───────────────────────────────────────────────────
+      # continue-on-error so the comment step always runs; we re-fail below.
       - name: Test
-        run: pnpm test
+        id: test
+        run: >-
+          pnpm vitest run
+          --reporter=verbose
+          --reporter=json
+          --outputFile.json=vitest-results.json
+          --coverage
+          --coverage.reporter=text
+          --coverage.reporter=json-summary
+        continue-on-error: true
+
+      - name: Generate test & coverage comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs')
+            const lines = []
+
+            lines.push('## 🧪 Test Results')
+            lines.push('')
+
+            try {
+              const r = JSON.parse(fs.readFileSync('vitest-results.json', 'utf8'))
+              const icon = r.success ? '✅' : '❌'
+              lines.push(`**Status:** ${icon} ${r.success ? 'All tests passed' : 'Some tests failed'}`)
+              lines.push('')
+              lines.push('| | Count |')
+              lines.push('|---|---|')
+              lines.push(`| ✅ Passed  | **${r.numPassedTests}** |`)
+              lines.push(`| ❌ Failed  | **${r.numFailedTests}** |`)
+              lines.push(`| ⏭️ Skipped | **${r.numPendingTests}** |`)
+              lines.push(`| 📊 Total   | **${r.numTotalTests}** |`)
+
+              if (!r.success) {
+                lines.push('')
+                lines.push('<details><summary>❌ Failed tests</summary>')
+                lines.push('')
+                for (const suite of (r.testResults || [])) {
+                  const failed = (suite.assertionResults || []).filter(t => t.status === 'failed')
+                  if (failed.length === 0) continue
+                  lines.push(`**\`${suite.name.replace(process.cwd() + '/', '')}\`**`)
+                  for (const t of failed) {
+                    lines.push(`- ${t.fullName}`)
+                    if (t.failureMessages?.[0]) {
+                      const msg = t.failureMessages[0].split('\n').slice(0, 5).join('\n')
+                      lines.push('  ```')
+                      lines.push('  ' + msg.replace(/\n/g, '\n  '))
+                      lines.push('  ```')
+                    }
+                  }
+                  lines.push('')
+                }
+                lines.push('</details>')
+              }
+            } catch {
+              lines.push('> ⚠️ Could not parse test results')
+            }
+
+            lines.push('')
+            lines.push('### 📊 Coverage')
+            lines.push('')
+
+            try {
+              const cov = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8'))
+              const t = cov.total
+              lines.push('| Metric | Coverage |')
+              lines.push('|--------|----------|')
+              for (const [key, val] of Object.entries(t)) {
+                const pct = val.pct
+                const dot = pct >= 80 ? '🟢' : pct >= 60 ? '🟡' : '🔴'
+                lines.push(`| ${key} | ${dot} **${pct}%** (${val.covered}/${val.total}) |`)
+              }
+            } catch {
+              lines.push('> Coverage data not available')
+            }
+
+            fs.writeFileSync('test-comment.md', lines.join('\n'))
+
+      - name: Post test & coverage comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: test-results
+          path: test-comment.md
+
+      - name: Fail if tests failed
+        if: steps.test.outcome == 'failure'
+        run: exit 1
+
+      # ─── Build ──────────────────────────────────────────────────────────────
+      # Run `astro build` directly — type-check was already done above.
+      # SENTRY_AUTH_TOKEN is optional; without it source-maps are not uploaded.
+      - name: Build
+        run: pnpm run build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      # ─── Build size analysis (PR only) ──────────────────────────────────────
+      - name: Analyze build size
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          {
+            echo "## 📦 Build Size"
+            echo ""
+            echo "**Total dist:** \`$(du -sh dist | cut -f1)\`"
+            echo ""
+
+            JS_COUNT=$(find dist -name "*.js" -type f | wc -l | tr -d ' ')
+            CSS_COUNT=$(find dist -name "*.css" -type f | wc -l | tr -d ' ')
+
+            if [ "$JS_COUNT" -gt 0 ]; then
+              echo "### JavaScript (${JS_COUNT} files)"
+              echo "| File | Raw | Gzip |"
+              echo "|------|-----|------|"
+              find dist -name "*.js" -type f | sort | while IFS= read -r f; do
+                raw=$(du -sh "$f" | cut -f1)
+                gz=$(gzip -c "$f" | wc -c | awk '{printf "%.1f KB", $1/1024}')
+                echo "| \`${f#dist/}\` | $raw | $gz |"
+              done
+              echo ""
+            fi
+
+            if [ "$CSS_COUNT" -gt 0 ]; then
+              echo "### CSS (${CSS_COUNT} files)"
+              echo "| File | Raw | Gzip |"
+              echo "|------|-----|------|"
+              find dist -name "*.css" -type f | sort | while IFS= read -r f; do
+                raw=$(du -sh "$f" | cut -f1)
+                gz=$(gzip -c "$f" | wc -c | awk '{printf "%.1f KB", $1/1024}')
+                echo "| \`${f#dist/}\` | $raw | $gz |"
+              done
+              echo ""
+            fi
+
+            echo "### Top 10 assets by size"
+            echo "| Size | File |"
+            echo "|------|------|"
+            find dist -type f | xargs du -sh 2>/dev/null | sort -rh | head -10 | \
+              awk '{size=$1; $1=""; gsub(/^ /, ""); gsub(/^dist\//, "", $0); printf "| %s | `%s` |\n", size, $0}'
+          } > build-size.md
+
+      - name: Post build size comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: build-size
+          path: build-size.md
+
+      # ─── Upload Pages artifact (main branch only) ───────────────────────────
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        with:
+          path: dist
+
+  # ─── Deploy to GitHub Pages (main branch only) ──────────────────────────────
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: ci
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: https://slm-router.d0w.dev
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
