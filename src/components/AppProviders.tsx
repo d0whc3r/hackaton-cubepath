@@ -66,8 +66,9 @@ function GuardGate({ children }: { children: React.ReactNode }) {
   const [canBypassBlockingInit, setCanBypassBlockingInit] = useState(hasGuardReadySession)
 
   // Exclude routes that don't need guard model checking (like /settings and root /)
-  const pathname = globalThis.location?.pathname || ''
-  const isExcludedPage = pathname === '/settings' || pathname === '/'
+  // Ensure we handle both with and without trailing slashes
+  const pathname = globalThis.location?.pathname?.replace(/\/+$/, '') || ''
+  const isExcludedPage = pathname === '/settings' || pathname === ''
 
   useEffect(() => {
     if (state.status === 'ready') {
