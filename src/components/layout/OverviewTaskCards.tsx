@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { TaskType } from '@/lib/schemas/route'
+import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { MODEL_CONFIG_UPDATED_EVENT, STORAGE_KEY, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { MODELS_BY_TASK } from '@/lib/router/models'
@@ -162,7 +163,7 @@ function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: 
   )
 }
 
-export function OverviewTaskCards() {
+function OverviewTaskCardsContent() {
   const [modelConfig, setModelConfig] = useState(loadModelConfig)
 
   useEffect(() => {
@@ -192,5 +193,13 @@ export function OverviewTaskCards() {
         <TaskCardGrid tasks={GENERATION_TASKS} modelConfig={modelConfig} />
       </section>
     </div>
+  )
+}
+
+export function OverviewTaskCards() {
+  return (
+    <AppErrorBoundary boundaryName="layout.overview-task-cards" variant="inline">
+      <OverviewTaskCardsContent />
+    </AppErrorBoundary>
   )
 }

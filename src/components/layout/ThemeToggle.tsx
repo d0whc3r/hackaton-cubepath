@@ -1,5 +1,6 @@
 import { Moon, Sun } from 'lucide-react'
 import { ThemeProvider, useTheme } from 'next-themes'
+import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { Button } from '@/components/ui/button'
 
 function ThemeToggleButton() {
@@ -20,8 +21,10 @@ function ThemeToggleButton() {
 
 export function ThemeToggle() {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <ThemeToggleButton />
-    </ThemeProvider>
+    <AppErrorBoundary boundaryName="layout.theme-toggle" variant="inline">
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeToggleButton />
+      </ThemeProvider>
+    </AppErrorBoundary>
   )
 }

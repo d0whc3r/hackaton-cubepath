@@ -2,6 +2,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, CircleDashed, Loader2, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { OllamaHealth, OllamaHealthStatus } from '@/hooks/use-ollama-health'
+import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { queryClient } from '@/components/AppProviders'
 import { useOllamaHealth } from '@/hooks/use-ollama-health'
 import { MODEL_CONFIG_UPDATED_EVENT, STORAGE_KEY, loadModelConfig } from '@/lib/config/model-config'
@@ -94,8 +95,10 @@ function OllamaStatusBadgeInner() {
 
 export function OllamaStatusBadge() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <OllamaStatusBadgeInner />
-    </QueryClientProvider>
+    <AppErrorBoundary boundaryName="layout.ollama-status-badge" variant="inline">
+      <QueryClientProvider client={queryClient}>
+        <OllamaStatusBadgeInner />
+      </QueryClientProvider>
+    </AppErrorBoundary>
   )
 }

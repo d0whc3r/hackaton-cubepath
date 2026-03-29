@@ -177,7 +177,7 @@ export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatus
 
       // Check if it's a valid URL
       try {
-        new URL(trimmed)
+        const _url = new URL(trimmed)
         onEndpointChange(trimmed)
       } catch {
         // Not a valid URL yet, do nothing

@@ -4,6 +4,7 @@ import type { ToasterProps } from 'sonner'
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Toaster as Sonner } from 'sonner'
+import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
@@ -19,38 +20,40 @@ const Toaster = ({ ...props }: ToasterProps) => {
   }, [])
 
   return (
-    <Sonner
-      theme={theme}
-      className="toaster group"
-      position="top-right"
-      offset={16}
-      richColors
-      icons={{
-        error: <OctagonXIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
-        success: <CircleCheckIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-      }}
-      style={
-        {
-          '--border-radius': 'var(--radius)',
-          '--normal-bg': 'var(--popover)',
-          '--normal-border': 'var(--border)',
-          '--normal-text': 'var(--popover-foreground)',
-        } as React.CSSProperties
-      }
-      toastOptions={{
-        classNames: {
-          actionButton: 'cn-toast-action',
-          cancelButton: 'cn-toast-cancel',
-          description: 'cn-toast-description',
-          title: 'cn-toast-title',
-          toast: 'cn-toast',
-        },
-      }}
-      {...props}
-    />
+    <AppErrorBoundary boundaryName="ui.toaster" variant="inline">
+      <Sonner
+        theme={theme}
+        className="toaster group"
+        position="top-right"
+        offset={16}
+        richColors
+        icons={{
+          error: <OctagonXIcon className="size-4" />,
+          info: <InfoIcon className="size-4" />,
+          loading: <Loader2Icon className="size-4 animate-spin" />,
+          success: <CircleCheckIcon className="size-4" />,
+          warning: <TriangleAlertIcon className="size-4" />,
+        }}
+        style={
+          {
+            '--border-radius': 'var(--radius)',
+            '--normal-bg': 'var(--popover)',
+            '--normal-border': 'var(--border)',
+            '--normal-text': 'var(--popover-foreground)',
+          } as React.CSSProperties
+        }
+        toastOptions={{
+          classNames: {
+            actionButton: 'cn-toast-action',
+            cancelButton: 'cn-toast-cancel',
+            description: 'cn-toast-description',
+            title: 'cn-toast-title',
+            toast: 'cn-toast',
+          },
+        }}
+        {...props}
+      />
+    </AppErrorBoundary>
   )
 }
 

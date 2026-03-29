@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { useEffect, useState } from 'react'
+import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { Button } from '@/components/ui/button'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useGuardBootstrap } from '@/hooks/use-guard-bootstrap'
@@ -116,10 +117,12 @@ export function AppProviders({ children }: AppProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <GuardGate>{children}</GuardGate>
-      </TooltipProvider>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <AppErrorBoundary boundaryName="app.providers" variant="page">
+        <TooltipProvider>
+          <GuardGate>{children}</GuardGate>
+        </TooltipProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </AppErrorBoundary>
     </QueryClientProvider>
   )
 }

@@ -1,0 +1,18 @@
+---
+import { ErrorScreen } from '@/components/layout/ErrorScreen'
+import NonTaskLayout from '@/layouts/NonTaskLayout.astro'
+---
+
+<NonTaskLayout title="Page not found">
+  <ErrorScreen
+    code="404"
+    title="This route does not exist"
+    description="The page may have been moved, removed, or the URL might be incorrect."
+    hint="Start from the overview or jump straight into a task route to continue working."
+    actions={[
+      { href: '/', label: 'Go to overview', variant: 'default', icon: 'home' },
+      { href: '/tasks/explain', label: 'Open tasks', variant: 'outline', icon: 'back' },
+      { href: '/settings', label: 'Review settings', variant: 'secondary', icon: 'settings' },
+    ]}
+  />
+</NonTaskLayout>
