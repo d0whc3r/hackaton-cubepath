@@ -5,137 +5,233 @@
 [![Node >= 24](https://img.shields.io/badge/node-%3E%3D24-1f6feb.svg)](https://nodejs.org/)
 [![pnpm 10](https://img.shields.io/badge/pnpm-10-f69220.svg)](https://pnpm.io/)
 
-Task-focused SLM router for developer workflows.
+**Intelligent routing of small language models for developer workflows — 100% local, no cloud required.**
 
-This project routes requests to small specialized models based on task type:
+Instead of sending every request to one large model, SLM Router detects what kind of task the user wants to perform and delegates it to a specialized small model (SLM) that is purpose-built and prompt-tuned for that exact task. All inference runs locally via [Ollama](https://ollama.com) — your code never leaves your machine.
 
-- `Explain`
-- `Generate Tests`
-- `Refactor`
-- `Write Commit`
+---
 
-It streams routing and output in real time and shows an estimated cost comparison.
+## How it works
 
-## Why this project
+```
+User submits code
+  → RailGuard validates input (static rules + LLM guard)
+    → Analyst detects language & framework
+      → Router selects the right specialist model
+        → Specialist streams the response in real time
+          → UI shows result + cost savings vs cloud providers
+```
 
-- Demonstrates practical SLM routing for dev tasks.
-- Keeps output quality high while reducing model cost.
-- Uses a clear, visual UI for demo and product communication.
+Every step is visible in real time: the UI shows routing progress, the detected language, the model chosen, and a live cost comparison against GPT-4o, Claude, and other cloud providers.
+
+---
+
+## Supported tasks (10 specialists)
+
+| Task               | Description                                                      |
+| ------------------ | ---------------------------------------------------------------- |
+| `explain`          | Senior-level explanation of what a piece of code does            |
+| `test`             | Unit tests using the detected framework (Vitest, pytest, JUnit…) |
+| `refactor`         | Code quality and readability improvements                        |
+| `commit`           | Concise, descriptive commit message from a `git diff`            |
+| `docstring`        | Documentation comments (JSDoc, Python docstrings, etc.)          |
+| `type-hints`       | Type annotations (TypeScript, Python mypy)                       |
+| `error-explain`    | Root cause analysis and fix steps for error messages             |
+| `performance-hint` | Performance optimization suggestions                             |
+| `naming-helper`    | Better names for variables and functions                         |
+| `dead-code`        | Detection of unreachable or unused code                          |
+
+Each task has its own specialist model and a dedicated system prompt that injects the detected language, framework, and task context.
+
+---
+
+## Key features
+
+### Task-based routing
+
+The **Analyst** model (`qwen2.5:0.5b` by default) inspects the input and returns structured JSON with the detected language, framework, and whether the input is a `git diff`. This context is injected into the specialist's system prompt to produce much better results (e.g. `test` generates `vitest` tests for a TypeScript project, not generic ones). For tasks that don't need this context (like `commit` or `naming-helper`), the router goes straight to the specialist — no analyst overhead.
+
+### RailGuard — two-layer security
+
+Every request is validated before reaching any model:
+
+1. **Static rules** (`sanitise.ts`) — always active, very fast. Regex-based detection of prompt injection attempts (`ignore previous instructions`, `you are now`…), off-topic input, and code injection patterns (`eval(`, `exec(`, `__import__`…).
+2. **Semantic validation** (`semantic-validator.ts`) — a tiny, fast guard model (`qwen2.5:0.5b`) is asked: _"Is this input appropriate for this task? YES or NO."_ The guard is **fail-open**: it only blocks if the answer is an explicit `NO`. Timeouts, ambiguous responses, and connection errors are allowed through — false positives are minimized, and the static layer is the authoritative gate.
+
+A circular in-memory buffer (max 1,000 entries) logs every validation event for debugging and monitoring.
+
+### Real-time streaming
+
+Responses stream token by token from Ollama directly to the browser via the Vercel AI SDK. If the model hits a token limit mid-response, the system **auto-continues** automatically, sending a second request with the last 2 KB of context. Progress steps (guard check, language detection, model selection) are streamed as SSE events so the UI stays live throughout.
+
+### Cost comparison
+
+After each response, the UI shows how much the same request would have cost on GPT-4o, Claude 3.5 Sonnet, and other cloud providers — versus running locally. The `CostBadge` component displays the estimated savings (typically 95–99%) with a per-provider breakdown.
+
+### Translate response
+
+Any response can be translated to the user's language with a single click. The translation preserves code blocks, function names, identifiers, and all programming-related content — only prose is translated.
+
+### Conversation history
+
+Each task page maintains its own conversation history, persisted in IndexedDB (with localStorage fallback). Unread notification badges appear for tasks completed in the background.
+
+---
+
+## Architecture
+
+The entire application runs **100% in the browser** — there is no application server. Ollama is called directly from the client via `fetch` using its OpenAI-compatible API.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                  Browser — React Islands (client:only)           │
+│                                                                  │
+│  ChatInput → useChatSession → buildRouteMutationOptions()        │
+│                                                                  │
+│  1. RailGuard        static rules → semantic LLM guard           │
+│  2. Router           analyst LLM → specialist selection          │
+│  3. Specialist       runStream() → auto-continue on token limit  │
+│                                                                  │
+│  chat-store (useSyncExternalStore) + IndexedDB persistence       │
+└───────────────────────────────┬─────────────────────────────────┘
+                                │ fetch (OpenAI-compatible API)
+                                ▼
+                    ┌───────────────────────┐
+                    │   Ollama local         │
+                    │   localhost:11434       │
+                    └───────────────────────┘
+```
+
+The UI is built with Astro + React Islands: only the interactive parts are hydrated as React components; the rest is static HTML.
+
+---
 
 ## Tech stack
 
-- Astro 6 (SSR, Node adapter)
-- React 19 islands
-- Tailwind CSS 4 + shadcn/ui
-- Vercel AI SDK + OpenAI-compatible provider
-- Ollama for local/VPS model serving
-- Vitest + Testing Library
+- **Astro 6** (SSG, static output)
+- **React 19** islands (`client:only`)
+- **Tailwind CSS 4** + shadcn/ui
+- **Vercel AI SDK** + Ollama provider (OpenAI-compatible)
+- **Ollama** for local model serving
+- **wretch** for HTTP with middleware
+- **Zod** for schema validation
+- **Vitest** + Testing Library
 
-## Project structure
-
-```text
-src/
-  components/        # React UI and task workspace
-  layouts/           # Astro layout with shared menu/chrome
-  pages/             # Astro routes + API endpoint
-  lib/               # router, cost, types
-  __tests__/         # component + unit tests
-```
+---
 
 ## Getting started
 
-### 1) Install dependencies
+### 1. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 2) Configure environment
+### 2. Configure environment
 
 ```bash
 cp .env.example .env
 ```
 
-Default important variables:
+Key variables:
 
-- `OLLAMA_BASE_URL`
-- `OLLAMA_EXPLAIN_MODEL`
-- `OLLAMA_TEST_MODEL`
-- `OLLAMA_REFACTOR_MODEL`
-- `OLLAMA_COMMIT_MODEL`
+| Variable                | Description                                         |
+| ----------------------- | --------------------------------------------------- |
+| `OLLAMA_BASE_URL`       | Ollama endpoint (default: `http://localhost:11434`) |
+| `OLLAMA_EXPLAIN_MODEL`  | Model for the `explain` task                        |
+| `OLLAMA_TEST_MODEL`     | Model for the `test` task                           |
+| `OLLAMA_REFACTOR_MODEL` | Model for the `refactor` task                       |
+| `OLLAMA_COMMIT_MODEL`   | Model for the `commit` task                         |
+| `OLLAMA_CODE_MODEL`     | Fallback for any task without a specific model set  |
 
-Optional fallback for legacy setups:
+Model selection can also be managed at runtime from the `/settings` page.
 
-- `OLLAMA_CODE_MODEL` (used only if the task-specific model variable is not set)
-- `HOST`
-- `PORT`
-
-### 3) Run with local Ollama
-
-Start Ollama and pull models:
+### 3. Pull models and run
 
 ```bash
 ollama serve
-ollama pull phi3.5
-ollama pull qwen2.5-coder:7b
+ollama pull qwen2.5:0.5b      # analyst + guard (tiny, fast)
+ollama pull qwen2.5-coder:7b  # specialist tasks
+ollama pull phi3.5             # alternative specialist
 ```
-
-Then run app:
 
 ```bash
 pnpm dev
 ```
 
-### 4) Run with Docker Compose
+App runs at `http://localhost:4321`.
+
+### 4. Run with Docker Compose
 
 ```bash
 docker compose up --build
 ```
 
-App runs at `http://localhost:4321`.
+---
 
-## Available pages
+## Pages
 
-- `/` overview
-- `/tasks/explain`
-- `/tasks/test`
-- `/tasks/refactor`
-- `/tasks/commit`
+| Route                     | Description                |
+| ------------------------- | -------------------------- |
+| `/`                       | Overview and task launcher |
+| `/tasks/explain`          | Explain code               |
+| `/tasks/test`             | Generate tests             |
+| `/tasks/refactor`         | Refactor code              |
+| `/tasks/commit`           | Write commit message       |
+| `/tasks/docstring`        | Add documentation comments |
+| `/tasks/type-hints`       | Add type annotations       |
+| `/tasks/error-explain`    | Explain errors             |
+| `/tasks/performance-hint` | Performance suggestions    |
+| `/tasks/naming-helper`    | Naming suggestions         |
+| `/tasks/dead-code`        | Dead code detection        |
+| `/settings`               | Model configuration        |
+
+---
 
 ## Scripts
 
-- `pnpm dev` run local dev server
-- `pnpm build` run type-check + build
-- `pnpm preview` preview build
-- `pnpm type-check` Astro type diagnostics
-- `pnpm test` run Vitest once
-- `pnpm test:watch` run Vitest in watch mode
-- `pnpm lint` run oxlint
-- `pnpm format` run oxfmt
+| Command           | Description                |
+| ----------------- | -------------------------- |
+| `pnpm dev`        | Start local dev server     |
+| `pnpm build`      | Type-check + build         |
+| `pnpm preview`    | Preview production build   |
+| `pnpm type-check` | Run Astro type diagnostics |
+| `pnpm test`       | Run Vitest once            |
+| `pnpm test:watch` | Run Vitest in watch mode   |
+| `pnpm lint`       | Run oxlint                 |
+| `pnpm format`     | Run oxfmt                  |
+
+---
 
 ## CI
 
-GitHub Actions workflow runs on:
+GitHub Actions runs on push to `main` and on pull requests:
 
-- push to `main`
-- pull requests targeting `main`
+1. Install
+2. Build (includes type-check)
+3. Test
 
-It executes:
+See [.github/workflows/ci.yml](.github/workflows/ci.yml).
 
-1. install
-2. build
-3. test
-
-See `.github/workflows/ci.yml`.
+---
 
 ## Documentation
 
-Detailed project docs live in [`docs/`](./docs):
+Detailed technical docs live in [`docs/explain/`](./docs/explain/):
 
-- product scope
-- architecture
-- implementation plan
-- decision log
+- [Vision & value proposition](./docs/explain/01-vision-general.md)
+- [Architecture](./docs/explain/02-arquitectura.md)
+- [Tech stack](./docs/explain/03-tecnologias.md)
+- [Project structure](./docs/explain/04-estructura-proyecto.md)
+- [Routing system](./docs/explain/05-enrutamiento.md)
+- [Streaming & API](./docs/explain/06-streaming-api.md)
+- [State management](./docs/explain/07-gestion-estado.md)
+- [Security — RailGuard](./docs/explain/08-seguridad.md)
+- [Cost calculation](./docs/explain/09-costes.md)
+- [Tests](./docs/explain/10-tests.md)
+- [Configuration](./docs/explain/11-configuracion.md)
+
+---
 
 ## Contributing
 
