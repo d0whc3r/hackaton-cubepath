@@ -29,6 +29,9 @@ jobs:
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'pnpm'
 
       - name: Install
         run: pnpm install --frozen-lockfile
@@ -141,6 +144,10 @@ jobs:
         run: pnpm run build
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+
+      - name: Add CNAME (main branch only)
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: echo "slm-router.d0w.dev" > dist/CNAME
 
       # ─── Build size analysis (PR only) ──────────────────────────────────────
       - name: Analyze build size
