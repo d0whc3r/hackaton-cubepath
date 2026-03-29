@@ -1,4 +1,7 @@
+import type { ReactNode } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, act, waitFor } from '@testing-library/react'
+import { createElement } from 'react'
 import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { useChatSession } from '@/hooks/use-chat-session'
 import { getModelForTask, loadModelConfig } from '@/lib/config/model-config'
@@ -82,6 +85,18 @@ vi.mock(import('@/lib/config/model-config'), () => ({
   })),
 }))
 
+function renderUseChatSession(fixedTaskType?: TaskType) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      mutations: { retry: false },
+      queries: { retry: false },
+    },
+  })
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(QueryClientProvider, { client: queryClient }, children)
+  return renderHook(() => useChatSession(fixedTaskType), { wrapper })
+}
+
 describe('useChatSession', () => {
   beforeEach(() => {
     resetStore()
@@ -118,23 +133,23 @@ describe('useChatSession', () => {
     }
     vi.mocked(loadHistoryAsync).mockResolvedValueOnce([mockEntry])
 
-    const { result } = renderHook(() => useChatSession('explain'))
+    const { result } = renderUseChatSession('explain')
     await waitFor(() => expect(result.current.entries).toHaveLength(1))
     expect(result.current.entries[0].id).toBe('1')
   })
 
   it('initialises activeTask from fixedTaskType', () => {
-    const { result } = renderHook(() => useChatSession('commit'))
+    const { result } = renderUseChatSession('commit')
     expect(result.current.activeTask).toBe('commit')
   })
 
   it('defaults activeTask to explain when no fixedTaskType', () => {
-    const { result } = renderHook(() => useChatSession())
+    const { result } = renderUseChatSession()
     expect(result.current.activeTask).toBe('explain')
   })
 
   it('handleSubmit appends entry with streaming status', async () => {
-    const { result } = renderHook(() => useChatSession())
+    const { result } = renderUseChatSession()
     await waitFor(() => expect(result.current.isHydrated).toBe(true))
 
     act(() => {
@@ -151,7 +166,7 @@ describe('useChatSession', () => {
       mutationFn: vi.fn(() => new Promise<void>(() => {})),
       mutationKey: ['route'],
     })
-    const { result } = renderHook(() => useChatSession())
+    const { result } = renderUseChatSession()
     await waitFor(() => expect(result.current.isHydrated).toBe(true))
 
     act(() => {
@@ -173,7 +188,7 @@ describe('useChatSession', () => {
         userMessage: { content: 'test', taskType: 'explain', timestamp: new Date() },
       },
     ])
-    const { result } = renderHook(() => useChatSession('explain'))
+    const { result } = renderUseChatSession('explain')
     await waitFor(() => expect(result.current.entries).toHaveLength(1))
 
     act(() => {
@@ -190,7 +205,7 @@ describe('useChatSession', () => {
       mutationFn,
       mutationKey: ['route'],
     })
-    const { result } = renderHook(() => useChatSession('refactor'))
+    const { result } = renderUseChatSession('refactor')
     await waitFor(() => expect(result.current.isHydrated).toBe(true))
 
     act(() => {
@@ -198,16 +213,19 @@ describe('useChatSession', () => {
     })
 
     expect(result.current.entries[0].userMessage.taskType).toBe('refactor')
-    expect(mutationFn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: 'code',
-        taskType: 'refactor',
-      }),
+    await waitFor(() =>
+      expect(mutationFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          input: 'code',
+          taskType: 'refactor',
+        }),
+        expect.anything(),
+      ),
     )
   })
 
   it('fixedTaskType locks activeTask despite setActiveTask calls', () => {
-    const { result } = renderHook(() => useChatSession('refactor'))
+    const { result } = renderUseChatSession('refactor')
 
     act(() => {
       result.current.setActiveTask('explain' as TaskType)
@@ -216,33 +234,13 @@ describe('useChatSession', () => {
     expect(result.current.activeTask).toBe('refactor')
   })
 
-  it('sets assistant error when route mutation is unavailable', async () => {
-    vi.mocked(buildRouteMutationOptions).mockReturnValueOnce({
-      mutationFn: undefined,
-      mutationKey: ['route'],
-    })
-    const { result } = renderHook(() => useChatSession())
-    await waitFor(() => expect(result.current.isHydrated).toBe(true))
-
-    act(() => {
-      result.current.handleSubmit('code', 'explain')
-    })
-
-    expect(result.current.entries[0].assistantMessage.status).toBe('error')
-    expect(result.current.entries[0].assistantMessage.error).toBe('Route mutation is not configured.')
-    expect(notify.error).toHaveBeenCalledWith(
-      'Route request unavailable',
-      expect.objectContaining({ description: 'Route mutation is not configured in the current environment.' }),
-    )
-  })
-
   it('sets blocked status and block reason when mutation rejects with BlockedError', async () => {
     const mutationFn = vi.fn().mockRejectedValueOnce(new BlockedError('Task and input do not match'))
     vi.mocked(buildRouteMutationOptions).mockReturnValueOnce({
       mutationFn,
       mutationKey: ['route'],
     })
-    const { result } = renderHook(() => useChatSession())
+    const { result } = renderUseChatSession()
     await waitFor(() => expect(result.current.isHydrated).toBe(true))
 
     act(() => {
@@ -263,7 +261,7 @@ describe('useChatSession', () => {
       mutationFn,
       mutationKey: ['route'],
     })
-    const { result } = renderHook(() => useChatSession())
+    const { result } = renderUseChatSession()
     await waitFor(() => expect(result.current.isHydrated).toBe(true))
 
     act(() => {

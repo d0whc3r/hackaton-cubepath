@@ -13,50 +13,68 @@ const MAX_OUTPUT_CHARS = 50_000
 
 /** How many chars of prior output to include as context for the continuation request. */
 const CONTINUATION_CONTEXT_CHARS = 2000
+const OLLAMA_UNREACHABLE_HINT = "Cannot connect to Ollama. Make sure it's running on your machine."
 
-function parseOllamaError(error: unknown, modelId: string): { code: string; message: string } {
-  // AI SDK HTTP-level errors (model not found, server errors, etc.)
+interface StreamError {
+  code: string
+  message: string
+}
+
+function parseApiErrorBody(responseBody?: string): string | undefined {
+  if (!responseBody) {
+    return undefined
+  }
+  try {
+    const body = JSON.parse(responseBody) as { error?: string }
+    return body.error
+  } catch {
+    return undefined
+  }
+}
+
+function modelNotFoundError(modelId: string, responseBody?: string): StreamError {
+  return {
+    code: 'MODEL_NOT_FOUND',
+    message: parseApiErrorBody(responseBody) ?? `Model "${modelId}" not found. Run: ollama pull ${modelId}`,
+  }
+}
+
+function genericOllamaApiError(responseBody?: string): StreamError | undefined {
+  const message = parseApiErrorBody(responseBody)
+  if (!message) {
+    return undefined
+  }
+  return { code: 'OLLAMA_ERROR', message }
+}
+
+function isConnectionFailure(error: Error): boolean {
+  const combined =
+    `${error.message} ${error.cause instanceof Error ? error.cause.message : String(error.cause ?? '')}`.toLowerCase()
+  return (
+    combined.includes('econnrefused') ||
+    combined.includes('fetch failed') ||
+    combined.includes('connection refused') ||
+    combined.includes('enotfound')
+  )
+}
+
+function parseOllamaError(error: unknown, modelId: string): StreamError {
   if (APICallError.isInstance(error)) {
     if (error.statusCode === 404) {
-      try {
-        const body = JSON.parse(error.responseBody ?? '{}') as { error?: string }
-        if (body.error) {
-          return { code: 'MODEL_NOT_FOUND', message: body.error }
-        }
-      } catch {
-        /* Ignore malformed body */
-      }
-      return {
-        code: 'MODEL_NOT_FOUND',
-        message: `Model "${modelId}" not found. Run: ollama pull ${modelId}`,
-      }
+      return modelNotFoundError(modelId, error.responseBody)
     }
     if (error.statusCode === 400 || error.statusCode === 500) {
-      try {
-        const body = JSON.parse(error.responseBody ?? '{}') as { error?: string }
-        if (body.error) {
-          return { code: 'OLLAMA_ERROR', message: body.error }
-        }
-      } catch {
-        /* Ignore malformed body */
+      const apiError = genericOllamaApiError(error.responseBody)
+      if (apiError) {
+        return apiError
       }
     }
   }
 
-  // Network-level errors (Ollama not running, port refused, DNS failure)
-  if (error instanceof Error) {
-    const combined =
-      `${error.message} ${error.cause instanceof Error ? error.cause.message : String(error.cause ?? '')}`.toLowerCase()
-    if (
-      combined.includes('econnrefused') ||
-      combined.includes('fetch failed') ||
-      combined.includes('connection refused') ||
-      combined.includes('enotfound')
-    ) {
-      return {
-        code: 'OLLAMA_UNREACHABLE',
-        message: "Cannot connect to Ollama. Make sure it's running on your machine.",
-      }
+  if (error instanceof Error && isConnectionFailure(error)) {
+    return {
+      code: 'OLLAMA_UNREACHABLE',
+      message: OLLAMA_UNREACHABLE_HINT,
     }
   }
 
@@ -80,13 +98,7 @@ async function drainTextStream(textStream: AsyncIterable<string>, emit: SseEmitt
   return chunks.join('')
 }
 
-function emitStreamDone(
-  emit: SseEmitter,
-  modelId: string,
-  inputSize: number,
-  outputSize: number,
-  durationMs: number,
-): void {
+function emitStreamDone(emit: SseEmitter, modelId: string, inputSize: number, outputSize: number, durationMs: number) {
   logServer('info', 'stream.specialist.done', { durationMs, inputSize, modelId, outputSize })
   recordStreamDuration(modelId, durationMs, 'done')
   recordStreamChars(modelId, inputSize, outputSize)

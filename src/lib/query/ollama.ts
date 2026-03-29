@@ -131,7 +131,7 @@ function getContextLength(data: ShowResponse): number | undefined {
       return value
     }
   }
-  const match = (data.parameters ?? '').match(/num_ctx\s+(\d+)/)
+  const match = new RegExp(/num_ctx\s+(\d+)/).exec(data.parameters ?? '')
   return match ? Number(match[1]) : undefined
 }
 
@@ -187,9 +187,10 @@ export const modelDetailsOptions = (baseUrl: string, modelId: string, enabled: b
       ])
 
       const normalizedModel = normalizeModelName(modelId)
-      const matchedTag = (tagsData.models ?? []).find(
-        (item) => Boolean(item.name) && (normalizeModelName(item.name) === normalizedModel || item.name === modelId),
-      )
+      const matchedTag = (tagsData.models ?? []).find((item) => {
+        const name = item.name ?? ''
+        return Boolean(name) && (normalizeModelName(name) === normalizedModel || name === modelId)
+      })
 
       return {
         capabilities: showData.capabilities ?? [],
@@ -226,6 +227,11 @@ export const guardCheckOptions = (baseUrl: string, retryCount: number) =>
 
 const PERCENT_BASE = 100
 
+function formatProgress(event: PullEvent): string {
+  const hasProgress = typeof event.completed === 'number' && typeof event.total === 'number' && event.total > 0
+  return hasProgress ? `${Math.round((event.completed! / event.total!) * PERCENT_BASE)}%` : (event.status ?? 'Pulling…')
+}
+
 /**
  * Streaming model pull with per-model progress tracking.
  * On success, automatically invalidates ollamaKeys.tags and ollamaKeys.health
@@ -244,13 +250,6 @@ export function useModelPullMutation() {
     },
     [],
   )
-
-  function formatProgress(event: PullEvent): string {
-    const hasProgress = typeof event.completed === 'number' && typeof event.total === 'number' && event.total > 0
-    return hasProgress
-      ? `${Math.round((event.completed! / event.total!) * PERCENT_BASE)}%`
-      : (event.status ?? 'Pulling…')
-  }
 
   function handlePull(modelId: string, baseUrl: string): void {
     pullAborts.current[modelId]?.abort()

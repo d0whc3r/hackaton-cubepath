@@ -1,13 +1,20 @@
-// Metrics stubs — no-ops until a real metrics backend is configured.
+type StreamStatus = 'aborted' | 'done' | 'error'
 
-export function recordRouteRequest(_taskType: string): void {}
+interface MetricsSink {
+  recordStreamChars(modelId: string, inputChars: number, outputChars: number): void
+  recordStreamDuration(modelId: string, durationMs: number, status: StreamStatus): void
+}
 
-export function recordRouteBlocked(_taskType: string): void {}
+let sink: MetricsSink | null = null
 
-export function recordStreamDuration(
-  _modelId: string,
-  _durationMs: number,
-  _status: 'aborted' | 'done' | 'error',
-): void {}
+export function setMetricsSink(nextSink: MetricsSink | null): void {
+  sink = nextSink
+}
 
-export function recordStreamChars(_modelId: string, _inputChars: number, _outputChars: number): void {}
+export function recordStreamDuration(modelId: string, durationMs: number, status: StreamStatus): void {
+  sink?.recordStreamDuration(modelId, durationMs, status)
+}
+
+export function recordStreamChars(modelId: string, inputChars: number, outputChars: number): void {
+  sink?.recordStreamChars(modelId, inputChars, outputChars)
+}

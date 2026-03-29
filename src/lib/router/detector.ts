@@ -5,6 +5,11 @@ interface LanguageRule {
   patterns: RegExp[]
 }
 
+const HIGH_CONFIDENCE_SCORE = 3
+const MEDIUM_CONFIDENCE_SCORE = 2
+const SAMPLE_SIZE = 2000
+const UNKNOWN_LANGUAGE = 'unknown'
+
 // Ordered from more specific to more general so equal-score ties pick the
 // More specific language: TypeScript before JavaScript, C++ before C, etc.
 const RULES: LanguageRule[] = [
@@ -66,44 +71,72 @@ const RULES: LanguageRule[] = [
 ]
 
 export function detectLanguage(input: string): DetectedLanguage {
-  if (!input.trim()) {
-    return { confidence: 'low', language: 'unknown' }
+  if (isBlank(input)) {
+    return unknownLanguage()
   }
 
-  // Sample only the first 2000 chars — language markers appear early and
-  // Keeping the slice small makes regex scans faster on large inputs.
-  const sample = input.slice(0, 2000)
-  const scores = new Map<string, number>()
+  const scores = scoreLanguages(sampleInput(input), RULES)
+  const topMatch = pickTopLanguage(scores)
+  if (!topMatch) {
+    return unknownLanguage()
+  }
 
-  for (const rule of RULES) {
-    let matchCount = 0
-    for (const pattern of rule.patterns) {
-      if (pattern.test(sample)) {
-        matchCount++
-        // Early exit once high confidence is reached — no need to test more patterns.
-        if (matchCount >= 3) {
-          break
-        }
+  return {
+    confidence: confidenceFromScore(topMatch[1]),
+    language: topMatch[0],
+  }
+}
+
+function isBlank(input: string): boolean {
+  return input.trim().length === 0
+}
+
+function sampleInput(input: string): string {
+  return input.slice(0, SAMPLE_SIZE)
+}
+
+function unknownLanguage(): DetectedLanguage {
+  return { confidence: 'low', language: UNKNOWN_LANGUAGE }
+}
+
+function scoreLanguages(sample: string, rules: LanguageRule[]): Map<string, number> {
+  const scores = new Map<string, number>()
+  for (const rule of rules) {
+    const score = countMatches(sample, rule.patterns)
+    if (score > 0) {
+      scores.set(rule.language, score)
+    }
+  }
+  return scores
+}
+
+function countMatches(sample: string, patterns: RegExp[]): number {
+  let matched = 0
+  for (const pattern of patterns) {
+    if (pattern.test(sample)) {
+      matched += 1
+      if (matched >= HIGH_CONFIDENCE_SCORE) {
+        return matched
       }
     }
-    if (matchCount > 0) {
-      scores.set(rule.language, matchCount)
-    }
   }
+  return matched
+}
 
+function pickTopLanguage(scores: Map<string, number>): [string, number] | undefined {
   if (scores.size === 0) {
-    return { confidence: 'low', language: 'unknown' }
+    return undefined
   }
-
   const sorted = [...scores.entries()].toSorted((elementA, elementB) => elementB[1] - elementA[1])
-  const [[language, topScore]] = sorted
+  return sorted[0]
+}
 
-  let confidence: DetectedLanguage['confidence'] = 'low'
-  if (topScore >= 3) {
-    confidence = 'high'
-  } else if (topScore >= 2) {
-    confidence = 'medium'
+function confidenceFromScore(score: number): DetectedLanguage['confidence'] {
+  if (score >= HIGH_CONFIDENCE_SCORE) {
+    return 'high'
   }
-
-  return { confidence, language }
+  if (score >= MEDIUM_CONFIDENCE_SCORE) {
+    return 'medium'
+  }
+  return 'low'
 }

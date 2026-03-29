@@ -1,4 +1,5 @@
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react'
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { DEFAULTS, getAnalystModel, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { BlockedError, buildRouteMutationOptions } from '@/lib/services/route.service'
@@ -50,8 +51,10 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     loading: loadingByTask,
   } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  const [activeTask, setActiveTaskState] = useState<TaskType>(defaultTask)
+  const [activeTask, setActiveTask] = useState<TaskType>(defaultTask)
   const [currentModel, setCurrentModel] = useState(() => getModelForTask(DEFAULTS, defaultTask))
+  const routeMutationOptions = useMemo(() => buildRouteMutationOptions(), [])
+  const routeMutation = useMutation(routeMutationOptions)
 
   const viewTask = fixedTaskType ?? activeTask
 
@@ -73,7 +76,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
 
     ensureLoaded(task)
     if (!fixedTaskType) {
-      setActiveTaskState(task)
+      setActiveTask(task)
     }
     setCurrentModel(getModelForTask(config, task))
 
@@ -97,38 +100,25 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
     })
     setLoading(task, true)
 
-    const { mutationFn } = buildRouteMutationOptions()
-    if (!mutationFn) {
-      notify.error('Route request unavailable', {
-        description: 'Route mutation is not configured in the current environment.',
+    routeMutation
+      .mutateAsync({
+        analystModel: getAnalystModel(config),
+        callbacks: buildStreamCallbacks(task, updateLastAssistant),
+        commitModel: config.commitModel,
+        deadCodeModel: config.deadCodeModel,
+        docstringModel: config.docstringModel,
+        errorExplainModel: config.errorExplainModel,
+        explainModel: config.explainModel,
+        input,
+        namingHelperModel: config.namingHelperModel,
+        ollamaBaseUrl: config.ollamaBaseUrl,
+        performanceHintModel: config.performanceHintModel,
+        refactorModel: config.refactorModel,
+        signal: abort.signal,
+        taskType: task,
+        testModel: config.testModel,
+        typeHintsModel: config.typeHintsModel,
       })
-      updateLastAssistant(task, (prev: AssistantMessage) => ({
-        ...prev,
-        error: 'Route mutation is not configured.',
-        status: 'error',
-      }))
-      setLoading(task, false)
-      return
-    }
-
-    void mutationFn({
-      analystModel: getAnalystModel(config),
-      callbacks: buildStreamCallbacks(task, updateLastAssistant),
-      commitModel: config.commitModel,
-      deadCodeModel: config.deadCodeModel,
-      docstringModel: config.docstringModel,
-      errorExplainModel: config.errorExplainModel,
-      explainModel: config.explainModel,
-      input,
-      namingHelperModel: config.namingHelperModel,
-      ollamaBaseUrl: config.ollamaBaseUrl,
-      performanceHintModel: config.performanceHintModel,
-      refactorModel: config.refactorModel,
-      signal: abort.signal,
-      taskType: task,
-      testModel: config.testModel,
-      typeHintsModel: config.typeHintsModel,
-    })
       .catch((error) => {
         if (abort.signal.aborted) {
           updateLastAssistant(task, (prev: AssistantMessage) => ({ ...prev, status: 'interrupted' }))
@@ -212,7 +202,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
       if (fixedTaskType) {
         return
       }
-      setActiveTaskState(task)
+      setActiveTask(task)
     },
   }
 }

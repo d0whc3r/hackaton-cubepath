@@ -41,7 +41,7 @@ export function useGuardBootstrap() {
 
   useEffect(() => {
     if (checkQuery.data === false && pullState.status === 'idle') {
-      void pull()
+      pull()
     }
   }, [checkQuery.data, pullState.status, pull])
 
