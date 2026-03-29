@@ -31,6 +31,16 @@ export interface UseChatSessionReturn {
   setActiveTask: (task: TaskType) => void
 }
 
+function generateEntryId(): string {
+  const uuid = globalThis.crypto?.randomUUID?.()
+  if (uuid) {
+    return uuid
+  }
+  const randomBytes = new Uint32Array(2)
+  globalThis.crypto?.getRandomValues?.(randomBytes)
+  return `${Date.now()}-${(randomBytes[0] ?? 0).toString(16)}${(randomBytes[1] ?? 0).toString(16)}`
+}
+
 export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
   const defaultTask = fixedTaskType ?? 'explain'
 
@@ -82,7 +92,7 @@ export function useChatSession(fixedTaskType?: TaskType): UseChatSessionReturn {
         specialist: null,
         status: 'streaming',
       },
-      id: `${Date.now()}-${Math.random()}`,
+      id: generateEntryId(),
       userMessage: { content: input, fileName, taskType: task, timestamp: new Date() },
     })
     setLoading(task, true)

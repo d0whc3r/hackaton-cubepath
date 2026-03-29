@@ -62,7 +62,16 @@ const GENERATION_TASK_ITEMS = [
 ] as const
 
 const EMPTY_SAVINGS: SavingsData = { queryCount: 0, totalInputTokens: 0, totalOutputTokens: 0, totalSavedUsd: 0 }
-const normalizePath = (path: string) => (path === '/' ? path : path.replace(/\/+$/, ''))
+const normalizePath = (path: string) => {
+  if (path === '/') {
+    return path
+  }
+  let end = path.length
+  while (end > 0 && path.codePointAt(end - 1) === 47) {
+    end -= 1
+  }
+  return path.slice(0, end)
+}
 const TASK_PATH_BY_TYPE: Record<TaskType, string> = {
   commit: '/tasks/commit',
   'dead-code': '/tasks/dead-code',

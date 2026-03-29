@@ -20,6 +20,14 @@ interface AppProvidersProps {
 
 let hasGuardReadySession = false
 
+function trimTrailingSlashes(path: string): string {
+  let end = path.length
+  while (end > 0 && path.codePointAt(end - 1) === 47) {
+    end -= 1
+  }
+  return path.slice(0, end)
+}
+
 function InitializingScreen({
   error,
   modelId,
@@ -68,7 +76,7 @@ function GuardGate({ children }: { children: React.ReactNode }) {
 
   // Exclude routes that don't need guard model checking (like /settings and root /)
   // Ensure we handle both with and without trailing slashes
-  const pathname = globalThis.location?.pathname?.replace(/\/+$/, '') || ''
+  const pathname = trimTrailingSlashes(globalThis.location?.pathname ?? '')
   const isExcludedPage = pathname === '/settings' || pathname === ''
 
   useEffect(() => {

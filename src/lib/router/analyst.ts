@@ -60,9 +60,10 @@ export async function runAnalyst(
 /** Fallback when Analyst model is unavailable or times out */
 export function fallbackAnalysis(input: string): CodeContext {
   const detected = detectLanguage(input)
+  const trimmed = input.trimStart()
   return {
     confidence: detected.confidence,
-    isDiff: /^diff --git|^@@\s/.test(input.trimStart()),
+    isDiff: trimmed.startsWith('diff --git') || trimmed.startsWith('@@ '),
     language: detected.language,
     testFramework: defaultFramework(detected.language),
   }

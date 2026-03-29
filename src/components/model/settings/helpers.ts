@@ -5,7 +5,8 @@ import type { SectionDef, SectionId } from './types'
 import { SECTIONS } from './constants'
 
 export function ollamaModelUrl(modelId: string): string {
-  const withoutTag = modelId.replace(/:.*$/, '')
+  const tagStart = modelId.indexOf(':')
+  const withoutTag = tagStart === -1 ? modelId : modelId.slice(0, tagStart)
   if (withoutTag.includes('/')) {
     return `https://ollama.com/${withoutTag}`
   }
