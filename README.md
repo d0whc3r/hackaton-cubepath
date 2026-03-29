@@ -1,6 +1,8 @@
 # SLM Router
 
 [![CI](https://github.com/d0whc3r/hackaton-cubepath/actions/workflows/ci.yml/badge.svg)](https://github.com/d0whc3r/hackaton-cubepath/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/d0whc3r/hackaton-cubepath/branch/main/graph/badge.svg)](https://codecov.io/gh/d0whc3r/hackaton-cubepath)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=d0whc3r_hackaton-cubepath&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=d0whc3r_hackaton-cubepath)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black.svg)](./LICENSE)
 [![Node >= 24](https://img.shields.io/badge/node-%3E%3D24-1f6feb.svg)](https://nodejs.org/)
 [![pnpm 10](https://img.shields.io/badge/pnpm-10-f69220.svg)](https://pnpm.io/)
