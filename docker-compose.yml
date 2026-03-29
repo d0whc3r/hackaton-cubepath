@@ -3,14 +3,10 @@ services:
     build: .
     ports:
       - '4321:4321'
-    environment:
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - OLLAMA_EXPLAIN_MODEL=phi3.5
-      - OLLAMA_TEST_MODEL=qwen2.5-coder:7b
-      - OLLAMA_REFACTOR_MODEL=qwen2.5-coder:7b
-      - OLLAMA_COMMIT_MODEL=qwen2.5-coder:7b
-      - OLLAMA_TRANSLATE_MODEL=icky/translate
-      - OLLAMA_ANALYST_MODEL=llama3.2:1b
+    # Este es un sitio estático: las variables PUBLIC_* se embeben en el bundle
+    # durante `pnpm build` (dentro del contenedor).
+    # La URL de Ollama también se puede cambiar desde la UI en /settings
+    # (se persiste en localStorage sin necesidad de reconstruir la imagen).
     depends_on:
       ollama:
         condition: service_healthy
@@ -22,7 +18,7 @@ services:
     volumes:
       - ./ollama_data:/root/.ollama
     environment:
-      - OLLAMA_ORIGINS=http://*
+      - OLLAMA_ORIGINS=*
     healthcheck:
       test: ['CMD', 'ollama', 'list']
       interval: 10s

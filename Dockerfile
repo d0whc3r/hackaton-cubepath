@@ -13,7 +13,6 @@ RUN pnpm build
 FROM base AS runtime
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
-ENV HOST=0.0.0.0
-ENV PORT=4321
+COPY --from=build /app/package.json ./package.json
 EXPOSE 4321
-CMD ["node", "./dist/server/entry.mjs"]
+CMD ["node_modules/.bin/astro", "preview", "--host", "0.0.0.0", "--port", "4321"]
