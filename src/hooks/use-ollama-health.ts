@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import type { ModelConfig } from '@/lib/config/model-config'
-import type { OllamaHealthResponse } from '@/pages/api/ollama/health'
+import type { OllamaHealthRaw } from '@/lib/query/ollama'
 import { SECTIONS } from '@/components/model/settings/constants'
-import { appWretch } from '@/lib/http/app-client'
+import { ollamaHealthOptions } from '@/lib/query/ollama'
 
 export type OllamaHealthStatus = 'loading' | 'healthy' | 'degraded' | 'unreachable' | 'stale'
 
@@ -45,8 +45,7 @@ const INITIAL_HEALTH: OllamaHealth = {
   totalUniqueModels: 0,
 }
 
-function computeHealth(response: OllamaHealthResponse, config: ModelConfig): OllamaHealth {
-  // All unique model IDs required by the current config
+function computeHealth(response: OllamaHealthRaw, config: ModelConfig): OllamaHealth {
   const requiredModelIds = [
     ...new Set(SECTIONS.map((section) => config[section.configKey as keyof ModelConfig] as string).filter(Boolean)),
   ]
@@ -91,71 +90,24 @@ function computeHealth(response: OllamaHealthResponse, config: ModelConfig): Oll
 }
 
 /**
- * Fetches Ollama health on mount and whenever `triggerKey` changes (i.e. user
- * clicks the refresh button). URL changes alone do NOT trigger a new request —
- * they transition the status to 'stale' so the UI can prompt the user to verify.
+ * Checks Ollama health via React Query. Re-fetches whenever `triggerKey` changes
+ * (user clicks refresh) or when `ollamaBaseUrl` changes (new URL saved).
  */
 export function useOllamaHealth(config: ModelConfig, triggerKey: number, enabled: boolean): OllamaHealth {
-  const [health, setHealth] = useState<OllamaHealth>(INITIAL_HEALTH)
-  const triggeredUrlRef = useRef<string>(config.ollamaBaseUrl)
+  const { data, isPending } = useQuery(ollamaHealthOptions(config.ollamaBaseUrl, triggerKey, enabled))
 
-  useEffect(() => {
-    if (!enabled) {
-      setHealth((previous) => ({
-        ...previous,
-        checkedAt: new Date().toISOString(),
-        checkedUrl: config.ollamaBaseUrl,
-        status: 'healthy',
-      }))
-      return
+  if (!enabled) {
+    return {
+      ...INITIAL_HEALTH,
+      checkedAt: new Date().toISOString(),
+      checkedUrl: config.ollamaBaseUrl,
+      status: 'healthy',
     }
+  }
 
-    const abort = new AbortController()
-    const urlToCheck = config.ollamaBaseUrl
-    triggeredUrlRef.current = urlToCheck
+  if (isPending || !data) {
+    return { ...INITIAL_HEALTH }
+  }
 
-    setHealth((previous) => ({ ...previous, status: 'loading' }))
-
-    appWretch
-      .url('/api/ollama/health')
-      .query({ baseUrl: urlToCheck })
-      .options({ signal: abort.signal })
-      .get()
-      .json<OllamaHealthResponse>()
-      .then((response) => {
-        setHealth(computeHealth(response, config))
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error && error.name === 'AbortError') {
-          return
-        }
-        const requiredModelIds = [
-          ...new Set(
-            SECTIONS.map((section) => config[section.configKey as keyof ModelConfig] as string).filter(Boolean),
-          ),
-        ]
-        setHealth({
-          checkedAt: new Date().toISOString(),
-          checkedUrl: urlToCheck,
-          installedModels: [],
-          installedUniqueModels: 0,
-          missingModels: [],
-          ollamaVersion: null,
-          readyTasks: 0,
-          status: 'unreachable',
-          totalTasks: TOTAL_TASKS,
-          totalUniqueModels: requiredModelIds.length,
-        })
-      })
-
-    return () => {
-      abort.abort()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [config.ollamaBaseUrl, enabled, triggerKey])
-
-  const isStale =
-    health.status !== 'loading' && health.checkedUrl !== null && config.ollamaBaseUrl !== health.checkedUrl
-
-  return isStale ? { ...health, status: 'stale' } : health
+  return computeHealth(data, config)
 }

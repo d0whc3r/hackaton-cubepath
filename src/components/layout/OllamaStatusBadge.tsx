@@ -1,6 +1,8 @@
+import { QueryClientProvider } from '@tanstack/react-query'
 import { AlertTriangle, CheckCircle2, CircleDashed, Loader2, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { OllamaHealth, OllamaHealthStatus } from '@/hooks/use-ollama-health'
+import { queryClient } from '@/components/AppProviders'
 import { useOllamaHealth } from '@/hooks/use-ollama-health'
 import { MODEL_CONFIG_UPDATED_EVENT, STORAGE_KEY, loadModelConfig } from '@/lib/config/model-config'
 
@@ -91,5 +93,9 @@ function OllamaStatusBadgeInner() {
 }
 
 export function OllamaStatusBadge() {
-  return <OllamaStatusBadgeInner />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <OllamaStatusBadgeInner />
+    </QueryClientProvider>
+  )
 }

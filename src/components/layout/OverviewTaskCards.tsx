@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import type { TaskType } from '@/lib/schemas/route'
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { MODEL_CONFIG_UPDATED_EVENT, STORAGE_KEY, getModelForTask, loadModelConfig } from '@/lib/config/model-config'
 import { MODELS_BY_TASK } from '@/lib/router/models'
 
@@ -134,25 +135,26 @@ function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: 
         const modelLabel = MODELS_BY_TASK[task].find((model) => model.id === modelId)?.label ?? modelId
 
         return (
-          <a
-            key={task}
-            href={href}
-            className="group rounded-xl border border-border/70 bg-card p-5 shadow-sm transition-colors hover:border-primary/40"
-          >
-            <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg} ${color}`}>
-              <Icon className="h-5 w-5" />
-            </div>
-
-            <h3 className="mt-4 mb-2 text-base font-semibold text-foreground transition-colors group-hover:text-primary">
-              {title}
-            </h3>
-            <p className="text-sm leading-6 text-muted-foreground">{description}</p>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-              <span className="rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 font-mono text-primary">
-                {modelLabel}
-              </span>
-            </div>
+          <a key={task} href={href} className="group block">
+            <Card
+              size="sm"
+              className="h-full border border-border/70 shadow-sm ring-0 transition-colors group-hover:border-primary/40"
+            >
+              <CardHeader>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg} ${color}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-base text-foreground transition-colors group-hover:text-primary">
+                  {title}
+                </CardTitle>
+                <CardDescription className="leading-6">{description}</CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <span className="rounded-full border border-primary/15 bg-primary/10 px-2.5 py-1 font-mono text-xs text-primary">
+                  {modelLabel}
+                </span>
+              </CardFooter>
+            </Card>
           </a>
         )
       })}

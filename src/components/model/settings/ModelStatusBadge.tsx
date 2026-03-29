@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle2, Download, Loader2 } from 'lucide-react'
+import type { PullState } from '@/lib/query/ollama'
 import { Badge } from '@/components/ui/badge'
-import type { PullState } from './types'
 
 interface ModelStatusBadgeProps {
   modelId: string

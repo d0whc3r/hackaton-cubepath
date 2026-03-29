@@ -1,4 +1,12 @@
 import type { ModelOption } from '../types'
+import {
+  BASE_DEEPSEEK_CODER_V2_16B,
+  BASE_DEVSTRAL_24B,
+  BASE_GRANITE_CODE_3B,
+  BASE_GRANITE_CODE_8B,
+  BASE_QWEN25_CODER_14B,
+  BASE_QWEN25_CODER_7B,
+} from './shared'
 
 // ── Refactor ─────────────────────────────────────────────────────────────────
 // Code-specialist models for cleanup, idiomatic rewrites, and large-file edits.
@@ -6,53 +14,29 @@ import type { ModelOption } from '../types'
 // All models are code-fine-tuned or purpose-built for software engineering tasks.
 export const REFACTOR_MODELS: ModelOption[] = [
   {
-    contextWindow: 128_000,
+    ...BASE_GRANITE_CODE_8B,
     description: 'IBM · 125K ctx, best default when full-file refactors would otherwise truncate context',
-    id: 'granite-code:8b',
-    label: 'Granite Code',
-    params: '8B',
-    size: 4.6,
   },
   {
-    contextWindow: 131_072,
+    ...BASE_DEVSTRAL_24B,
     description:
       'Mistral/All Hands · 128K ctx, purpose-built for software engineering including whole-codebase refactoring; requires 32 GB RAM',
-    id: 'devstral:24b',
-    label: 'Devstral',
-    params: '24B',
-    size: 14,
   },
   {
-    contextWindow: 163_840,
+    ...BASE_DEEPSEEK_CODER_V2_16B,
     description: 'DeepSeek · MoE architecture, 160K ctx, GPT-4 Turbo competitive on complex multi-step refactors',
-    id: 'deepseek-coder-v2:16b',
-    label: 'DeepSeek Coder V2',
-    params: '16B',
-    size: 8.9,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_14B,
     description: 'Alibaba · best code-specialist quality under 10 GB for targeted refactors on 16 GB machines',
-    id: 'qwen2.5-coder:14b',
-    label: 'Qwen2.5 Coder',
-    params: '14B',
-    size: 9,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_7B,
     description: 'Alibaba · excellent for focused cleanup and behavior-preserving rewrites on RAM-constrained machines',
-    id: 'qwen2.5-coder:7b',
-    label: 'Qwen2.5 Coder',
-    params: '7B',
-    size: 4.7,
   },
   {
-    contextWindow: 128_000,
+    ...BASE_GRANITE_CODE_3B,
     description: 'IBM · lighter long-context refactor fallback for constrained machines',
-    id: 'granite-code:3b',
-    label: 'Granite Code',
-    params: '3B',
-    size: 2,
   },
 ]
 

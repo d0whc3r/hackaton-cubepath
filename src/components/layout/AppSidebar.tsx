@@ -1,6 +1,7 @@
 import {
   AlertCircle,
   BookOpen,
+  ExternalLink,
   FileText,
   GitCommitHorizontal,
   LayoutDashboard,
@@ -23,13 +24,18 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarInput,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSkeleton,
+  SidebarRail,
   SidebarSeparator,
   useSidebar,
 } from '@/components/ui/sidebar'
@@ -77,13 +83,18 @@ interface AppSidebarProps {
 export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
   const [pathname, setPathname] = useState(() => normalizePath(globalThis.location?.pathname ?? '/'))
   const [savings, setSavings] = useState<SavingsData>(EMPTY_SAVINGS)
+  const [savingsLoaded, setSavingsLoaded] = useState(false)
+  const [search, setSearch] = useState('')
   const { state } = useSidebar()
   const { loading, unread } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
   useEffect(() => {
     const syncPathname = () => setPathname(normalizePath(globalThis.location.pathname))
     syncPathname()
-    void loadSavings().then(setSavings)
+    void loadSavings().then((data) => {
+      setSavings(data)
+      setSavingsLoaded(true)
+    })
 
     const onPageLoad = () => syncPathname()
     const onAfterSwap = () => syncPathname()
@@ -105,6 +116,14 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
   const isCollapsed = state === 'collapsed'
   const activeTaskHref = fixedTaskType ? TASK_PATH_BY_TYPE[fixedTaskType] : null
   const hasSavings = savings.queryCount > 0
+
+  const searchLower = search.toLowerCase()
+  const filteredAnalysis = search
+    ? ANALYSIS_TASK_ITEMS.filter((item) => item.label.toLowerCase().includes(searchLower))
+    : ANALYSIS_TASK_ITEMS
+  const filteredGeneration = search
+    ? GENERATION_TASK_ITEMS.filter((item) => item.label.toLowerCase().includes(searchLower))
+    : GENERATION_TASK_ITEMS
 
   const handleResetSavings = () => {
     if (!hasSavings) {
@@ -141,6 +160,12 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
+        <SidebarInput
+          placeholder="Search tasks…"
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+          className="group-data-[collapsible=icon]:hidden"
+        />
       </SidebarHeader>
 
       <SidebarContent>
@@ -167,126 +192,154 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
 
         <SidebarSeparator />
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Analysis</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {ANALYSIS_TASK_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      activeTaskHref
-                        ? activeTaskHref === item.href
-                        : pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    }
-                    tooltip={item.label}
-                  >
-                    <a href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </a>
-                  </SidebarMenuButton>
-                  {loading[item.taskType] && (
-                    <SidebarMenuBadge>
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
-                    </SidebarMenuBadge>
-                  )}
-                  {!loading[item.taskType] && unread[item.taskType] && (
-                    <SidebarMenuBadge>
-                      <span className="h-2 w-2 rounded-full bg-green-500" />
-                    </SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {filteredAnalysis.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Analysis</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredAnalysis.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        activeTaskHref
+                          ? activeTaskHref === item.href
+                          : pathname === item.href || pathname.startsWith(`${item.href}/`)
+                      }
+                      tooltip={item.label}
+                    >
+                      <a href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                    {loading[item.taskType] && (
+                      <SidebarMenuBadge>
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                      </SidebarMenuBadge>
+                    )}
+                    {!loading[item.taskType] && unread[item.taskType] && (
+                      <SidebarMenuBadge>
+                        <span className="h-2 w-2 rounded-full bg-green-500" />
+                      </SidebarMenuBadge>
+                    )}
+                    {!loading[item.taskType] && !unread[item.taskType] && (
+                      <SidebarMenuAction showOnHover asChild>
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Open ${item.label} in new tab`}
+                        >
+                          <ExternalLink />
+                        </a>
+                      </SidebarMenuAction>
+                    )}
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Generation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {GENERATION_TASK_ITEMS.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={
-                      activeTaskHref
-                        ? activeTaskHref === item.href
-                        : pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    }
-                    tooltip={item.label}
-                  >
-                    <a href={item.href}>
-                      <item.icon />
-                      <span>{item.label}</span>
-                    </a>
-                  </SidebarMenuButton>
-                  {loading[item.taskType] && (
-                    <SidebarMenuBadge>
-                      <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
-                    </SidebarMenuBadge>
-                  )}
-                  {!loading[item.taskType] && unread[item.taskType] && (
-                    <SidebarMenuBadge>
-                      <span className="h-2 w-2 rounded-full bg-green-500" />
-                    </SidebarMenuBadge>
-                  )}
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {filteredGeneration.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Generation</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {filteredGeneration.map((item) => (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={
+                        activeTaskHref
+                          ? activeTaskHref === item.href
+                          : pathname === item.href || pathname.startsWith(`${item.href}/`)
+                      }
+                      tooltip={item.label}
+                    >
+                      <a href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                      </a>
+                    </SidebarMenuButton>
+                    {loading[item.taskType] && (
+                      <SidebarMenuBadge>
+                        <span className="h-2 w-2 animate-pulse rounded-full bg-amber-400" />
+                      </SidebarMenuBadge>
+                    )}
+                    {!loading[item.taskType] && unread[item.taskType] && (
+                      <SidebarMenuBadge>
+                        <span className="h-2 w-2 rounded-full bg-green-500" />
+                      </SidebarMenuBadge>
+                    )}
+                    {!loading[item.taskType] && !unread[item.taskType] && (
+                      <SidebarMenuAction showOnHover asChild>
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`Open ${item.label} in new tab`}
+                        >
+                          <ExternalLink />
+                        </a>
+                      </SidebarMenuAction>
+                    )}
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         <SidebarSeparator />
         <SidebarGroup>
-          <SidebarGroupLabel className="flex items-center justify-between gap-2">
-            <span>Savings</span>
-            <button
-              type="button"
-              onClick={handleResetSavings}
-              disabled={!hasSavings}
-              className="inline-flex h-5 items-center gap-1 rounded px-1 text-[10px] text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
-              aria-label="Reset savings"
-              title="Reset savings"
-            >
-              <RotateCcw className="h-3 w-3" />
-              <span className="group-data-[collapsible=icon]:hidden">Reset</span>
-            </button>
-          </SidebarGroupLabel>
+          <SidebarGroupLabel>Savings</SidebarGroupLabel>
+          <SidebarGroupAction
+            onClick={handleResetSavings}
+            disabled={!hasSavings}
+            title="Reset savings"
+            aria-label="Reset savings"
+          >
+            <RotateCcw />
+          </SidebarGroupAction>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <SidebarMenuButton
-                      className={
-                        hasSavings
-                          ? 'h-auto cursor-default text-green-600 hover:bg-green-500/10 hover:text-green-600 dark:text-green-400 dark:hover:text-green-400'
-                          : 'h-auto cursor-default text-muted-foreground hover:bg-muted'
-                      }
-                    >
-                      <TrendingDown className={hasSavings ? 'shrink-0 text-green-500' : 'shrink-0'} />
-                      <div className="flex min-w-0 flex-col">
-                        <span className="font-mono text-sm leading-tight font-bold">
-                          {`$${savings.totalSavedUsd.toFixed(2)}`}
-                        </span>
-                        <span className="text-[10px] font-normal text-muted-foreground">
-                          {hasSavings ? `${savings.queryCount} querie/s saved` : 'No savings yet'}
-                        </span>
-                      </div>
-                    </SidebarMenuButton>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" hidden={!isCollapsed} className="text-xs">
-                    <p className="font-semibold">Saved {`$${savings.totalSavedUsd.toFixed(2)}`} vs cloud</p>
-                    <p className="text-muted-foreground">
-                      {savings.queryCount} {savings.queryCount === 1 ? 'query' : 'queries'} ·{' '}
-                      {savings.totalInputTokens.toLocaleString()}↑ {savings.totalOutputTokens.toLocaleString()}↓ tokens
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </SidebarMenuItem>
+              {savingsLoaded ? (
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        className={
+                          hasSavings
+                            ? 'h-auto cursor-default text-green-600 hover:bg-green-500/10 hover:text-green-600 dark:text-green-400 dark:hover:text-green-400'
+                            : 'h-auto cursor-default text-muted-foreground hover:bg-muted'
+                        }
+                      >
+                        <TrendingDown className={hasSavings ? 'shrink-0 text-green-500' : 'shrink-0'} />
+                        <div className="flex min-w-0 flex-col">
+                          <span className="font-mono text-sm leading-tight font-bold">
+                            {`$${savings.totalSavedUsd.toFixed(2)}`}
+                          </span>
+                          <span className="text-[10px] font-normal text-muted-foreground">
+                            {hasSavings ? `${savings.queryCount} querie/s saved` : 'No savings yet'}
+                          </span>
+                        </div>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" hidden={!isCollapsed} className="text-xs">
+                      <p className="font-semibold">Saved {`$${savings.totalSavedUsd.toFixed(2)}`} vs cloud</p>
+                      <p className="text-muted-foreground">
+                        {savings.queryCount} {savings.queryCount === 1 ? 'query' : 'queries'} ·{' '}
+                        {savings.totalInputTokens.toLocaleString()}↑ {savings.totalOutputTokens.toLocaleString()}↓
+                        tokens
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </SidebarMenuItem>
+              ) : (
+                <SidebarMenuSkeleton showIcon />
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -323,6 +376,7 @@ export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
           </Tooltip>
         </div>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

@@ -1,5 +1,5 @@
 import { Zap } from 'lucide-react'
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty'
 import { useChatContext } from '@/lib/context/chat-context'
 
 const TASK_HINTS: Record<string, string> = {
@@ -22,6 +22,34 @@ export function EmptyState() {
         <EmptyTitle>Ready to route</EmptyTitle>
         <EmptyDescription>{hint}</EmptyDescription>
       </EmptyHeader>
+      <EmptyContent>
+        <div className="flex flex-wrap justify-center gap-2">
+          <a
+            href="/tasks/explain"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+          >
+            Explain
+          </a>
+          <a
+            href="/tasks/test"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+          >
+            Tests
+          </a>
+          <a
+            href="/tasks/refactor"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+          >
+            Refactor
+          </a>
+          <a
+            href="/tasks/commit"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+          >
+            Commit
+          </a>
+        </div>
+      </EmptyContent>
     </Empty>
   )
 }

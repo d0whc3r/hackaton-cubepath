@@ -1,8 +1,8 @@
 ---
 import NonTaskLayout from '@/layouts/NonTaskLayout.astro'
-import { ModelConfigPage } from '@/components/model/ModelConfigPage'
+import { SettingsApp } from '@/components/model/SettingsApp'
 ---
 
 <NonTaskLayout title="Settings">
-  <ModelConfigPage client:only="react" />
+  <SettingsApp client:only="react" />
 </NonTaskLayout>

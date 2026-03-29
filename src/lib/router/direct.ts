@@ -48,8 +48,8 @@ export interface DirectRouteResult {
   systemPrompt: string
 }
 
-export function routeDirect(taskType: DirectTaskType, modelId: string = DEFAULT_MODELS[taskType]): DirectRouteResult {
-  let systemPrompt: string
+export function routeDirect(taskType: DirectTaskType, modelId = DEFAULT_MODELS[taskType]): DirectRouteResult {
+  let systemPrompt = ''
 
   switch (taskType) {
     case 'error-explain': {

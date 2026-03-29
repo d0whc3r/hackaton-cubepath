@@ -20,7 +20,7 @@ const {
 } = Astro.props;
 
 const pageTitle = title.startsWith(`${APP_NAME};`) ? title : `${APP_NAME}; ${title}`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-router.local');
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-router.d0w.dev');
 ---
 
 <!doctype html>
@@ -57,26 +57,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-rout
     <!-- Apply theme before first paint and re-apply after every SPA navigation -->
     <script is:inline>
       (function () {
-        function readStoredTheme() {
-          const raw = localStorage.getItem('theme');
-          if (raw === 'dark' || raw === 'light') {
-            return raw;
-          }
-          if (raw === null) {
-            return null;
-          }
-          try {
-            const parsed = JSON.parse(raw);
-            return parsed === 'dark' || parsed === 'light' ? parsed : null;
-          } catch {
-            return null;
-          }
-        }
-
         function applyTheme() {
-          const stored = readStoredTheme();
+          const stored = localStorage.getItem('theme');
           const prefersDark = globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
-          document.documentElement.classList.toggle('dark', stored ? stored === 'dark' : prefersDark);
+          const isDark = stored === 'dark' || (stored !== 'light' && prefersDark);
+          document.documentElement.classList.toggle('dark', isDark);
         }
         applyTheme();
         document.addEventListener('astro:after-swap', applyTheme);

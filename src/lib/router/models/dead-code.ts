@@ -1,4 +1,11 @@
 import type { ModelOption } from '../types'
+import {
+  BASE_DEVSTRAL_24B,
+  BASE_GRANITE_CODE_3B,
+  BASE_GRANITE_CODE_8B,
+  BASE_QWEN25_CODER_3B,
+  BASE_QWEN25_CODER_7B,
+} from './shared'
 
 // ── Dead code detection ───────────────────────────────────────────────────────
 // Code-specialist models for identifying unused variables, functions, imports,
@@ -6,45 +13,25 @@ import type { ModelOption } from '../types'
 // A symbol may appear unused in one file but be exported and used in another.
 export const DEAD_CODE_MODELS: ModelOption[] = [
   {
-    contextWindow: 128_000,
+    ...BASE_GRANITE_CODE_8B,
     description: 'IBM · 125K ctx, best default for dead-code analysis across larger files and modules',
-    id: 'granite-code:8b',
-    label: 'Granite Code',
-    params: '8B',
-    size: 4.6,
   },
   {
-    contextWindow: 131_072,
+    ...BASE_DEVSTRAL_24B,
     description:
       'Mistral/All Hands · 128K ctx, agentic software-engineering model for comprehensive dead-code sweeps across larger codebases',
-    id: 'devstral:24b',
-    label: 'Devstral',
-    params: '24B',
-    size: 14,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_7B,
     description: 'Alibaba · best targeted option when you want stronger code reasoning over long context',
-    id: 'qwen2.5-coder:7b',
-    label: 'Qwen2.5 Coder',
-    params: '7B',
-    size: 4.7,
   },
   {
-    contextWindow: 128_000,
+    ...BASE_GRANITE_CODE_3B,
     description: 'IBM · lighter long-context fallback for broader unused-code sweeps on low-RAM machines',
-    id: 'granite-code:3b',
-    label: 'Granite Code',
-    params: '3B',
-    size: 2,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_3B,
     description: 'Alibaba · budget fallback for cleanup passes on smaller files',
-    id: 'qwen2.5-coder:3b',
-    label: 'Qwen2.5 Coder',
-    params: '3B',
-    size: 1.9,
   },
 ]
 

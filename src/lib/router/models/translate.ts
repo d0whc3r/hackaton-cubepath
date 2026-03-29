@@ -46,4 +46,4 @@ export const TRANSLATE_MODELS: ModelOption[] = [
   },
 ]
 
-export const DEFAULT_TRANSLATE_MODEL = 'translategemma:4b'
+export const DEFAULT_TRANSLATE_MODEL = TRANSLATE_MODELS[0].id

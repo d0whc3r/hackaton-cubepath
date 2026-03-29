@@ -1,4 +1,4 @@
-import { logServer } from '@/lib/observability/server'
+import { logClient as logServer } from '@/lib/observability/client'
 import type { AttackVectorCategory, SecurityMetrics, ValidationEvent, ValidationResult } from './types'
 import { sanitise } from './sanitise'
 

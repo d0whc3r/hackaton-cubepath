@@ -20,7 +20,7 @@ export interface ModelOption {
   size: number
   description: string
   /** Context window in tokens (e.g. 8192, 32768, 131072) */
-  contextWindow?: number
+  contextWindow: number
 }
 
 export interface DetectedLanguage {

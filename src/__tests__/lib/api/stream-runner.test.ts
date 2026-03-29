@@ -14,9 +14,9 @@ vi.mock(import('@/lib/observability/metrics'), () => ({
   recordStreamDuration: vi.fn(),
 }))
 
-vi.mock(import('@/lib/observability/server'), () => ({
-  logServer: vi.fn(),
-  logServerError: vi.fn(),
+vi.mock(import('@/lib/observability/client'), () => ({
+  logClient: vi.fn(),
+  logClientError: vi.fn(),
 }))
 
 function createAsyncIterable(chunks: string[], options?: { onBeforeFirstChunk?: () => Promise<void> | void }) {

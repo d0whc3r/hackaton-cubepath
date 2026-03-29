@@ -1,11 +1,18 @@
 import { APICallError, streamText } from 'ai'
 import type { ollamaClient, SseEmitter } from '@/lib/api/sse'
+import { createChunkBuffer } from '@/lib/api/sse'
 import { estimateCost } from '@/lib/cost/calculator'
+import { logClient as logServer, logClientError as logServerError } from '@/lib/observability/client'
 import { recordStreamChars, recordStreamDuration } from '@/lib/observability/metrics'
-import { logServer, logServerError } from '@/lib/observability/server'
 
 /** 5 min: specialist models on consumer hardware can be slow for large inputs */
 const SPECIALIST_TIMEOUT_MS = 300_000
+
+/** Guard against unbounded continuation payloads on very long outputs. */
+const MAX_OUTPUT_CHARS = 50_000
+
+/** How many chars of prior output to include as context for the continuation request. */
+const CONTINUATION_CONTEXT_CHARS = 2000
 
 function parseOllamaError(error: unknown, modelId: string): { code: string; message: string } {
   // AI SDK HTTP-level errors (model not found, server errors, etc.)
@@ -59,13 +66,36 @@ function parseOllamaError(error: unknown, modelId: string): { code: string; mess
   }
 }
 
-/** Guard against unbounded continuation payloads on very long outputs. */
-const MAX_OUTPUT_CHARS = 50_000
+/**
+ * Drains an async text stream, buffering chunks for SSE and returning the full output.
+ */
+async function drainTextStream(textStream: AsyncIterable<string>, emit: SseEmitter): Promise<string> {
+  const chunks: string[] = []
+  const buf = createChunkBuffer((text) => emit('response_chunk', { text }))
+  for await (const chunk of textStream) {
+    chunks.push(chunk)
+    buf.add(chunk)
+  }
+  buf.end()
+  return chunks.join('')
+}
 
-/** How many chars of prior output to include as context for the continuation request. */
-const CONTINUATION_CONTEXT_CHARS = 2000
+function emitStreamDone(
+  emit: SseEmitter,
+  modelId: string,
+  inputSize: number,
+  outputSize: number,
+  durationMs: number,
+): void {
+  logServer('info', 'stream.specialist.done', { durationMs, inputSize, modelId, outputSize })
+  recordStreamDuration(modelId, durationMs, 'done')
+  recordStreamChars(modelId, inputSize, outputSize)
+  emit('routing_step', { label: 'Response generated', status: 'done', step: 'generating_response' })
+  emit('cost', estimateCost(inputSize, outputSize))
+  emit('done', {})
+}
 
-interface StreamRunnerParams {
+export interface StreamRunnerParams {
   emit: SseEmitter
   input: string
   modelId: string
@@ -73,22 +103,6 @@ interface StreamRunnerParams {
   systemPrompt: string
   /** When true, sends a follow-up message if the model stops at the token limit. */
   autoContinue?: boolean
-}
-
-async function emitTruncationWarningIfNeeded(
-  emit: SseEmitter,
-  finishReason: PromiseLike<string | null | undefined>,
-): Promise<void> {
-  if ((await finishReason) !== 'length') {
-    return
-  }
-
-  emit('routing_step', {
-    detail: 'Response was truncated after the continuation. Try a shorter input.',
-    label: 'Response truncated',
-    status: 'error',
-    step: 'generating_response',
-  })
 }
 
 /**
@@ -107,71 +121,49 @@ export async function runStream({
 }: StreamRunnerParams): Promise<void> {
   const abortController = new AbortController()
   const timeout = setTimeout(() => abortController.abort(), SPECIALIST_TIMEOUT_MS)
-  const outputChunks: string[] = []
   const startedAt = Date.now()
+  const baseOptions = { abortSignal: abortController.signal, model: ollama(modelId), system: systemPrompt }
 
   logServer('info', 'stream.specialist.start', { autoContinue, inputSize: input.length, modelId })
 
   try {
-    const result = streamText({
-      abortSignal: abortController.signal,
-      model: ollama(modelId),
-      prompt: input,
-      system: systemPrompt,
-    })
-
-    for await (const chunk of result.textStream) {
-      outputChunks.push(chunk)
-      emit('response_chunk', { text: chunk })
-    }
-
-    const outputText = outputChunks.join('')
+    const result = streamText({ ...baseOptions, prompt: input })
+    let output = await drainTextStream(result.textStream, emit)
 
     if (
       autoContinue &&
-      outputText.length < MAX_OUTPUT_CHARS &&
+      output.length < MAX_OUTPUT_CHARS &&
       (await result.finishReason) === 'length' &&
       !abortController.signal.aborted
     ) {
       // Truncate prior output to the last N chars so the continuation payload
       // Stays bounded regardless of how long the initial response was.
-      const contextForContinuation = outputText.slice(-CONTINUATION_CONTEXT_CHARS)
       const continuation = streamText({
-        abortSignal: abortController.signal,
+        ...baseOptions,
         messages: [
           { content: input, role: 'user' },
-          { content: contextForContinuation, role: 'assistant' },
+          { content: output.slice(-CONTINUATION_CONTEXT_CHARS), role: 'assistant' },
           {
             content: 'Continue exactly from where you left off. Do not repeat anything already written.',
             role: 'user',
           },
         ],
-        model: ollama(modelId),
-        system: systemPrompt,
       })
 
-      for await (const chunk of continuation.textStream) {
-        outputChunks.push(chunk)
-        emit('response_chunk', { text: chunk })
-      }
+      output += await drainTextStream(continuation.textStream, emit)
 
-      await emitTruncationWarningIfNeeded(emit, continuation.finishReason)
+      if ((await continuation.finishReason) === 'length') {
+        emit('routing_step', {
+          detail: 'Response was truncated after the continuation. Try a shorter input.',
+          label: 'Response truncated',
+          status: 'error',
+          step: 'generating_response',
+        })
+      }
     }
 
     clearTimeout(timeout)
-    const totalOutputChars = outputChunks.reduce((sum, c) => sum + c.length, 0)
-    const durationMs = Date.now() - startedAt
-    logServer('info', 'stream.specialist.done', {
-      durationMs,
-      inputSize: input.length,
-      modelId,
-      outputSize: totalOutputChars,
-    })
-    recordStreamDuration(modelId, durationMs, 'done')
-    recordStreamChars(modelId, input.length, totalOutputChars)
-    emit('routing_step', { label: 'Response generated', status: 'done', step: 'generating_response' })
-    emit('cost', estimateCost(input.length, totalOutputChars))
-    emit('done', {})
+    emitStreamDone(emit, modelId, input.length, output.length, Date.now() - startedAt)
   } catch (error) {
     clearTimeout(timeout)
     const isAbort = error instanceof Error && (error.name === 'AbortError' || error.message.includes('abort'))

@@ -1,0 +1,21 @@
+{
+  "$schema": "./node_modules/knip/schema.json",
+
+  "paths": {
+    "@/*": ["./src/*"]
+  },
+
+  "entry": ["src/sentry.client.config.ts"],
+
+  "project": ["src/**/*.{ts,tsx,astro}"],
+
+  "vitest": {
+    "entry": ["src/__tests__/msw/setup.ts", "src/__tests__/setup.ts", "src/**/*.test.{ts,tsx}"]
+  },
+
+  "ignoreFiles": ["src/env.d.ts"],
+
+  "ignoreDependencies": ["@fontsource-variable/inter", "babel-plugin-react-compiler", "tw-animate-css"],
+
+  "ignoreExportsUsedInFile": true
+}

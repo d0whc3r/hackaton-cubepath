@@ -1,12 +1,23 @@
 import { CheckCheck, ClipboardCopy, ExternalLink } from 'lucide-react'
+import type { PullState } from '@/lib/query/ollama'
 import type { ModelRuntime } from '@/lib/router/types'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Progress } from '@/components/ui/progress'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import type { PullState, SectionDef, SectionGroupId } from './types'
+import type { SectionDef, SectionGroupId } from './types'
 import { CUSTOM_VALUE } from './constants'
 import { formatModelSizeGb, ollamaModelUrl } from './helpers'
 import { ModelStatusBadge } from './ModelStatusBadge'
@@ -83,6 +94,7 @@ export function TaskRow({
     ? `${Math.round(selectedModel.contextWindow / CONTEXT_DIVISOR)}K ctx`
     : null
   const copied = copiedModelId === modelId
+  const pullProgress = pullState?.progress?.endsWith('%') ? parseInt(pullState.progress, 10) : null
   const isCloudModel = selectedModel ? selectedModel.size <= 0 : false
   const canPull =
     isLocalRuntime && installedModelsReady && !isInstalled && !isCloudModel && pullState?.status !== 'done'
@@ -159,19 +171,23 @@ export function TaskRow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {section.models.map((model) => (
-                <SelectItem key={model.id} value={model.id} className="text-xs">
-                  <span className="font-medium">{model.label}</span>
-                  {model.id === defaultModelId && (
-                    <span className="ml-2 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">
-                      Recommended
+              <SelectGroup>
+                <SelectLabel>Available models</SelectLabel>
+                {section.models.map((model) => (
+                  <SelectItem key={model.id} value={model.id} className="text-xs">
+                    <span className="font-medium">{model.label}</span>
+                    {model.id === defaultModelId && (
+                      <span className="ml-2 rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">
+                        Recommended
+                      </span>
+                    )}
+                    <span className="ml-1.5 text-muted-foreground">
+                      {model.params} · {formatModelSizeGb(model)}
                     </span>
-                  )}
-                  <span className="ml-1.5 text-muted-foreground">
-                    {model.params} · {formatModelSizeGb(model)}
-                  </span>
-                </SelectItem>
-              ))}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+              <SelectSeparator />
               <SelectItem value={CUSTOM_VALUE} className="text-xs text-muted-foreground">
                 Custom model ID...
               </SelectItem>
@@ -229,6 +245,14 @@ export function TaskRow({
                 )}
 
                 <Separator className="opacity-50" />
+
+                {/* Pull progress */}
+                {pullState?.status === 'pulling' && (
+                  <div className="space-y-1.5">
+                    <Progress value={pullProgress ?? 0} className={pullProgress === null ? 'animate-pulse' : ''} />
+                    <p className="text-[10px] text-muted-foreground">{pullState.progress ?? 'Pulling…'}</p>
+                  </div>
+                )}
 
                 {/* Actions */}
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">

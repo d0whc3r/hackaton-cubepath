@@ -1,31 +1,27 @@
 import { Moon, Sun } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { ThemeProvider, useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
-import { writeStorage } from '@/lib/utils/storage'
 
-export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false)
-
-  useEffect(() => {
-    setIsDark(document.documentElement.classList.contains('dark'))
-  }, [])
-
-  function toggle() {
-    const html = document.documentElement
-    if (html.classList.contains('dark')) {
-      html.classList.remove('dark')
-      writeStorage('theme', 'light')
-      setIsDark(false)
-    } else {
-      html.classList.add('dark')
-      writeStorage('theme', 'dark')
-      setIsDark(true)
-    }
-  }
+function ThemeToggleButton() {
+  const { resolvedTheme, setTheme } = useTheme()
 
   return (
-    <Button type="button" variant="ghost" size="icon" onClick={toggle} aria-label="Toggle theme">
-      {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+      aria-label="Toggle theme"
+    >
+      {resolvedTheme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
+  )
+}
+
+export function ThemeToggle() {
+  return (
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ThemeToggleButton />
+    </ThemeProvider>
   )
 }

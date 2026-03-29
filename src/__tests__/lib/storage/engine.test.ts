@@ -1,5 +1,6 @@
 import { getStorageEngine } from '@/lib/storage/engine'
-import * as idb from '@/lib/storage/idb'
+// oxlint-disable-next-line import/no-namespace
+import * as storageIdbModule from '@/lib/storage/idb'
 
 describe('getStorageEngine', () => {
   beforeEach(() => {
@@ -9,10 +10,10 @@ describe('getStorageEngine', () => {
   })
 
   it('uses the IndexedDB engine when IndexedDB is available', async () => {
-    vi.spyOn(idb, 'isIndexedDBAvailable').mockReturnValue(true)
-    const setSpy = vi.spyOn(idb, 'idbSet').mockResolvedValue()
-    const getSpy = vi.spyOn(idb, 'idbGet').mockResolvedValue({ ok: true })
-    const removeSpy = vi.spyOn(idb, 'idbRemove').mockResolvedValue()
+    vi.spyOn(storageIdbModule, 'isIndexedDBAvailable').mockReturnValue(true)
+    const setSpy = vi.spyOn(storageIdbModule, 'idbSet').mockResolvedValue()
+    const getSpy = vi.spyOn(storageIdbModule, 'idbGet').mockResolvedValue({ ok: true })
+    const removeSpy = vi.spyOn(storageIdbModule, 'idbRemove').mockResolvedValue()
     const engine = getStorageEngine('history')
 
     await engine.write('k', { ok: true })
@@ -25,8 +26,8 @@ describe('getStorageEngine', () => {
   })
 
   it('falls back to localStorage when IndexedDB is unavailable', async () => {
-    vi.spyOn(idb, 'isIndexedDBAvailable').mockReturnValue(false)
-    const getSpy = vi.spyOn(idb, 'idbGet')
+    vi.spyOn(storageIdbModule, 'isIndexedDBAvailable').mockReturnValue(false)
+    const getSpy = vi.spyOn(storageIdbModule, 'idbGet')
     const engine = getStorageEngine('history')
 
     await engine.write('k', { ok: true })
@@ -38,8 +39,8 @@ describe('getStorageEngine', () => {
   })
 
   it('always uses localStorage for config storage', async () => {
-    vi.spyOn(idb, 'isIndexedDBAvailable').mockReturnValue(true)
-    const setSpy = vi.spyOn(idb, 'idbSet')
+    vi.spyOn(storageIdbModule, 'isIndexedDBAvailable').mockReturnValue(true)
+    const setSpy = vi.spyOn(storageIdbModule, 'idbSet')
     const engine = getStorageEngine('config')
 
     await engine.write('cfg', { theme: 'light' })

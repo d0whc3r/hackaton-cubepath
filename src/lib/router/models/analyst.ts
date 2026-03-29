@@ -1,4 +1,5 @@
 import type { ModelOption } from '../types'
+import { BASE_GRANITE33_2B, BASE_LLAMA32_1B, BASE_PHI4_MINI, BASE_QWEN25_05B, BASE_QWEN25_15B } from './shared'
 
 // ── Analyst (routing intelligence) ───────────────────────────────────────────
 // Small, fast models optimised for structured JSON output and code classification.
@@ -7,45 +8,25 @@ import type { ModelOption } from '../types'
 // Inference layer — this dramatically improves JSON reliability for all models below.
 export const ANALYST_MODELS: ModelOption[] = [
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_05B,
     description: 'Alibaba · tiny but strong at structured JSON outputs and code classification',
-    id: 'qwen2.5:0.5b',
-    label: 'Qwen 2.5',
-    params: '0.5B',
-    size: 0.398,
   },
   {
-    contextWindow: 131_072,
+    ...BASE_LLAMA32_1B,
     description: 'Meta · dependable 128K classifier when inputs contain longer snippets or diffs',
-    id: 'llama3.2:1b',
-    label: 'Llama 3.2',
-    params: '1B',
-    size: 1.3,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_15B,
     description: 'Alibaba · stronger tiny-model reasoning if you can spare a little more memory',
-    id: 'qwen2.5:1.5b',
-    label: 'Qwen 2.5',
-    params: '1.5B',
-    size: 0.986,
   },
   {
-    contextWindow: 131_072,
+    ...BASE_GRANITE33_2B,
     description: 'IBM · 128K ctx, strong instruction following when routing prompts get more complex',
-    id: 'granite3.3:2b',
-    label: 'Granite 3.3',
-    params: '2B',
-    size: 1.5,
   },
   {
-    contextWindow: 131_072,
+    ...BASE_PHI4_MINI,
     description:
       'Microsoft · 128K ctx, native function-calling support for reliable JSON schema adherence on harder routing inputs',
-    id: 'phi4-mini:3.8b',
-    label: 'Phi 4 Mini',
-    params: '3.8B',
-    size: 2.5,
   },
   {
     contextWindow: 32_768,

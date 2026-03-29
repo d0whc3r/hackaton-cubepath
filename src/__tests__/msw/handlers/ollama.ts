@@ -28,14 +28,3 @@ export const ollamaHandlers = [
     })
   }),
 ]
-
-// Error-case handlers; use with server.use(...ollamaErrorHandlers) inside a test
-export const ollamaErrorHandlers = {
-  show404: http.post('http://localhost:11434/api/show', () =>
-    HttpResponse.json({ error: 'not found' }, { status: 404 }),
-  ),
-  tags500: http.get('http://localhost:11434/api/tags', () =>
-    HttpResponse.json({ error: 'server error' }, { status: 500 }),
-  ),
-  tagsNetworkError: http.get('http://localhost:11434/api/tags', () => HttpResponse.error()),
-}

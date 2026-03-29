@@ -1,8 +1,8 @@
 import type { ModelConfig } from '@/lib/config/model-config'
 import type { ModelOption } from '@/lib/router/types'
-import { DEFAULTS, buildDefaultsForRuntime } from '@/lib/config/model-config'
+import { buildDefaultsForRuntime } from '@/lib/config/model-config'
 import type { SectionDef, SectionId } from './types'
-import { CUSTOM_VALUE, SECTIONS } from './constants'
+import { SECTIONS } from './constants'
 
 export function ollamaModelUrl(modelId: string): string {
   const withoutTag = modelId.replace(/:.*$/, '')
@@ -40,18 +40,6 @@ export function buildInitialCustomModels(
   }
 
   return custom
-}
-
-export function getSelectValue(section: SectionDef, config: ModelConfig, customModels: Record<string, string>): string {
-  const currentValue = config[section.configKey] as string
-  const isKnown = section.models.some((model) => model.id === currentValue)
-  const isCustom = section.id in customModels
-
-  return isCustom || !isKnown ? CUSTOM_VALUE : currentValue
-}
-
-export function getDefaultModelId(section: SectionDef): string {
-  return DEFAULTS[section.configKey] as string
 }
 
 export function getDefaultModelIdForRuntime(section: SectionDef, modelRuntime: ModelConfig['modelRuntime']): string {

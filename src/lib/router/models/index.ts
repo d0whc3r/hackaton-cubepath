@@ -33,6 +33,7 @@ export type { ModelOption } from '../types'
 export {
   ANALYST_MODELS,
   ANALYST_MODELS_CLOUD,
+  ANALYST_MODELS_SMALL,
   COMMIT_MODELS,
   DEAD_CODE_MODELS,
   DOCSTRING_MODELS,
@@ -43,13 +44,15 @@ export {
   REFACTOR_MODELS,
   TEST_MODELS,
   TRANSLATE_MODELS,
-  TYPE_HINTS_MODELS,
   TRANSLATE_MODELS_CLOUD,
+  TRANSLATE_MODELS_SMALL,
+  TYPE_HINTS_MODELS,
 }
 
 export {
   DEFAULT_ANALYST_MODEL,
   DEFAULT_ANALYST_MODEL_CLOUD,
+  DEFAULT_ANALYST_MODEL_SMALL,
   DEFAULT_COMMIT_MODEL,
   DEFAULT_DEAD_CODE_MODEL,
   DEFAULT_DOCSTRING_MODEL,
@@ -61,6 +64,7 @@ export {
   DEFAULT_TEST_MODEL,
   DEFAULT_TRANSLATE_MODEL,
   DEFAULT_TRANSLATE_MODEL_CLOUD,
+  DEFAULT_TRANSLATE_MODEL_SMALL,
   DEFAULT_TYPE_HINTS_MODEL,
 }
 
@@ -126,12 +130,4 @@ export const DEFAULT_TRANSLATE_MODEL_BY_RUNTIME: Record<ModelRuntime, string> = 
   small: DEFAULT_TRANSLATE_MODEL_SMALL,
 }
 
-/**
- * Ollama base URL default, resolved in priority order:
- *  1. PUBLIC_OLLAMA_BASE_URL env var (available both server and client via Astro)
- *  2. Hardcoded fallback for zero-config local dev
- *
- * When the user configures a URL in the web UI, that value is sent in the request
- * body and takes priority over this default in every API route. See resolveModel().
- */
-export const OLLAMA_BASE_URL_DEFAULT: string = import.meta.env.PUBLIC_OLLAMA_BASE_URL ?? 'http://localhost:11434'
+export { OLLAMA_BASE_URL_DEFAULT } from '../ollama-defaults'

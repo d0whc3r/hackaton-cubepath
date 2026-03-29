@@ -154,6 +154,7 @@ interface PlatformStatusPanelProps {
 
 export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatusPanelProps) {
   const [triggerKey, setTriggerKey] = useState(0)
+
   const isLocalRuntime = config.modelRuntime === 'local' || config.modelRuntime === 'small'
   const health = useOllamaHealth(config, triggerKey, isLocalRuntime)
   const [detailOpen, setDetailOpen] = useState(false)

@@ -4,6 +4,7 @@ import { RoutingProgress } from '@/components/chat/RoutingProgress'
 import { TranslateButton } from '@/components/chat/TranslateButton'
 import { CostBadge } from '@/components/cost/CostBadge'
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface AssistantBubbleProps {
   msg: AssistantMessage
@@ -35,15 +36,13 @@ export function AssistantBubble({ msg }: AssistantBubbleProps) {
     return (
       <div className="flex justify-start">
         <div className="max-w-[85%] min-w-0">
-          <div className="flex items-start gap-3 rounded-2xl rounded-tl-sm bg-orange-50 px-4 py-3 dark:bg-orange-950/25">
-            <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-orange-500 dark:text-orange-400" />
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-orange-700 dark:text-orange-300">Request blocked</p>
-              <p className="mt-0.5 text-xs leading-relaxed text-orange-600/90 dark:text-orange-400/80">
-                {msg.blockReason}
-              </p>
-            </div>
-          </div>
+          <Alert className="rounded-2xl rounded-tl-sm border-orange-200 bg-orange-50 text-orange-700 dark:border-orange-900 dark:bg-orange-950/25 dark:text-orange-300">
+            <ShieldAlert className="h-4 w-4 text-orange-500 dark:text-orange-400" />
+            <AlertTitle>Request blocked</AlertTitle>
+            <AlertDescription className="text-orange-600/90 dark:text-orange-400/80">
+              {msg.blockReason}
+            </AlertDescription>
+          </Alert>
         </div>
       </div>
     )
@@ -69,18 +68,18 @@ export function AssistantBubble({ msg }: AssistantBubbleProps) {
 
         <div className="rounded-2xl rounded-tl-sm border border-border/60 bg-card px-4 py-3 shadow-sm">
           {msg.error && (
-            <div className="flex items-start gap-3 rounded-xl border border-destructive/20 bg-red-50 px-4 py-3 dark:bg-red-950/20">
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-destructive" />
-              <div className="min-w-0 space-y-1">
-                <p className="text-sm font-semibold text-destructive">{getErrorTitle(msg.errorCode)}</p>
-                <p className="text-xs leading-relaxed text-destructive/80">{msg.error}</p>
+            <Alert variant="destructive" className="rounded-xl border-destructive/20 bg-red-50 dark:bg-red-950/20">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>{getErrorTitle(msg.errorCode)}</AlertTitle>
+              <AlertDescription>
+                <span>{msg.error}</span>
                 {getErrorHint(msg.errorCode) && (
-                  <p className="text-[10px] text-destructive/60">
+                  <span className="mt-1 block text-[10px] text-destructive/60">
                     Run: <code className="font-mono">{getErrorHint(msg.errorCode)}</code>
-                  </p>
+                  </span>
                 )}
-              </div>
-            </div>
+              </AlertDescription>
+            </Alert>
           )}
           {!msg.error && msg.content && <MarkdownRenderer content={msg.content} />}
 

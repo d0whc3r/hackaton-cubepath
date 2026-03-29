@@ -122,12 +122,6 @@ export const PROVIDERS: Provider[] = [
   },
 ]
 
-/**
- * Specialist (local SLM via Ollama) cost estimate.
- * This is a rough electricity + amortized-hardware proxy, not a billing-grade number.
- * ~$0.00; used only to show "you ran this locally".
- */
-export const SPECIALIST_LOCAL_COST_PER_TOKEN = 0
 export const MILLION_UNIT = 1_000_000
 
 export function getRepresentativeModel(provider: Provider): ProviderModel | undefined {

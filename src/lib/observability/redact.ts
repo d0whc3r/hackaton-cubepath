@@ -5,7 +5,7 @@ import type { LogLayerPlugin } from 'loglayer'
  * Does NOT use eval / new Function, making it compatible with Cloudflare Workers.
  */
 export function redactionPlugin(opts: { censor: string; paths: string[]; id?: string }): LogLayerPlugin {
-  const parsed = opts.paths.map((p) => p.split('.'))
+  const parsed = opts.paths.map((path) => path.split('.'))
 
   function redactIn(obj: Record<string, unknown>, parts: string[]): void {
     if (!obj || typeof obj !== 'object' || Array.isArray(obj)) {

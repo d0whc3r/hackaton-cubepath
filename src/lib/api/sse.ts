@@ -31,6 +31,34 @@ export function createSseStream(handler: (emit: SseEmitter) => Promise<void>): R
   })
 }
 
+/**
+ * Accumulates stream chunks and flushes them in batches to reduce SSE event volume.
+ * Flushes when the buffer contains a newline (preserves markdown structure) or
+ * reaches MIN_FLUSH_CHARS, whichever comes first. Call `end()` after the stream
+ * to flush any remaining bytes.
+ */
+const MIN_FLUSH_CHARS = 5
+
+export function createChunkBuffer(flush: (text: string) => void): { add: (chunk: string) => void; end: () => void } {
+  let buffer = ''
+
+  return {
+    add(chunk: string): void {
+      buffer += chunk
+      if (buffer.includes('\n') || buffer.length >= MIN_FLUSH_CHARS) {
+        flush(buffer)
+        buffer = ''
+      }
+    },
+    end(): void {
+      if (buffer.length > 0) {
+        flush(buffer)
+        buffer = ''
+      }
+    },
+  }
+}
+
 /** Returns a streaming SSE Response with the correct headers. */
 export function sseResponse(stream: ReadableStream): Response {
   return new Response(stream, { headers: SSE_HEADERS, status: 200 })

@@ -1,12 +1,13 @@
+import { streamText } from 'ai'
 import { ChevronDown, Languages, RotateCcw, X } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { MarkdownRenderer } from '@/components/markdown/MarkdownRenderer'
 import { Button } from '@/components/ui/button'
+import { ollamaClient } from '@/lib/api/sse'
 import { getTranslateModel, loadModelConfig } from '@/lib/config/model-config'
-import { appWretch } from '@/lib/http/app-client'
 
-// When includeCode is false, code blocks are extracted client-side before
-// Sending text to the model, then restored verbatim after translation.
+// Code blocks are extracted client-side before sending text to the model,
+// Then restored verbatim after translation.
 
 function extractCodeBlocks(markdown: string): { stripped: string; blocks: string[] } {
   const blocks: string[] = []
@@ -28,35 +29,6 @@ function extractCodeBlocks(markdown: string): { stripped: string; blocks: string
 
 function restoreCodeBlocks(translated: string, blocks: string[]): string {
   return translated.replaceAll(/\[\[CODE:(\d+)\]\]/g, (_match, idx) => blocks[Number.parseInt(idx, 10)] ?? '')
-}
-
-async function* readSseChunks(body: ReadableStream<Uint8Array>): AsyncGenerator<string> {
-  const reader = body.getReader()
-  const decoder = new TextDecoder()
-  let buf = ''
-
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) {
-      break
-    }
-    buf += decoder.decode(value, { stream: true })
-    const lines = buf.split('\n')
-    buf = lines.pop() ?? ''
-    for (const line of lines) {
-      if (!line.startsWith('data:')) {
-        continue
-      }
-      try {
-        const json = JSON.parse(line.slice(5).trim()) as Record<string, unknown>
-        if (typeof json.text === 'string') {
-          yield json.text
-        }
-      } catch {
-        /* Ignore malformed */
-      }
-    }
-  }
 }
 
 const LANGUAGES = [
@@ -146,25 +118,18 @@ export function TranslateButton({ content }: TranslateButtonProps) {
     const model = getTranslateModel(cfg)
 
     try {
-      const res = await appWretch
-        .url('/api/translate')
-        .options({ signal: abort.signal })
-        .post({
-          model,
-          ollamaBaseUrl: cfg.ollamaBaseUrl,
-          targetLanguage: language.label,
-          text: stripped,
-        })
-        .res()
-
-      if (!res.body) {
-        throw new Error('No stream')
-      }
+      const ollama = ollamaClient(cfg.ollamaBaseUrl)
+      const result = streamText({
+        abortSignal: abort.signal,
+        model: ollama(model),
+        prompt: stripped,
+        system: systemPrompt(language.label),
+      })
 
       // Buffer chunks; restore code blocks only once the full translation
       // Is done, so placeholders never appear in the rendered output.
       let raw = ''
-      for await (const chunk of readSseChunks(res.body)) {
+      for await (const chunk of result.textStream) {
         raw += chunk
       }
 

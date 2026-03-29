@@ -4,6 +4,7 @@ import { AssistantBubble } from '@/components/chat/AssistantBubble'
 import { EmptyState } from '@/components/chat/EmptyState'
 import { UserBubble } from '@/components/chat/UserBubble'
 import { Button } from '@/components/ui/button'
+import { ScrollArea, ScrollAreaViewport, ScrollBar } from '@/components/ui/scroll-area'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useChatContext } from '@/lib/context/chat-context'
 import { getServerSnapshot, getSnapshot, markRead, subscribe } from '@/lib/stores/chat-store'
@@ -133,9 +134,12 @@ export function ChatMessages() {
   if (!isHydrated && hasPersistedHistory) {
     return (
       <div className="relative min-h-0 flex-1 overflow-hidden">
-        <div className="h-full overflow-y-auto">
-          <ChatSkeleton />
-        </div>
+        <ScrollArea className="h-full">
+          <ScrollAreaViewport>
+            <ChatSkeleton />
+          </ScrollAreaViewport>
+          <ScrollBar />
+        </ScrollArea>
       </div>
     )
   }
@@ -147,17 +151,20 @@ export function ChatMessages() {
   return (
     <div className="relative min-h-0 flex-1 overflow-hidden">
       {/* Scrollable messages area */}
-      <div ref={scrollRef} className="h-full overflow-y-auto">
-        <div className="space-y-6 p-4 md:p-6">
-          {entries.map((entry) => (
-            <div key={entry.id} className="space-y-3">
-              <UserBubble msg={entry.userMessage} />
-              <AssistantBubble msg={entry.assistantMessage} />
-            </div>
-          ))}
-          <div ref={bottomRef} />
-        </div>
-      </div>
+      <ScrollArea className="h-full">
+        <ScrollAreaViewport ref={scrollRef}>
+          <div className="space-y-6 p-4 md:p-6">
+            {entries.map((entry) => (
+              <div key={entry.id} className="space-y-3">
+                <UserBubble msg={entry.userMessage} />
+                <AssistantBubble msg={entry.assistantMessage} />
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        </ScrollAreaViewport>
+        <ScrollBar />
+      </ScrollArea>
 
       {/* Jump to bottom; shown when user has scrolled up */}
       {!isAtBottom && (

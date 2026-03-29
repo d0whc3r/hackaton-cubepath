@@ -28,21 +28,3 @@ export interface SectionDef {
   configKey: keyof ModelConfig
   accent: string
 }
-
-export type PullStatus = 'idle' | 'pulling' | 'done' | 'error'
-
-export interface PullState {
-  status: PullStatus
-  progress?: string
-  error?: string
-}
-
-export interface RuntimeModelDetails {
-  capabilities?: string[]
-  contextLength?: number
-  family?: string
-  modifiedAt?: string
-  parameterSize?: string
-  quantizationLevel?: string
-  sizeBytes?: number
-}

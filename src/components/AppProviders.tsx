@@ -46,9 +46,14 @@ function InitializingScreen({
         {status === 'error' && (
           <div className="mt-4 space-y-3">
             <p className="text-sm text-destructive">{error ?? 'Initialization failed.'}</p>
-            <Button onClick={onRetry} type="button" variant="outline">
-              Retry initialization
-            </Button>
+            <div className="flex justify-center gap-2">
+              <Button onClick={onRetry} type="button" variant="outline">
+                Retry
+              </Button>
+              <Button asChild type="button" variant="secondary">
+                <a href="/settings">Go to Settings</a>
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -56,10 +61,35 @@ function InitializingScreen({
   )
 }
 
-export function AppProviders({ children }: AppProvidersProps) {
+function GuardGate({ children }: { children: React.ReactNode }) {
   const { retry, state } = useGuardBootstrap()
   const [canBypassBlockingInit, setCanBypassBlockingInit] = useState(hasGuardReadySession)
+  const isSettingsPage = globalThis.location?.pathname === '/settings'
 
+  useEffect(() => {
+    if (state.status === 'ready') {
+      hasGuardReadySession = true
+      setCanBypassBlockingInit(true)
+    }
+  }, [state.status])
+
+  if (!canBypassBlockingInit && state.status !== 'ready' && !isSettingsPage) {
+    return (
+      <InitializingScreen
+        error={state.error}
+        modelId={state.modelId}
+        onRetry={retry}
+        progress={state.progress}
+        status={state.status}
+      />
+    )
+  }
+
+  // oxlint-disable-next-line react/jsx-no-useless-fragment
+  return <>{children}</>
+}
+
+export function AppProviders({ children }: AppProvidersProps) {
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
       logClientError('ui.window.error', event.error ?? event.message, {
@@ -80,29 +110,10 @@ export function AppProviders({ children }: AppProvidersProps) {
     }
   }, [])
 
-  useEffect(() => {
-    if (state.status === 'ready') {
-      hasGuardReadySession = true
-      setCanBypassBlockingInit(true)
-    }
-  }, [state.status])
-
-  const shouldShowBlockingInit = !canBypassBlockingInit && state.status !== 'ready'
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {shouldShowBlockingInit ? (
-          <InitializingScreen
-            error={state.error}
-            modelId={state.modelId}
-            onRetry={retry}
-            progress={state.progress}
-            status={state.status}
-          />
-        ) : (
-          children
-        )}
+        <GuardGate>{children}</GuardGate>
       </TooltipProvider>
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

@@ -24,6 +24,3 @@ export function resolveValue(
   }
   return envOrFallback ?? ''
 }
-
-/** Backwards-compatible alias for model-specific call sites. */
-export const resolveModel = resolveValue

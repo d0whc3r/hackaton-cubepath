@@ -16,7 +16,6 @@ import type { ModelRuntime } from '@/lib/router/types'
 import { ANALYST_MODELS_BY_RUNTIME, MODELS_BY_TASK_BY_RUNTIME, TRANSLATE_MODELS_BY_RUNTIME } from '@/lib/router/models'
 import type { SectionDef } from './types'
 
-export const CONTEXT_DIVISOR = 1024
 export const CUSTOM_VALUE = '__custom__'
 
 interface SectionTemplate {

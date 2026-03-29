@@ -1,4 +1,5 @@
 import type { ModelOption } from '../types'
+import { BASE_GRANITE33_2B, BASE_QWEN25_CODER_05B, BASE_QWEN25_CODER_15B, BASE_QWEN25_CODER_3B } from './shared'
 
 // ── Commit messages ───────────────────────────────────────────────────────────
 // Task-specific and code-specialist models for conventional commit generation.
@@ -24,36 +25,20 @@ export const COMMIT_MODELS: ModelOption[] = [
     size: 5,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_15B,
     description: 'Alibaba · best lightweight code-tuned fallback for conventional commits from diffs',
-    id: 'qwen2.5-coder:1.5b',
-    label: 'Qwen2.5 Coder',
-    params: '1.5B',
-    size: 0.986,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_05B,
     description: 'Alibaba · smallest diff-aware option for very fast local commit generation with minimal RAM',
-    id: 'qwen2.5-coder:0.5b',
-    label: 'Qwen2.5 Coder',
-    params: '0.5B',
-    size: 0.398,
   },
   {
-    contextWindow: 131_072,
+    ...BASE_GRANITE33_2B,
     description: 'IBM · 128K ctx, strong instruction following for clean one-line summaries in CI pipelines',
-    id: 'granite3.3:2b',
-    label: 'Granite 3.3',
-    params: '2B',
-    size: 1.5,
   },
   {
-    contextWindow: 32_768,
+    ...BASE_QWEN25_CODER_3B,
     description: 'Alibaba · higher-quality fallback for noisy diffs, monorepos, and nuanced commit scopes',
-    id: 'qwen2.5-coder:3b',
-    label: 'Qwen2.5 Coder',
-    params: '3B',
-    size: 1.9,
   },
 ]
 

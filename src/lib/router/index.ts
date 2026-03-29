@@ -26,6 +26,7 @@ export async function routeWithAnalyst(
   analystModelId: string,
   baseUrl: string,
 ): Promise<RoutingDecision> {
+  // oxlint-disable-next-line init-declarations
   let codeContext
 
   try {

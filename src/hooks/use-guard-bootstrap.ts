@@ -1,63 +1,54 @@
-import { useMemo, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect, useState } from 'react'
+import { useModelPull } from '@/hooks/use-model-pull'
+import { loadModelConfig } from '@/lib/config/model-config'
+import { guardCheckOptions } from '@/lib/query/ollama'
 import { DEFAULT_GUARD_MODEL } from '@/lib/railguard/guard-models'
-
-type BootstrapStatus = 'checking' | 'pulling' | 'ready' | 'error'
+import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
 
 export interface GuardBootstrapState {
   error?: string
   modelId: string
   progress?: string
-  status: BootstrapStatus
+  status: 'checking' | 'pulling' | 'ready' | 'error'
 }
 
-const READY_COOKIE_NAME = 'slm_router_guard_ready'
-const STATE_COOKIE_NAME = 'slm_router_guard_state'
-const READY_CACHE_TTL_MS = 30 * 60 * 1000
-
-function readCookie(name: string): string | null {
-  if (typeof document === 'undefined') {
-    return null
+function deriveState(
+  checkQuery: { data?: boolean; isError: boolean; isPending: boolean },
+  pullState: { error?: string; progress?: string; status: string },
+): GuardBootstrapState {
+  if (checkQuery.isError) {
+    return { error: 'Could not reach Ollama. Is it running?', modelId: DEFAULT_GUARD_MODEL, status: 'error' }
   }
-  const match = document.cookie.match(new RegExp(`${name}=([^;]+)`))
-  return match?.[1] ?? null
-}
-
-function hasFreshReadyCookie(): boolean {
-  const raw = readCookie(READY_COOKIE_NAME)
-  if (!raw) {
-    return false
+  if (checkQuery.isPending) {
+    return { modelId: DEFAULT_GUARD_MODEL, status: 'checking' }
   }
-  try {
-    const parsed = JSON.parse(decodeURIComponent(raw)) as { timestamp?: number }
-    return typeof parsed.timestamp === 'number' && Date.now() - parsed.timestamp < READY_CACHE_TTL_MS
-  } catch {
-    return false
+  if (checkQuery.data === true || pullState.status === 'ready') {
+    return { modelId: DEFAULT_GUARD_MODEL, status: 'ready' }
   }
-}
-
-function initialState(): GuardBootstrapState {
-  const modelId = DEFAULT_GUARD_MODEL
-  const stateCookie = readCookie(STATE_COOKIE_NAME)
-
-  if (hasFreshReadyCookie() || stateCookie === 'ready' || stateCookie === null) {
-    return { modelId, status: 'ready' }
+  if (pullState.status === 'error') {
+    return { error: pullState.error, modelId: DEFAULT_GUARD_MODEL, status: 'error' }
   }
-
-  if (stateCookie === 'loading') {
-    return { modelId, status: 'checking' }
-  }
-
-  return { error: 'Guard model is not ready.', modelId, status: 'error' }
+  return { modelId: DEFAULT_GUARD_MODEL, progress: pullState.progress, status: 'pulling' }
 }
 
 export function useGuardBootstrap() {
-  const [state] = useState<GuardBootstrapState>(initialState)
-  const retry = useMemo(
-    () => () => {
-      globalThis.location.reload()
-    },
-    [],
-  )
+  const [retryCount, setRetryCount] = useState(0)
+  const baseUrl = loadModelConfig().ollamaBaseUrl ?? OLLAMA_BASE_URL_DEFAULT
 
-  return { retry, state }
+  const checkQuery = useQuery(guardCheckOptions(baseUrl, retryCount))
+  const { state: pullState, pull, reset: resetPull } = useModelPull(baseUrl, DEFAULT_GUARD_MODEL)
+
+  useEffect(() => {
+    if (checkQuery.data === false && pullState.status === 'idle') {
+      void pull()
+    }
+  }, [checkQuery.data, pullState.status, pull])
+
+  const retry = useCallback(() => {
+    resetPull()
+    setRetryCount((count) => count + 1)
+  }, [resetPull])
+
+  return { retry, state: deriveState(checkQuery, pullState) }
 }
