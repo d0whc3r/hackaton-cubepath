@@ -64,7 +64,10 @@ function InitializingScreen({
 function GuardGate({ children }: { children: React.ReactNode }) {
   const { retry, state } = useGuardBootstrap()
   const [canBypassBlockingInit, setCanBypassBlockingInit] = useState(hasGuardReadySession)
-  const isSettingsPage = globalThis.location?.pathname === '/settings'
+
+  // Exclude routes that don't need guard model checking (like /settings and root /)
+  const pathname = globalThis.location?.pathname || ''
+  const isExcludedPage = pathname === '/settings' || pathname === '/'
 
   useEffect(() => {
     if (state.status === 'ready') {
@@ -73,7 +76,7 @@ function GuardGate({ children }: { children: React.ReactNode }) {
     }
   }, [state.status])
 
-  if (!canBypassBlockingInit && state.status !== 'ready' && !isSettingsPage) {
+  if (!canBypassBlockingInit && state.status !== 'ready' && !isExcludedPage) {
     return (
       <InitializingScreen
         error={state.error}

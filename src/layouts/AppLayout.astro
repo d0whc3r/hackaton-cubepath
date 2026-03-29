@@ -20,7 +20,7 @@ const {
 } = Astro.props;
 
 const pageTitle = title.startsWith(`${APP_NAME};`) ? title : `${APP_NAME}; ${title}`;
-const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://slm-router.d0w.dev');
+const canonicalURL = new URL(Astro.url.pathname, Astro.site ?? 'https://hackaton-cubepath.d0w.dev');
 ---
 
 <!doctype html>

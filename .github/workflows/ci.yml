@@ -146,10 +146,6 @@ jobs:
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
-      - name: Add CNAME (main branch only)
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: echo "slm-router.d0w.dev" > dist/CNAME
-
       # ─── Build size analysis (PR only) ──────────────────────────────────────
       - name: Analyze build size
         if: github.event_name == 'pull_request'
@@ -217,7 +213,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: https://slm-router.d0w.dev
+      url: https://hackaton-cubepath.d0w.dev
     permissions:
       pages: write
       id-token: write
