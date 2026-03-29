@@ -85,7 +85,7 @@ export function TaskRow({
   onCustomModelChange,
   onPull,
   onCopyPull,
-}: TaskRowProps) {
+}: Readonly<TaskRowProps>) {
   const Icon = section.icon
   const badge = GROUP_BADGE[section.group]
   const isLocalRuntime = modelRuntime === 'local' || modelRuntime === 'small'

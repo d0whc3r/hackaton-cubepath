@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Toaster as Sonner } from 'sonner'
 import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 
-const Toaster = ({ ...props }: ToasterProps) => {
+const Toaster = ({ ...props }: Readonly<ToasterProps>) => {
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
     typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light',
   )

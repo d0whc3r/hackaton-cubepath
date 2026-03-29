@@ -18,7 +18,7 @@ export function ComposerSubmitControls({
   submitDisabled = false,
   sendTooltip,
   showShortcutHint = true,
-}: ComposerSubmitControlsProps) {
+}: Readonly<ComposerSubmitControlsProps>) {
   if (isLoading) {
     return (
       <Button type="button" variant="outline" size="sm" onClick={onCancel} className="h-8 gap-1.5">

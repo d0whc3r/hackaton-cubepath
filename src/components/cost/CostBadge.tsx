@@ -12,7 +12,7 @@ interface CostBadgeProps {
   cost: CostEstimate
 }
 
-export function CostBadge({ cost }: CostBadgeProps) {
+export function CostBadge({ cost }: Readonly<CostBadgeProps>) {
   const comparisons = [...(cost.providerComparisons ?? [])].toSorted(
     (aProvider, bProvider) => bProvider.costUsd - aProvider.costUsd,
   )

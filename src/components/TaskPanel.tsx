@@ -15,7 +15,7 @@ interface TaskTypeButtonProps {
   onSelect: (value: TaskType) => void
 }
 
-function TaskTypeButton({ label, value, active, onSelect }: TaskTypeButtonProps) {
+function TaskTypeButton({ label, value, active, onSelect }: Readonly<TaskTypeButtonProps>) {
   function handleClick() {
     onSelect(value)
   }
@@ -34,7 +34,7 @@ interface TaskPanelProps {
   initialInput?: string
 }
 
-export function TaskPanel({ isLoading, onSubmit, onCancel, initialInput = '' }: TaskPanelProps) {
+export function TaskPanel({ isLoading, onSubmit, onCancel, initialInput = '' }: Readonly<TaskPanelProps>) {
   const [input, setInput] = useState(initialInput)
   const [taskType, setTaskType] = useState<TaskType>('explain')
 

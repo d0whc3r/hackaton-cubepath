@@ -22,11 +22,11 @@ function BoundaryFallback({
   error,
   onRetry,
   variant,
-}: {
+}: Readonly<{
   error: Error
   onRetry: () => void
   variant: 'inline' | 'page'
-}) {
+}>) {
   if (variant === 'inline') {
     return (
       <Alert variant="destructive" className="my-1">
@@ -113,7 +113,7 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
     })
   }
 
-  private handleRetry = () => {
+  private readonly handleRetry = () => {
     globalThis.location.reload()
   }
 

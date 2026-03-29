@@ -128,7 +128,10 @@ const GENERATION_TASKS: TaskCard[] = [
   },
 ]
 
-function TaskCardGrid({ tasks, modelConfig }: { tasks: TaskCard[]; modelConfig: ReturnType<typeof loadModelConfig> }) {
+function TaskCardGrid({
+  tasks,
+  modelConfig,
+}: Readonly<{ tasks: TaskCard[]; modelConfig: ReturnType<typeof loadModelConfig> }>) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {tasks.map(({ task, href, icon: Icon, iconBg, color, title, description }) => {

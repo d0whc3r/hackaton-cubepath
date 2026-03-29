@@ -36,7 +36,7 @@ const STEP_LABELS: Record<RoutingStepName, string> = {
   selecting_specialist: 'Select specialist',
 }
 
-function StepIcon({ status, stepName }: { status: RoutingStep['status']; stepName: RoutingStepName }) {
+function StepIcon({ status, stepName }: Readonly<{ status: RoutingStep['status']; stepName: RoutingStepName }>) {
   const Icon = STEP_ICONS[stepName]
   if (status === 'active') {
     return <Loader2 className="h-3.5 w-3.5 animate-spin text-primary" />
@@ -56,7 +56,7 @@ interface RoutingProgressProps {
   isStreaming: boolean
 }
 
-export function RoutingProgress({ steps, specialist, isStreaming }: RoutingProgressProps) {
+export function RoutingProgress({ steps, specialist, isStreaming }: Readonly<RoutingProgressProps>) {
   const [expanded, setExpanded] = useState(false)
 
   function handleToggle() {

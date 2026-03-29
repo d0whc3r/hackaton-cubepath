@@ -8,7 +8,7 @@ function formatUsd(usd: number): string {
   return `$${usd.toFixed(6)}`
 }
 
-export function CostBadge({ cost }: CostBadgeProps) {
+export function CostBadge({ cost }: Readonly<CostBadgeProps>) {
   if (!cost) {
     return null
   }

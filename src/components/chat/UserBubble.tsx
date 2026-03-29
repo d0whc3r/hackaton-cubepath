@@ -22,7 +22,7 @@ interface UserBubbleProps {
   msg: UserMessage
 }
 
-export function UserBubble({ msg }: UserBubbleProps) {
+export function UserBubble({ msg }: Readonly<UserBubbleProps>) {
   const isLong = msg.content.length > PREVIEW_LIMIT
   const [expanded, setExpanded] = useState(false)
   const displayContent = isLong && !expanded ? `${msg.content.slice(0, PREVIEW_LIMIT)}…` : msg.content

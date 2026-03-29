@@ -28,7 +28,7 @@ const iconByAction = {
   settings: Settings2,
 } as const
 
-export function ErrorScreen({ code, title, description, hint, actions }: ErrorScreenProps) {
+export function ErrorScreen({ code, title, description, hint, actions }: Readonly<ErrorScreenProps>) {
   return (
     <section className="mx-auto w-full max-w-3xl py-10 md:py-14">
       <Card className="border border-border/70 bg-card/80 backdrop-blur-sm">

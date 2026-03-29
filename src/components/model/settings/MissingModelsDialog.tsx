@@ -23,7 +23,7 @@ export function MissingModelsDialog({
   getModelId,
   onOpenChange,
   onInstallMissing,
-}: MissingModelsDialogProps) {
+}: Readonly<MissingModelsDialogProps>) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>

@@ -31,6 +31,15 @@ function restoreCodeBlocks(translated: string, blocks: string[]): string {
   return translated.replaceAll(/\[\[CODE:(\d+)\]\]/g, (_match, idx) => blocks[Number.parseInt(idx, 10)] ?? '')
 }
 
+function systemPrompt(languageLabel: string): string {
+  return [
+    `You are a precise technical translator. Translate the user text to ${languageLabel}.`,
+    'Preserve markdown structure, lists, headings, links, and punctuation.',
+    'Do not translate placeholders in the form [[CODE:N]].',
+    'Return only the translated text without explanations.',
+  ].join(' ')
+}
+
 const LANGUAGES = [
   // Romance
   { code: 'es', label: 'Español' },
@@ -87,7 +96,7 @@ interface TranslateButtonProps {
   content: string
 }
 
-export function TranslateButton({ content }: TranslateButtonProps) {
+export function TranslateButton({ content }: Readonly<TranslateButtonProps>) {
   const [open, setOpen] = useState(false)
   const [status, setStatus] = useState<Status>('idle')
   const [selectedLang, setSelectedLang] = useState<LangCode | null>(null)

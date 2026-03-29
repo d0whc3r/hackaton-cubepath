@@ -55,38 +55,38 @@ describe('attempt; sync', () => {
 
 describe('attempt; async', () => {
   it('returns Promise<{ ok: true, value }> on resolution', async () => {
-    const result = await attempt(() => Promise.resolve('hello'))
-    expect(result).toEqual({ ok: true, value: 'hello' })
+    const result = attempt(() => Promise.resolve('hello'))
+    expect(result).resolves.toEqual({ ok: true, value: 'hello' })
   })
 
   it('returns Promise<{ ok: false, error }> on rejection (no fallback)', async () => {
     const err = new Error('async boom')
-    const result = await attempt(() => Promise.reject<string>(err))
-    expect(result).toEqual({ error: err, ok: false })
+    const result = attempt(() => Promise.reject<string>(err))
+    expect(result).resolves.toEqual({ error: err, ok: false })
   })
 
   it('returns { ok: true, value: fallback } on rejection with plain-value fallback', async () => {
-    const result = await attempt(() => Promise.reject<number>(new Error('fail')), 0)
-    expect(result).toEqual({ ok: true, value: 0 })
+    const result = attempt(() => Promise.reject<number>(new Error('fail')), 0)
+    expect(result).resolves.toEqual({ ok: true, value: 0 })
   })
 
   it('returns { ok: true, value } on rejection with async function fallback that resolves', async () => {
-    const result = await attempt(
+    const result = attempt(
       () => Promise.reject<string>(new Error('fail')),
       async () => 'async-recovered',
     )
-    expect(result).toEqual({ ok: true, value: 'async-recovered' })
+    expect(result).resolves.toEqual({ ok: true, value: 'async-recovered' })
   })
 
   it('returns { ok: false, error: originalError } when async fallback also rejects', async () => {
     const original = new Error('original async')
-    const result = await attempt(
+    const result = attempt(
       () => Promise.reject<string>(original),
       async () => {
         throw new Error('fallback rejected')
       },
     )
-    expect(result).toEqual({ error: original, ok: false })
+    expect(result).resolves.toEqual({ error: original, ok: false })
   })
 
   it('never returns a rejected Promise', async () => {

@@ -10,15 +10,15 @@ interface RoutingPanelProps {
   specialist: SpecialistBadge | null
 }
 
-export function RoutingPanel({ steps, specialist }: RoutingPanelProps) {
+export function RoutingPanel({ steps, specialist }: Readonly<RoutingPanelProps>) {
   if (steps.length === 0 && !specialist) {
     return null
   }
 
   return (
     <div>
-      {steps.map((step, i) => (
-        <div key={i} className="flex items-center gap-2">
+      {steps.map((step) => (
+        <div key={step.step} className="flex items-center gap-2">
           {step.status === 'active' && <span className="animate-spin">⏳</span>}
           {step.status === 'done' && <span>✓</span>}
           {step.status === 'error' && <span>✗</span>}

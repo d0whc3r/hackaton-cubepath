@@ -14,7 +14,7 @@ interface HistoryPanelProps {
 
 const PAGE_SIZE = 10
 
-export function HistoryPanel({ history, onReuse }: HistoryPanelProps) {
+export function HistoryPanel({ history, onReuse }: Readonly<HistoryPanelProps>) {
   const [visible, setVisible] = useState(PAGE_SIZE)
 
   if (history.length === 0) {

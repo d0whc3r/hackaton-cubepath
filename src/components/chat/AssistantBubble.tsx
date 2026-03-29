@@ -29,7 +29,7 @@ function getErrorHint(code: string | null | undefined): string | null {
   return (code && ERROR_HINTS[code]) ?? null
 }
 
-export function AssistantBubble({ msg }: AssistantBubbleProps) {
+export function AssistantBubble({ msg }: Readonly<AssistantBubbleProps>) {
   const isStreaming = msg.status === 'streaming'
 
   if (msg.status === 'blocked') {

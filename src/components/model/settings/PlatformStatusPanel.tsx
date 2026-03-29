@@ -78,7 +78,7 @@ const GROUP_LABELS: Record<string, string> = {
   language: 'Language',
 }
 
-function StatusIcon({ status }: { status: CheckStatus }) {
+function StatusIcon({ status }: Readonly<{ status: CheckStatus }>) {
   if (status === 'ok') {
     return <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
   }
@@ -94,7 +94,7 @@ function StatusIcon({ status }: { status: CheckStatus }) {
   return <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
 }
 
-function ModelPill({ label, modelId, status }: { label: string; modelId: string; status: CheckStatus }) {
+function ModelPill({ label, modelId, status }: Readonly<{ label: string; modelId: string; status: CheckStatus }>) {
   return (
     <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background px-2.5 py-2">
       <StatusIcon status={status} />
@@ -106,7 +106,7 @@ function ModelPill({ label, modelId, status }: { label: string; modelId: string;
   )
 }
 
-function ModelHealthGrid({ health, config }: { health: OllamaHealth; config: ModelConfig }) {
+function ModelHealthGrid({ health, config }: Readonly<{ health: OllamaHealth; config: ModelConfig }>) {
   const sizeByModel = buildModelSizeIndex(SECTIONS)
 
   return (
@@ -152,7 +152,7 @@ interface PlatformStatusPanelProps {
   onEndpointChange: (url: string) => void
 }
 
-export function PlatformStatusPanel({ config, onEndpointChange }: PlatformStatusPanelProps) {
+export function PlatformStatusPanel({ config, onEndpointChange }: Readonly<PlatformStatusPanelProps>) {
   const [triggerKey, setTriggerKey] = useState(0)
   const [localEndpoint, setLocalEndpoint] = useState(config.ollamaBaseUrl)
 

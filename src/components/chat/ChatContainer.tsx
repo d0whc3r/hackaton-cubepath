@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import type { TaskType } from '@/lib/schemas/route'
 import { ChatInput } from '@/components/chat/ChatInput'
 import { ChatMessages } from '@/components/chat/ChatMessages'
@@ -11,25 +12,39 @@ interface ChatContainerProps {
   composer?: React.ReactNode
 }
 
-export function ChatContainer({ fixedTaskType, pageTitle, pageDescription, composer }: ChatContainerProps) {
+export function ChatContainer({ fixedTaskType, pageTitle, pageDescription, composer }: Readonly<ChatContainerProps>) {
   const session = useChatSession(fixedTaskType)
+  const contextValue = useMemo(
+    () => ({
+      activeTask: session.activeTask,
+      currentModel: session.currentModel,
+      entries: session.entries,
+      fixedTaskType,
+      handleCancel: session.handleCancel,
+      handleClearHistory: session.handleClearHistory,
+      handleSubmit: session.handleSubmit,
+      hasPersistedHistory: session.hasPersistedHistory,
+      isHydrated: session.isHydrated,
+      isLoading: session.isLoading,
+      setActiveTask: session.setActiveTask,
+    }),
+    [
+      fixedTaskType,
+      session.activeTask,
+      session.currentModel,
+      session.entries,
+      session.handleCancel,
+      session.handleClearHistory,
+      session.handleSubmit,
+      session.hasPersistedHistory,
+      session.isHydrated,
+      session.isLoading,
+      session.setActiveTask,
+    ],
+  )
 
   return (
-    <ChatContext.Provider
-      value={{
-        activeTask: session.activeTask,
-        currentModel: session.currentModel,
-        entries: session.entries,
-        fixedTaskType,
-        handleCancel: session.handleCancel,
-        handleClearHistory: session.handleClearHistory,
-        handleSubmit: session.handleSubmit,
-        hasPersistedHistory: session.hasPersistedHistory,
-        isHydrated: session.isHydrated,
-        isLoading: session.isLoading,
-        setActiveTask: session.setActiveTask,
-      }}
-    >
+    <ChatContext.Provider value={contextValue}>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {(pageTitle ?? pageDescription) && (
           <div className="shrink-0 border-b border-border/50 px-4 py-3 md:px-6">

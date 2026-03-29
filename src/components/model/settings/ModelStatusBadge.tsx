@@ -10,7 +10,13 @@ interface ModelStatusBadgeProps {
   onPull: (modelId: string, baseUrl: string) => void
 }
 
-export function ModelStatusBadge({ modelId, installed, pullState, ollamaBaseUrl, onPull }: ModelStatusBadgeProps) {
+export function ModelStatusBadge({
+  modelId,
+  installed,
+  pullState,
+  ollamaBaseUrl,
+  onPull,
+}: Readonly<ModelStatusBadgeProps>) {
   if (pullState?.status === 'pulling') {
     return (
       <div className="flex min-w-0 items-center gap-1.5">

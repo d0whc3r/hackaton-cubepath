@@ -34,17 +34,18 @@ function InitializingScreen({
   progress,
   status,
   onRetry,
-}: {
+}: Readonly<{
   error?: string
   modelId: string
   progress?: string
   status: 'checking' | 'pulling' | 'ready' | 'error'
   onRetry: () => void
-}) {
+}>) {
+  const progressText = progress ? ` · ${progress}` : ''
   const subtitle =
     status === 'checking'
       ? `Checking security model availability (${modelId})`
-      : `Downloading security model (${modelId})${progress ? ` · ${progress}` : ''}`
+      : `Downloading security model (${modelId})${progressText}`
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -70,7 +71,7 @@ function InitializingScreen({
   )
 }
 
-function GuardGate({ children }: { children: React.ReactNode }) {
+function GuardGate({ children }: Readonly<{ children: React.ReactNode }>) {
   const { retry, state } = useGuardBootstrap()
   const [canBypassBlockingInit, setCanBypassBlockingInit] = useState(hasGuardReadySession)
 
@@ -102,7 +103,7 @@ function GuardGate({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
-export function AppProviders({ children }: AppProvidersProps) {
+export function AppProviders({ children }: Readonly<AppProvidersProps>) {
   useEffect(() => {
     const onError = (event: ErrorEvent) => {
       logClientError('ui.window.error', event.error ?? event.message, {

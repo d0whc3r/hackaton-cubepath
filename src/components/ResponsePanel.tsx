@@ -5,7 +5,12 @@ interface ResponsePanelProps {
   interrupted: boolean
 }
 
-export function ResponsePanel({ responseText, specialistDisplayName, error, interrupted }: ResponsePanelProps) {
+export function ResponsePanel({
+  responseText,
+  specialistDisplayName,
+  error,
+  interrupted,
+}: Readonly<ResponsePanelProps>) {
   function handleCopy() {
     void navigator.clipboard.writeText(responseText)
   }

@@ -12,7 +12,7 @@ interface TaskAppProps {
   pageDescription?: string
 }
 
-export function TaskApp({ fixedTaskType, pageTitle, pageDescription }: TaskAppProps) {
+export function TaskApp({ fixedTaskType, pageTitle, pageDescription }: Readonly<TaskAppProps>) {
   const composer = fixedTaskType === 'error-explain' ? <ErrorExplainComposer /> : undefined
 
   return (

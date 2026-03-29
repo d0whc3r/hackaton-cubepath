@@ -89,7 +89,7 @@ interface AppSidebarProps {
   fixedTaskType?: TaskType
 }
 
-export function AppSidebar({ fixedTaskType }: AppSidebarProps) {
+export function AppSidebar({ fixedTaskType }: Readonly<AppSidebarProps>) {
   const [pathname, setPathname] = useState(() => normalizePath(globalThis.location?.pathname ?? '/'))
   const [savings, setSavings] = useState<SavingsData>(EMPTY_SAVINGS)
   const [savingsLoaded, setSavingsLoaded] = useState(false)
