@@ -3,10 +3,6 @@ services:
     build: .
     ports:
       - '4321:4321'
-    # Este es un sitio estático: las variables PUBLIC_* se embeben en el bundle
-    # durante `pnpm build` (dentro del contenedor).
-    # La URL de Ollama también se puede cambiar desde la UI en /settings
-    # (se persiste en localStorage sin necesidad de reconstruir la imagen).
     depends_on:
       ollama:
         condition: service_healthy

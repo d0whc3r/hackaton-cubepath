@@ -9,15 +9,13 @@ FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
 COPY astro.config.ts ./astro.config.ts
 COPY package.json ./package.json
-COPY tsconfig.json ./tsconfig.json
+COPY tsconfig*.json ./
 COPY public ./public
 COPY src ./src
-RUN pnpm build
+RUN corepack enable && pnpm build
 
-FROM base AS runtime
-COPY --from=build --chown=node:node /app/dist ./dist
-COPY --from=build --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/package.json ./package.json
-USER node
+FROM nginx:1.27-alpine AS runtime
+COPY --from=build --chmod=755 /app/dist /usr/share/nginx/html
+COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 EXPOSE 4321
-CMD ["node_modules/.bin/astro", "preview", "--host", "0.0.0.0", "--port", "4321"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,7 +1,8 @@
 *
 !package.json
 !pnpm-lock.yaml
-!tsconfig.json
+!tsconfig*.json
 !src/
 !public/
 !astro.config.ts
+!docker/
