@@ -14,8 +14,9 @@ COPY public ./public
 COPY src ./src
 RUN corepack enable && pnpm build
 
-FROM nginx:1.27-alpine AS runtime
+FROM nginxinc/nginx-unprivileged:1.27-alpine AS runtime
 COPY --from=build --chmod=755 /app/dist /usr/share/nginx/html
 COPY docker/nginx/default.conf /etc/nginx/conf.d/default.conf
+USER 101
 EXPOSE 4321
 CMD ["nginx", "-g", "daemon off;"]
