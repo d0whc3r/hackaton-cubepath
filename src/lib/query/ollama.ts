@@ -251,7 +251,7 @@ export function useModelPullMutation() {
     [],
   )
 
-  function handlePull(modelId: string, baseUrl: string): void {
+  function handlePull(modelId: string, baseUrl: string) {
     pullAborts.current[modelId]?.abort()
 
     const abort = new AbortController()
@@ -272,8 +272,8 @@ export function useModelPullMutation() {
             description: modelId,
           })
           setPullStates((prev) => ({ ...prev, [modelId]: { status: 'done' } }))
-          void queryClient.invalidateQueries({ queryKey: ollamaKeys.tags(baseUrl) })
-          void queryClient.invalidateQueries({ queryKey: ollamaKeys.health(baseUrl) })
+          queryClient.invalidateQueries({ queryKey: ollamaKeys.tags(baseUrl) })
+          queryClient.invalidateQueries({ queryKey: ollamaKeys.health(baseUrl) })
         } else if (result.type === 'error') {
           notify.error(`Pull failed: ${modelId}`, {
             action: { label: 'Retry', onClick: () => handlePull(modelId, baseUrl) },

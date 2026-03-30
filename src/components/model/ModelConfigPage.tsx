@@ -63,7 +63,7 @@ export function ModelConfigPage() {
 
   const isLocalRuntime = modelRuntime === 'local' || modelRuntime === 'small'
   const missingSections = isLocalRuntime
-    ? sections.filter((section) => !isModelInstalled(installedModels, config[section.configKey] as string))
+    ? sections.filter((section) => !isModelInstalled(installedModels, config[section.configKey]))
     : []
   const canSave = !isLocalRuntime || (installedModels !== null && missingSections.length === 0)
 
@@ -152,9 +152,7 @@ export function ModelConfigPage() {
   }
 
   function handleInstallMissingModels() {
-    const missingModelIds = [
-      ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
-    ]
+    const missingModelIds = [...new Set(missingSections.map((section) => config[section.configKey]).filter(Boolean))]
     for (const modelId of missingModelIds) {
       handlePull(modelId, ollamaBaseUrl)
     }
@@ -218,9 +216,10 @@ export function ModelConfigPage() {
             missingSections.length > 0 &&
             (() => {
               const missingModelIds = [
-                ...new Set(missingSections.map((section) => config[section.configKey] as string).filter(Boolean)),
+                ...new Set(missingSections.map((section) => config[section.configKey]).filter(Boolean)),
               ]
               const isPulling = missingModelIds.some((id) => pullStates[id]?.status === 'pulling')
+              const pullAll = missingModelIds.length > 1 ? ' All' : ''
               return (
                 <Button
                   type="button"
@@ -229,7 +228,7 @@ export function ModelConfigPage() {
                   onClick={handleInstallMissingModels}
                   disabled={isPulling}
                 >
-                  {isPulling ? 'Pulling…' : `Pull${missingModelIds.length > 1 ? ' All' : ''}`}
+                  {isPulling ? 'Pulling…' : `Pull${pullAll}`}
                 </Button>
               )
             })()}
@@ -273,7 +272,7 @@ export function ModelConfigPage() {
               <div className="overflow-hidden rounded-xl border border-border bg-card">
                 <div className="divide-y divide-border/60">
                   {groupSections.map((section) => {
-                    const modelId = config[section.configKey] as string
+                    const modelId = config[section.configKey]
                     return (
                       <TaskRow
                         key={section.id}
@@ -309,7 +308,7 @@ export function ModelConfigPage() {
       <MissingModelsDialog
         open={showMissingDialog}
         sections={missingSections}
-        getModelId={(section) => config[section.configKey] as string}
+        getModelId={(section) => config[section.configKey]}
         onOpenChange={setShowMissingDialog}
         onInstallMissing={handleInstallMissingModels}
       />

@@ -62,7 +62,7 @@ export type SpecialistInfo = z.infer<typeof SpecialistInfoSchema>
 /** Validates a model ID: alphanumeric, dots, dashes, colons, slashes, at-signs. Max 100 chars. */
 const ModelIdSchema = z
   .string()
-  .regex(/^[\w][\w.\-:/@]{0,99}$/, 'Invalid model ID format')
+  .regex(/^\w[\w.\-:/@]{0,99}$/, 'Invalid model ID format')
   .optional()
 
 export const RouteRequestSchema = z.object({
@@ -74,7 +74,7 @@ export const RouteRequestSchema = z.object({
   explainModel: ModelIdSchema,
   input: z.string().min(1).max(15_000),
   namingHelperModel: ModelIdSchema,
-  ollamaBaseUrl: z.string().url().optional(),
+  ollamaBaseUrl: z.url().optional(),
   performanceHintModel: ModelIdSchema,
   refactorModel: ModelIdSchema,
   taskType: TaskTypeSchema,

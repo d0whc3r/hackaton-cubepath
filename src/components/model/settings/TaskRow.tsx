@@ -94,7 +94,7 @@ export function TaskRow({
     ? `${Math.round(selectedModel.contextWindow / CONTEXT_DIVISOR)}K ctx`
     : null
   const copied = copiedModelId === modelId
-  const pullProgress = pullState?.progress?.endsWith('%') ? parseInt(pullState.progress, 10) : null
+  const pullProgress = pullState?.progress?.endsWith('%') ? Number.parseInt(pullState.progress, 10) : null
   const isCloudModel = selectedModel ? selectedModel.size <= 0 : false
   const canPull =
     isLocalRuntime && installedModelsReady && !isInstalled && !isCloudModel && pullState?.status !== 'done'
