@@ -1,13 +1,10 @@
 import { streamText } from 'ai'
 import { runStream } from '@/lib/api/stream-runner'
 
-vi.mock(import('ai'), async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual,
-    streamText: vi.fn(),
-  }
-})
+vi.mock(import('ai'), async (importOriginal) => ({
+  ...(await importOriginal()),
+  streamText: vi.fn(),
+}))
 
 vi.mock(import('@/lib/observability/metrics'), () => ({
   recordStreamChars: vi.fn(),

@@ -80,7 +80,7 @@ type TaskModelKey =
   | 'namingHelperModel'
   | 'deadCodeModel'
 
-export const TASK_MODEL_KEY: Record<TaskType, TaskModelKey> = {
+const TASK_MODEL_KEY: Record<TaskType, TaskModelKey> = {
   commit: 'commitModel',
   'dead-code': 'deadCodeModel',
   docstring: 'docstringModel',

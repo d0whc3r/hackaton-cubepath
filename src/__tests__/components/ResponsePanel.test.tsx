@@ -49,7 +49,7 @@ describe('ResponsePanel', () => {
   })
 
   it('copy button copies response text only', () => {
-    const writeText = vi.fn().mockResolvedValue()
+    const writeText = vi.fn().mockResolvedValue(null)
     Object.defineProperty(navigator, 'clipboard', {
       configurable: true,
       value: { writeText },

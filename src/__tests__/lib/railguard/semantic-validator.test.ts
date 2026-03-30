@@ -1,15 +1,7 @@
 import { validateInputSemantic } from '@/lib/railguard/semantic-validator'
 
-vi.mock(import('ai'), async (importOriginal) => {
-  const actual = await importOriginal()
-  return {
-    ...actual,
-    generateText: vi.fn(),
-  }
-})
-
-vi.mock(import('@/lib/api/sse'), () => ({
-  ollamaClient: vi.fn(() => vi.fn((modelId: string) => ({ modelId }))),
+vi.mock(import('ai'), () => ({
+  generateText: vi.fn(),
 }))
 
 const BASE_URL = 'http://localhost:11434'

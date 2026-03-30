@@ -3,9 +3,8 @@ import { useFileAttachment } from '@/hooks/use-file-attachment'
 
 const MAX_CHARS = 15_000
 
+let capturedOnload: (ev: ProgressEvent<FileReader>) => void = () => {}
 function makeMockFileReader(content: string) {
-  let capturedOnload: ((ev: ProgressEvent<FileReader>) => void) | null = null
-
   vi.stubGlobal(
     'FileReader',
     class {
@@ -13,14 +12,14 @@ function makeMockFileReader(content: string) {
       get onload() {
         return capturedOnload
       }
-      set onload(fn: (ev: ProgressEvent<FileReader>) => void) {
-        capturedOnload = fn
+      set onload(fn: ((ev: ProgressEvent<FileReader>) => void) | null) {
+        capturedOnload = fn ?? (() => {})
       }
     },
   )
 
   return {
-    triggerLoad: () => capturedOnload?.({ target: { result: content } } as unknown as ProgressEvent<FileReader>),
+    triggerLoad: () => capturedOnload({ target: { result: content } } as unknown as ProgressEvent<FileReader>),
   }
 }
 

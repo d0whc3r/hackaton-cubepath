@@ -5,11 +5,7 @@ interface MetricsSink {
   recordStreamDuration(modelId: string, durationMs: number, status: StreamStatus): void
 }
 
-let sink: MetricsSink | null = null
-
-export function setMetricsSink(nextSink: MetricsSink | null): void {
-  sink = nextSink
-}
+const sink: MetricsSink | null = null
 
 export function recordStreamDuration(modelId: string, durationMs: number, status: StreamStatus): void {
   sink?.recordStreamDuration(modelId, durationMs, status)

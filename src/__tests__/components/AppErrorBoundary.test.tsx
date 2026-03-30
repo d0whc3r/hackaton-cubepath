@@ -3,26 +3,21 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { AppErrorBoundary } from '@/components/AppErrorBoundary'
 import { logClientError } from '@/lib/observability/client'
 
-vi.mock(import('@sentry/browser'), () => ({
+// oxlint-disable-next-line prefer-import-in-mock
+vi.mock('@sentry/browser', async (importOriginal) => ({
+  ...(await importOriginal()),
   captureException: vi.fn(),
-  withScope: (
-    callback: (scope: {
-      setTag: (key: string, value: string) => void
-      setContext: (key: string, value: unknown) => void
-    }) => void,
-  ) => {
-    callback({
-      setContext: vi.fn(),
-      setTag: vi.fn(),
-    })
-  },
+  withScope: vi.fn((callback: (scope: { setTag: typeof vi.fn; setContext: typeof vi.fn }) => unknown) =>
+    callback({ setContext: vi.fn(), setTag: vi.fn() }),
+  ),
 }))
 
-vi.mock(import('@/lib/observability/client'), () => ({
+vi.mock(import('@/lib/observability/client'), async (importOriginal) => ({
+  ...(await importOriginal()),
   logClientError: vi.fn(),
 }))
 
-function Thrower() {
+function Thrower(): never {
   throw new Error('boom from render')
 }
 

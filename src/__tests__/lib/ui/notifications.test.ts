@@ -1,18 +1,13 @@
 import { toast } from 'sonner'
 import { copyNotificationDetails, notify } from '@/lib/ui/notifications'
 
-vi.mock(import('sonner'), () => ({
-  toast: {
-    error: vi.fn(),
-    info: vi.fn(),
-    success: vi.fn(),
-    warning: vi.fn(),
-  },
-}))
-
 describe('notify', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    vi.spyOn(toast, 'error').mockImplementation(() => '')
+    vi.spyOn(toast, 'info').mockImplementation(() => '')
+    vi.spyOn(toast, 'success').mockImplementation(() => '')
+    vi.spyOn(toast, 'warning').mockImplementation(() => '')
   })
 
   it('applies default options for info notifications', () => {

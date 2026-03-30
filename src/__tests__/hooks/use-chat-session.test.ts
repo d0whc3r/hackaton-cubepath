@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { createElement } from 'react'
+import type { ModelConfig } from '@/lib/config/model-config'
 import type { ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { useChatSession } from '@/hooks/use-chat-session'
 import { getModelForTask, loadModelConfig } from '@/lib/config/model-config'
@@ -10,13 +11,29 @@ import { resetStore } from '@/lib/stores/chat-store'
 import { notify } from '@/lib/ui/notifications'
 import { clearHistoryAsync, loadHistoryAsync } from '@/lib/utils/history'
 
-// --- Mocks ---
+const { mockedModelConfig } = vi.hoisted(() => ({
+  mockedModelConfig: {
+    analystModel: 'analyst-model',
+    commitModel: 'commit-model',
+    deadCodeModel: 'dead-code-model',
+    docstringModel: 'docstring-model',
+    errorExplainModel: 'error-explain-model',
+    explainModel: 'explain-model',
+    modelRuntime: 'small',
+    namingHelperModel: 'naming-helper-model',
+    ollamaBaseUrl: 'http://localhost:11434',
+    performanceHintModel: 'performance-hint-model',
+    refactorModel: 'refactor-model',
+    testModel: 'test-model',
+    translateModel: 'translate-model',
+    typeHintsModel: 'type-hints-model',
+  } satisfies ModelConfig,
+}))
+
 vi.mock(import('@/lib/utils/history'), () => ({
   clearHistoryAsync: vi.fn(() => Promise.resolve()),
   getHistoryHintCount: vi.fn(() => 0),
-  loadHistory: vi.fn(() => []),
   loadHistoryAsync: vi.fn(() => Promise.resolve([])),
-  saveHistory: vi.fn(),
   saveHistoryAsync: vi.fn(() => Promise.resolve()),
 }))
 
@@ -33,7 +50,7 @@ vi.mock(import('@/lib/services/route.service'), () => ({
     }
   },
   buildRouteMutationOptions: vi.fn(() => ({
-    mutationFn: vi.fn().mockResolvedValue(),
+    mutationFn: vi.fn().mockResolvedValue(null),
     mutationKey: ['route'],
   })),
 }))
@@ -49,40 +66,10 @@ vi.mock(import('@/lib/ui/notifications'), () => ({
 }))
 
 vi.mock(import('@/lib/config/model-config'), () => ({
-  DEFAULTS: {
-    analystModel: 'analyst-model',
-    commitModel: 'commit-model',
-    deadCodeModel: 'dead-code-model',
-    docstringModel: 'docstring-model',
-    errorExplainModel: 'error-explain-model',
-    explainModel: 'explain-model',
-    modelRuntime: 'local',
-    namingHelperModel: 'naming-helper-model',
-    ollamaBaseUrl: 'http://localhost:11434',
-    performanceHintModel: 'performance-hint-model',
-    refactorModel: 'refactor-model',
-    testModel: 'test-model',
-    translateModel: 'translate-model',
-    typeHintsModel: 'type-hints-model',
-  },
+  DEFAULTS: mockedModelConfig,
   getAnalystModel: vi.fn(() => 'analyst-model'),
   getModelForTask: vi.fn(() => 'test-model'),
-  loadModelConfig: vi.fn(() => ({
-    analystModel: 'analyst-model',
-    commitModel: 'commit-model',
-    deadCodeModel: 'dead-code-model',
-    docstringModel: 'docstring-model',
-    errorExplainModel: 'error-explain-model',
-    explainModel: 'explain-model',
-    modelRuntime: 'local',
-    namingHelperModel: 'naming-helper-model',
-    ollamaBaseUrl: 'http://localhost:11434',
-    performanceHintModel: 'performance-hint-model',
-    refactorModel: 'refactor-model',
-    testModel: 'test-model',
-    translateModel: 'translate-model',
-    typeHintsModel: 'type-hints-model',
-  })),
+  loadModelConfig: vi.fn(() => mockedModelConfig),
 }))
 
 function renderUseChatSession(fixedTaskType?: TaskType) {
@@ -111,6 +98,7 @@ describe('useChatSession', () => {
       docstringModel: 'docstring-model',
       errorExplainModel: 'error-explain-model',
       explainModel: 'explain-model',
+      modelRuntime: 'local',
       namingHelperModel: 'naming-helper-model',
       ollamaBaseUrl: 'http://localhost:11434',
       performanceHintModel: 'performance-hint-model',
@@ -120,14 +108,23 @@ describe('useChatSession', () => {
       typeHintsModel: 'type-hints-model',
     })
     vi.mocked(buildRouteMutationOptions).mockReturnValue({
-      mutationFn: vi.fn().mockResolvedValue(),
+      mutationFn: vi.fn().mockResolvedValue(null),
       mutationKey: ['route'],
     })
   })
 
   it('initialises entries from loadHistoryAsync', async () => {
     const mockEntry: ConversationEntry = {
-      assistantMessage: { content: 'hi', cost: null, error: null, routingSteps: [], specialist: null, status: 'done' },
+      assistantMessage: {
+        blockReason: null,
+        content: 'hi',
+        cost: null,
+        error: null,
+        errorCode: null,
+        routingSteps: [],
+        specialist: null,
+        status: 'done',
+      },
       id: '1',
       userMessage: { content: 'hello', taskType: 'explain', timestamp: new Date() },
     }
@@ -183,7 +180,16 @@ describe('useChatSession', () => {
   it('handleClearHistory empties entries', async () => {
     vi.mocked(loadHistoryAsync).mockResolvedValueOnce([
       {
-        assistantMessage: { content: '', cost: null, error: null, routingSteps: [], specialist: null, status: 'done' },
+        assistantMessage: {
+          blockReason: null,
+          content: '',
+          cost: null,
+          error: null,
+          errorCode: null,
+          routingSteps: [],
+          specialist: null,
+          status: 'done',
+        },
         id: '1',
         userMessage: { content: 'test', taskType: 'explain', timestamp: new Date() },
       },

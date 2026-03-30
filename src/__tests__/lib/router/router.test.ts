@@ -2,7 +2,6 @@ import { route } from '@/lib/router/index'
 import { buildSpecialists } from '@/lib/router/specialists'
 
 const specialists = buildSpecialists({
-  codeModel: 'qwen2.5-coder:7b',
   explainModel: 'phi3.5',
 })
 

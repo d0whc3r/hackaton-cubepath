@@ -1,10 +1,19 @@
 {
-  "extends": "./tsconfig.base.json",
+  "extends": ["astro/tsconfigs/strict", "./tsconfig.base.json"],
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
+    "skipLibCheck": true,
     "types": ["vitest/globals", "node"]
   },
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "vitest.config.ts", "src/test/**/*", "src/**/__tests__/**/*"],
+  "include": [
+    ".astro/types.d.ts",
+    "src/**/*.d.ts",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "vitest.config.ts",
+    "src/test/**/*",
+    "src/__tests__/**/*"
+  ],
   "exclude": ["dist"]
 }

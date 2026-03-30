@@ -8,11 +8,13 @@ import {
   mergeRoutingStep,
 } from '@/lib/utils/stream-callbacks'
 
-vi.mock(import('@/lib/stores/chat-store'), () => ({
+vi.mock(import('@/lib/stores/chat-store'), async (importOriginal) => ({
+  ...(await importOriginal()),
   markTaskDone: vi.fn(),
 }))
 
-vi.mock(import('@/lib/utils/savings'), () => ({
+vi.mock(import('@/lib/utils/savings'), async (importOriginal) => ({
+  ...(await importOriginal()),
   addSaving: vi.fn(() => Promise.resolve()),
 }))
 

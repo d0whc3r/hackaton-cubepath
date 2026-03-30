@@ -17,7 +17,7 @@ import { emitLanguageDetection, emitSpecialistSelection, emitTaskAnalysis } from
 import { DEFAULT_ANALYST_MODEL } from '../router/models/analyst'
 import { OLLAMA_BASE_URL_DEFAULT } from '../router/ollama-defaults'
 
-export interface RouteStreamParams extends RouteRequest {
+interface RouteStreamParams extends RouteRequest {
   signal: AbortSignal
   callbacks: SSECallbacks
 }

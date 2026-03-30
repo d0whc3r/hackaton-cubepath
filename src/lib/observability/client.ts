@@ -16,7 +16,7 @@ function toLogLevel(level: string | undefined, fallback: LogLevel = 'info'): Log
 }
 
 function createClientTransports() {
-  const transports = [
+  const transports: (ConsoleTransport | SentryTransport)[] = [
     new ConsoleTransport({
       id: 'console',
       level: toLogLevel(import.meta.env.PUBLIC_LOG_LEVEL, 'info'),

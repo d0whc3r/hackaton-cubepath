@@ -1,9 +1,19 @@
+import type { CodeContext } from '@/lib/router/types'
 import { buildSpecialists } from '@/lib/router/specialists'
 
-const ENV = { codeModel: 'qwen2.5-coder:7b', explainModel: 'phi3.5' }
+const ENV = { explainModel: 'phi3.5' }
 const specialists = buildSpecialists(ENV)
 
-const mockLang = { confidence: 'high' as const, language: 'TypeScript' }
+function makeContext(language: string, confidence: CodeContext['confidence'] = 'high'): CodeContext {
+  return {
+    confidence,
+    isDiff: false,
+    language,
+    testFramework: null,
+  }
+}
+
+const mockLang = makeContext('TypeScript')
 
 // US1; Explain specialist
 describe('explanation-specialist', () => {
@@ -45,17 +55,17 @@ describe('test-specialist', () => {
   })
 
   it('buildSystemPrompt for TypeScript instructs Vitest', () => {
-    const prompt = specialists.test.buildSystemPrompt({ confidence: 'high', language: 'TypeScript' }, 'function f(){}')
+    const prompt = specialists.test.buildSystemPrompt(makeContext('TypeScript'), 'function f(){}')
     expect(prompt).toContain('Vitest')
   })
 
   it('buildSystemPrompt for Python instructs pytest', () => {
-    const prompt = specialists.test.buildSystemPrompt({ confidence: 'high', language: 'Python' }, 'def f(): pass')
+    const prompt = specialists.test.buildSystemPrompt(makeContext('Python'), 'def f(): pass')
     expect(prompt).toContain('pytest')
   })
 
   it('buildSystemPrompt for unknown instructs pseudocode only', () => {
-    const prompt = specialists.test.buildSystemPrompt({ confidence: 'low', language: 'unknown' }, 'lorem ipsum')
+    const prompt = specialists.test.buildSystemPrompt(makeContext('unknown', 'low'), 'lorem ipsum')
     expect(prompt.toLowerCase()).toContain('pseudocode')
     expect(prompt).not.toContain('Vitest')
     expect(prompt).not.toContain('pytest')

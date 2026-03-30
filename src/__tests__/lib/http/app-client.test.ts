@@ -1,4 +1,3 @@
-import { WretchError } from 'wretch'
 import { appWretch } from '@/lib/http/app-client'
 import { appErrorHandlers } from '../../msw/handlers/app'
 import { server } from '../../msw/server'
@@ -28,14 +27,14 @@ describe('appWretch', () => {
     expect(res.ok).toBe(true)
   })
 
-  it('throws WretchError on 5xx', async () => {
+  it('throws error payload on 5xx', async () => {
     server.use(appErrorHandlers.models500)
-    await expect(appWretch.url('/api/ollama/models').get().json()).rejects.toBeInstanceOf(WretchError)
+    await expect(appWretch.url('/api/ollama/models').get().json()).rejects.toMatchObject({ status: 500 })
   })
 
-  it('throws WretchError on 4xx', async () => {
+  it('throws error payload on 4xx', async () => {
     server.use(appErrorHandlers.models404)
-    await expect(appWretch.url('/api/ollama/models').get().json()).rejects.toBeInstanceOf(WretchError)
+    await expect(appWretch.url('/api/ollama/models').get().json()).rejects.toMatchObject({ status: 404 })
   })
 
   it('returns raw Response for streaming calls via .res()', async () => {

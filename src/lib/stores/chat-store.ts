@@ -1,14 +1,14 @@
 import type { AssistantMessage, ConversationEntry, TaskType } from '@/lib/schemas/route'
 import { clearHistoryAsync, loadHistoryAsync, saveHistoryAsync } from '@/lib/utils/history'
 
-export type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
+type AssistantUpdater = (prev: AssistantMessage) => AssistantMessage
 
 type EntriesByTask = Record<TaskType, ConversationEntry[]>
 type LoadingByTask = Record<TaskType, boolean>
 type UnreadByTask = Record<TaskType, boolean>
 type LoadedByTask = Record<TaskType, boolean>
 
-export const TASK_TYPES: TaskType[] = [
+const TASK_TYPES: TaskType[] = [
   'commit',
   'dead-code',
   'docstring',
@@ -57,7 +57,7 @@ const abortControllers: Partial<Record<TaskType, AbortController>> = {}
 type Listener = () => void
 const listeners = new Set<Listener>()
 
-export interface StoreSnapshot {
+interface StoreSnapshot {
   entries: EntriesByTask
   loaded: LoadedByTask
   loading: LoadingByTask

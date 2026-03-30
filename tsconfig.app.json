@@ -8,5 +8,5 @@
     ]
   },
   "include": [".astro/types.d.ts", "src/**/*", "./worker-configuration.d.ts"],
-  "exclude": ["dist", "src/**/*.test.ts", "src/**/*.test.tsx", "vitest.config.ts"]
+  "exclude": ["dist", "src/**/*.test.ts", "src/**/*.test.tsx", "src/__tests__/**/*", "vitest.config.ts"]
 }

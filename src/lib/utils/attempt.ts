@@ -17,7 +17,7 @@ export function attempt<T>(
     if (result instanceof Promise) {
       return result
         .then((value): AttemptResult<T> => ({ ok: true, value }))
-        .catch((error: unknown): Promise<AttemptResult<T>> => {
+        .catch((error: unknown): AttemptResult<T> | Promise<AttemptResult<T>> => {
           if (fallback === undefined) {
             return { error, ok: false }
           }
