@@ -1,10 +1,10 @@
-import type { RoutingDecision, SpecialistConfig, TaskType } from './types'
+import type { RoutingDecision, SpecialistConfig, SpecialistTaskType } from './types'
 import { fallbackAnalysis, runAnalyst } from './analyst'
 
 export function route(
-  taskType: TaskType,
+  taskType: SpecialistTaskType,
   input: string,
-  specialists: Record<TaskType, SpecialistConfig>,
+  specialists: Record<SpecialistTaskType, SpecialistConfig>,
 ): RoutingDecision {
   const codeContext = fallbackAnalysis(input)
   const specialist = specialists[taskType]
@@ -20,9 +20,9 @@ export function route(
 }
 
 export async function routeWithAnalyst(
-  taskType: TaskType,
+  taskType: SpecialistTaskType,
   input: string,
-  specialists: Record<TaskType, SpecialistConfig>,
+  specialists: Record<SpecialistTaskType, SpecialistConfig>,
   analystModelId: string,
   baseUrl: string,
 ): Promise<RoutingDecision> {

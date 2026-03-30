@@ -12,7 +12,7 @@ const TASK_OPTIONS: { value: TaskType; label: string; placeholder: string }[] = 
 
 export const MAX_CHARS = 15_000
 
-export interface UseChatInputReturn {
+interface UseChatInputReturn {
   displayTask: TaskType
   currentOption: { value: TaskType; label: string; placeholder: string } | undefined
   charCount: number

@@ -61,5 +61,3 @@ export function UserBubble({ msg }: Readonly<UserBubbleProps>) {
     </div>
   )
 }
-
-export { TASK_COLORS, TASK_LABEL }

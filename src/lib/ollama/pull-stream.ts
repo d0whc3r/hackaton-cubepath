@@ -1,6 +1,6 @@
 import { appWretch } from '@/lib/http/app-client'
 
-export const PULL_TIMEOUT_MS = 600_000
+const PULL_TIMEOUT_MS = 600_000
 
 export interface PullEvent {
   completed?: number
@@ -9,7 +9,7 @@ export interface PullEvent {
   total?: number
 }
 
-export type PullResult = { type: 'success' } | { message: string; type: 'error' } | { type: 'ended' }
+type PullResult = { type: 'success' } | { message: string; type: 'error' } | { type: 'ended' }
 
 function createPullSignal(signal: AbortSignal): AbortSignal {
   return AbortSignal.any([signal, AbortSignal.timeout(PULL_TIMEOUT_MS)])

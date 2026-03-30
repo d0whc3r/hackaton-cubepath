@@ -23,7 +23,7 @@ export interface PullState {
   status: PullStatus
 }
 
-export interface RuntimeModelDetails {
+interface RuntimeModelDetails {
   capabilities?: string[]
   contextLength?: number
   family?: string
@@ -42,7 +42,7 @@ export interface OllamaHealthRaw {
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
 
-export function normalizeModelName(name: string): string {
+function normalizeModelName(name: string): string {
   const [base, tag] = name.split(':')
   return tag && tag !== 'latest' ? `${base}:${tag}` : (base ?? name)
 }
@@ -54,7 +54,7 @@ export function normalizeModelName(name: string): string {
 //   QueryClient.invalidateQueries({ queryKey: ollamaKeys.tags(url) })    // specific tags
 //   QueryClient.invalidateQueries({ queryKey: ollamaKeys.health(url) })  // all health for url
 
-export const ollamaKeys = {
+const ollamaKeys = {
   all: () => ['ollama'] as const,
   health: (baseUrl: string, triggerKey?: number) =>
     triggerKey === undefined
@@ -64,7 +64,7 @@ export const ollamaKeys = {
   tags: (baseUrl: string) => [...ollamaKeys.all(), 'tags', baseUrl] as const,
 } as const
 
-export const guardKeys = {
+const guardKeys = {
   all: () => ['guard'] as const,
   check: (baseUrl: string, retryCount: number) =>
     [...guardKeys.all(), 'check', DEFAULT_GUARD_MODEL, baseUrl, retryCount] as const,
@@ -83,7 +83,7 @@ async function fetchTags(baseUrl: string, signal: AbortSignal): Promise<string[]
 
 const HEALTH_TIMEOUT_MS = 5000
 
-export async function fetchOllamaHealthRaw(baseUrl: string, signal: AbortSignal): Promise<OllamaHealthRaw> {
+async function fetchOllamaHealthRaw(baseUrl: string, signal: AbortSignal): Promise<OllamaHealthRaw> {
   const combined = AbortSignal.any([signal, AbortSignal.timeout(HEALTH_TIMEOUT_MS)])
   try {
     const [versionRes, tagsRes] = await Promise.all([

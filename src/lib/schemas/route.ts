@@ -22,7 +22,7 @@ export const RoutingStepNameSchema = z.enum([
 ])
 export type RoutingStepName = z.infer<typeof RoutingStepNameSchema>
 
-export const RoutingStepStatusSchema = z.enum(['pending', 'active', 'done', 'error'])
+const RoutingStepStatusSchema = z.enum(['pending', 'active', 'done', 'error'])
 
 export const RoutingStepSchema = z.object({
   detail: z.string().optional(),
@@ -32,7 +32,7 @@ export const RoutingStepSchema = z.object({
 })
 export type RoutingStep = z.infer<typeof RoutingStepSchema>
 
-export const ProviderComparisonSchema = z.object({
+const ProviderComparisonSchema = z.object({
   costUsd: z.number(),
   modelId: z.string(),
   modelLabel: z.string(),

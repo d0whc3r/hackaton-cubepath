@@ -11,9 +11,11 @@ import { appendEvent, buildValidationEvent, validateInputSemantic } from '@/lib/
 import { detectLanguage } from '@/lib/router/detector'
 import { isDirectTask, routeDirect } from '@/lib/router/direct'
 import { routeWithAnalyst } from '@/lib/router/index'
-import { DEFAULT_ANALYST_MODEL, DEFAULT_MODELS, OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
+import { DEFAULT_MODELS } from '@/lib/router/models'
 import { buildSpecialists } from '@/lib/router/specialists'
 import { emitLanguageDetection, emitSpecialistSelection, emitTaskAnalysis } from '@/lib/router/sse-emitters'
+import { DEFAULT_ANALYST_MODEL } from '../router/models/analyst'
+import { OLLAMA_BASE_URL_DEFAULT } from '../router/ollama-defaults'
 
 export interface RouteStreamParams extends RouteRequest {
   signal: AbortSignal

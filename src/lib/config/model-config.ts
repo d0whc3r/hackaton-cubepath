@@ -4,10 +4,10 @@ import {
   DEFAULT_ANALYST_MODEL_BY_RUNTIME,
   DEFAULT_MODELS_BY_RUNTIME,
   DEFAULT_TRANSLATE_MODEL_BY_RUNTIME,
-  OLLAMA_BASE_URL_DEFAULT,
 } from '@/lib/router/models'
 import { getStorageEngine } from '@/lib/storage/engine'
 import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
+import { OLLAMA_BASE_URL_DEFAULT } from '../router/ollama-defaults'
 
 export interface ModelConfig {
   modelRuntime: ModelRuntime

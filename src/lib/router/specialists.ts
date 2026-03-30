@@ -2,9 +2,9 @@ import { buildCommitPrompt } from '@/lib/prompts/commit'
 import { buildExplainPrompt } from '@/lib/prompts/explain'
 import { buildRefactorPrompt } from '@/lib/prompts/refactor'
 import { buildTestPrompt } from '@/lib/prompts/test'
-import type { CodeContext, SpecialistConfig, TaskType } from './types'
+import type { CodeContext, SpecialistConfig, SpecialistTaskType } from './types'
 
-export interface SpecialistEnv {
+interface SpecialistEnv {
   explainModel: string
   testModel?: string
   refactorModel?: string
@@ -25,7 +25,7 @@ function inferTestFramework(language: string): string | null {
   return map[language.toLowerCase()] ?? null
 }
 
-export function buildSpecialists(env: SpecialistEnv): Record<TaskType, SpecialistConfig> {
+export function buildSpecialists(env: SpecialistEnv): Record<SpecialistTaskType, SpecialistConfig> {
   return {
     commit: {
       buildSystemPrompt: (context: CodeContext, input: string) => {

@@ -8,7 +8,7 @@ import {
   removeModelConfig,
   saveModelConfig,
 } from '@/lib/config/model-config'
-import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
+import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/ollama-defaults'
 import type { SectionDef, SectionId } from './types'
 import { CUSTOM_VALUE, getSectionsForRuntime } from './constants'
 import { buildInitialCustomModels, getActiveSection, getDefaultModelIdForRuntime } from './helpers'

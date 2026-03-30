@@ -10,6 +10,8 @@ export type TaskType =
   | 'naming-helper'
   | 'dead-code'
 
+export type SpecialistTaskType = Extract<TaskType, 'explain' | 'test' | 'refactor' | 'commit'>
+
 export type ModelRuntime = 'local' | 'cloud' | 'small'
 
 export interface ModelOption {

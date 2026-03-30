@@ -107,7 +107,7 @@ function emitStreamDone(emit: SseEmitter, modelId: string, inputSize: number, ou
   emit('done', {})
 }
 
-export interface StreamRunnerParams {
+interface StreamRunnerParams {
   emit: SseEmitter
   input: string
   modelId: string

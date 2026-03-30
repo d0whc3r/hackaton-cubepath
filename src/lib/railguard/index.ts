@@ -1,5 +1,4 @@
 export { sanitise } from './sanitise'
 export { appendEvent, buildValidationEvent, getEvents, getMetrics, pruneOlderThan } from './event-log'
-export { DEFAULT_GUARD_MODEL, GUARD_MODELS } from './guard-models'
 export { validateInputSemantic } from './semantic-validator'
-export type { AttackVectorCategory, SecurityMetrics, ValidationEvent, ValidationResult } from './types'
+export type { ValidationEvent, ValidationResult } from './types'

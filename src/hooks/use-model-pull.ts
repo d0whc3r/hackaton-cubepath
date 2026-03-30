@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PullEvent } from '@/lib/ollama/pull-stream'
 import { streamModelPull } from '@/lib/ollama/pull-stream'
 
-export type ModelPullStatus = 'idle' | 'pulling' | 'ready' | 'error'
+type ModelPullStatus = 'idle' | 'pulling' | 'ready' | 'error'
 
-export interface ModelPullState {
+interface ModelPullState {
   error?: string
   progress?: string
   status: ModelPullStatus

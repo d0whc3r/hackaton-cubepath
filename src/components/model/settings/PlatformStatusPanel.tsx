@@ -14,7 +14,7 @@ import type { ModelConfig } from '@/lib/config/model-config'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useOllamaHealth } from '@/hooks/use-ollama-health'
-import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
+import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/ollama-defaults'
 import { SECTIONS } from './constants'
 import { buildModelSizeIndex, formatGb, getUniqueSelectedModelIds, getUniqueSelectedSizeGb } from './helpers'
 

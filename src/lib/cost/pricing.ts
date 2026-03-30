@@ -8,7 +8,7 @@
  *   docs/prompts/update-prices.md
  */
 
-export interface ProviderModel {
+interface ProviderModel {
   id: string
   label: string
   /** USD per 1 million input tokens */
@@ -17,7 +17,7 @@ export interface ProviderModel {
   outputPricePerMillion: number
 }
 
-export interface Provider {
+interface Provider {
   id: string
   label: string
   models: ProviderModel[]
@@ -122,7 +122,7 @@ export const PROVIDERS: Provider[] = [
   },
 ]
 
-export const MILLION_UNIT = 1_000_000
+const MILLION_UNIT = 1_000_000
 
 export function getRepresentativeModel(provider: Provider): ProviderModel | undefined {
   return provider.models.find((model) => model.id === provider.representativeModelId)

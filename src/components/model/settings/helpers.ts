@@ -51,7 +51,7 @@ export function getActiveSection(activeSection: SectionId, sections: SectionDef[
   return sections.find((section) => section.id === activeSection) ?? sections[0]
 }
 
-export function getModelSizeGb(model: ModelOption): number {
+function getModelSizeGb(model: ModelOption): number {
   return model.size
 }
 

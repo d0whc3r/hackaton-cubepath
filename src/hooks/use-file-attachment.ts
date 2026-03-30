@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 
-export type OnFileContent = (content: string, fileName: string) => void
+type OnFileContent = (content: string, fileName: string) => void
 
-export interface UseFileAttachmentReturn {
+interface UseFileAttachmentReturn {
   attachedFileName: string | null
   fileInputRef: React.RefObject<HTMLInputElement | null>
   onFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void

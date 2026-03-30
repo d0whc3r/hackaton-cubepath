@@ -19,7 +19,7 @@ import { copyNotificationDetails, notify } from '@/lib/ui/notifications'
 import { getHistoryHintCount } from '@/lib/utils/history'
 import { buildStreamCallbacks } from '@/lib/utils/stream-callbacks'
 
-export interface UseChatSessionReturn {
+interface UseChatSessionReturn {
   activeTask: TaskType
   currentModel: string
   entries: ConversationEntry[]

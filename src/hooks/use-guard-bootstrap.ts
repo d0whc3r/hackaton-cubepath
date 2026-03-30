@@ -4,9 +4,9 @@ import { useModelPull } from '@/hooks/use-model-pull'
 import { loadModelConfig } from '@/lib/config/model-config'
 import { guardCheckOptions } from '@/lib/query/ollama'
 import { DEFAULT_GUARD_MODEL } from '@/lib/railguard/guard-models'
-import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/models'
+import { OLLAMA_BASE_URL_DEFAULT } from '@/lib/router/ollama-defaults'
 
-export interface GuardBootstrapState {
+interface GuardBootstrapState {
   error?: string
   modelId: string
   progress?: string

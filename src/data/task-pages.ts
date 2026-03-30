@@ -1,6 +1,6 @@
 import type { TaskType } from '@/lib/schemas/route'
 
-export interface TaskPageMeta {
+interface TaskPageMeta {
   slug: string
   fixedTaskType: TaskType
   title: string

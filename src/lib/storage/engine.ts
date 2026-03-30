@@ -14,9 +14,9 @@
 import { idbGet, idbRemove, idbSet, isIndexedDBAvailable } from '@/lib/storage/idb'
 import { readStorage, removeStorage, writeStorage } from '@/lib/utils/storage'
 
-export type StorageCategory = 'history' | 'settings' | 'config' | 'session'
+type StorageCategory = 'history' | 'settings' | 'config' | 'session'
 
-export interface StorageEngine {
+interface StorageEngine {
   read<T>(key: string): Promise<T | null>
   remove(key: string): Promise<void>
   write<T>(key: string, value: T): Promise<void>

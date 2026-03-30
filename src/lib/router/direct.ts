@@ -42,7 +42,7 @@ export function isDirectTask(taskType: TaskType): taskType is DirectTaskType {
   )
 }
 
-export interface DirectRouteResult {
+interface DirectRouteResult {
   displayName: string
   modelId: string
   systemPrompt: string
