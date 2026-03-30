@@ -7,6 +7,15 @@ interface Props {
 
 const { currentPath } = Astro.props
 
+const normalizePath = (path: string) => {
+  if (path === '/') {
+    return path
+  }
+  return path.endsWith('/') ? path.slice(0, -1) : path
+}
+
+const normalizedCurrentPath = normalizePath(currentPath)
+
 const NAV_ITEMS = [
   { href: '/', label: 'Overview' },
   { href: '/tasks/explain', label: 'Tasks' },
@@ -27,7 +36,10 @@ const NAV_ITEMS = [
 
     <nav class="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto">
       {NAV_ITEMS.map((item) => {
-        const active = currentPath === item.href
+        const normalizedHref = normalizePath(item.href)
+        const active =
+          normalizedCurrentPath === normalizedHref ||
+          (normalizedHref !== '/' && normalizedCurrentPath.startsWith(`${normalizedHref}/`))
         return (
           <a
             href={item.href}
