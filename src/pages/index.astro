@@ -77,8 +77,11 @@ const workflowSteps = [
 
   <section class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
     {
-      statItems.map((item) => (
-        <article class="rounded-xl border border-border/70 bg-card p-5 shadow-sm">
+      statItems.map((item, index) => (
+        <article
+          class="rounded-xl border border-border/70 bg-card p-5 shadow-sm motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500"
+          style={`animation-delay:${120 + index * 80}ms`}
+        >
           <p class="text-[11px] font-semibold tracking-[0.2em] text-muted-foreground uppercase">{item.label}</p>
           <p class="mt-4 text-4xl font-bold tracking-tight text-foreground">{item.value}</p>
           <p class="mt-2 text-sm text-muted-foreground">{item.sub}</p>
@@ -87,7 +90,7 @@ const workflowSteps = [
     }
   </section>
 
-  <section id="approach" class="mt-14 scroll-mt-24">
+  <section id="approach" class="mt-14 scroll-mt-24 scroll-reveal">
     <div class="mb-5">
       <h2 class="text-2xl font-semibold tracking-tight text-foreground">Why this SLM approach works</h2>
       <p class="text-sm text-muted-foreground">
@@ -97,14 +100,14 @@ const workflowSteps = [
     </div>
 
     <div class="grid gap-4 lg:grid-cols-2">
-      <article class="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
+      <article class="rounded-xl border border-border/70 bg-card p-6 shadow-sm scroll-reveal-side">
         <h3 class="text-lg font-semibold text-foreground">SLM Router benefits</h3>
         <ul class="mt-4 space-y-2 text-sm text-muted-foreground">
           {slmAdvantages.map((item) => <li>{item}</li>)}
         </ul>
       </article>
 
-      <article class="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
+      <article class="rounded-xl border border-border/70 bg-card p-6 shadow-sm scroll-reveal-side">
         <h3 class="text-lg font-semibold text-foreground">Generic LLM tradeoffs</h3>
         <ul class="mt-4 space-y-2 text-sm text-muted-foreground">
           {genericLlmTradeoffs.map((item) => <li>{item}</li>)}
@@ -113,7 +116,7 @@ const workflowSteps = [
     </div>
   </section>
 
-  <section id="platform" class="mt-14 scroll-mt-24">
+  <section id="platform" class="mt-14 scroll-mt-24 scroll-reveal">
     <div class="mb-5">
       <h2 class="text-2xl font-semibold tracking-tight text-foreground">Platform architecture</h2>
       <p class="text-sm text-muted-foreground">
@@ -122,8 +125,11 @@ const workflowSteps = [
     </div>
     <div class="grid gap-4 lg:grid-cols-3">
       {
-        platformPillars.map((pillar) => (
-          <article class="rounded-xl border border-border/70 bg-card p-6 shadow-sm">
+        platformPillars.map((pillar, index) => (
+          <article
+            class="scroll-reveal-fast rounded-xl border border-border/70 bg-card p-6 shadow-sm transition-transform hover:-translate-y-1"
+            style={`animation-delay:${140 + index * 100}ms`}
+          >
             <p class="mb-2 text-xs font-medium text-muted-foreground">{pillar.badge}</p>
             <h3 class="mb-2 text-lg font-semibold text-foreground">{pillar.title}</h3>
             <p class="text-sm leading-7 text-muted-foreground">{pillar.desc}</p>
@@ -133,7 +139,7 @@ const workflowSteps = [
     </div>
   </section>
 
-  <section id="workflow" class="mt-14 scroll-mt-24">
+  <section id="workflow" class="mt-14 scroll-mt-24 scroll-reveal">
     <div class="mb-4">
       <h2 class="text-2xl font-semibold tracking-tight text-foreground">Operational workflow</h2>
       <p class="text-sm text-muted-foreground">
@@ -142,8 +148,11 @@ const workflowSteps = [
     </div>
     <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
       {
-        workflowSteps.map((item) => (
-          <article class="rounded-xl border border-border/70 bg-card p-4 shadow-sm">
+        workflowSteps.map((item, index) => (
+          <article
+            class="scroll-reveal-fast rounded-xl border border-border/70 bg-card p-4 shadow-sm transition-transform hover:-translate-y-1"
+            style={`animation-delay:${120 + index * 80}ms`}
+          >
             <p class="mb-2 font-mono text-xs text-muted-foreground">{item.step}</p>
             <h3 class="mb-2 text-sm font-semibold text-foreground">{item.title}</h3>
             <p class="text-xs leading-6 text-muted-foreground">{item.desc}</p>
@@ -153,7 +162,7 @@ const workflowSteps = [
     </div>
   </section>
 
-  <section id="tasks" class="mt-14 scroll-mt-24">
+  <section id="tasks" class="mt-14 scroll-mt-24 scroll-reveal">
     <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
       <div>
         <h2 class="text-2xl font-semibold tracking-tight text-foreground">Task catalog</h2>
@@ -165,4 +174,64 @@ const workflowSteps = [
     </div>
     <OverviewTaskCards client:only="react" />
   </section>
+
+  <script is:inline>
+    (() => {
+      if (!('IntersectionObserver' in globalThis)) {
+        return
+      }
+      const selector = '.scroll-reveal, .scroll-reveal-fast, .scroll-reveal-side'
+      const root = document.documentElement
+      root.classList.add('reveal-ready')
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) {
+              continue
+            }
+            const element = entry.target
+            element.classList.add('scroll-revealed')
+            observer.unobserve(element)
+          }
+        },
+        {
+          rootMargin: '0px 0px -10% 0px',
+          threshold: 0.08,
+        }
+      )
+
+      const observeElement = (element) => {
+        if (element.dataset.revealBound === '1') {
+          return
+        }
+        element.dataset.revealBound = '1'
+        observer.observe(element)
+      }
+
+      const scan = (container = document) => {
+        for (const element of container.querySelectorAll(selector)) {
+          observeElement(element)
+        }
+      }
+
+      scan()
+
+      const mutationObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (!(node instanceof Element)) {
+              continue
+            }
+            if (node.matches(selector)) {
+              observeElement(node)
+            }
+            scan(node)
+          }
+        }
+      })
+
+      mutationObserver.observe(document.body, { childList: true, subtree: true })
+    })()
+  </script>
 </NonTaskLayout>

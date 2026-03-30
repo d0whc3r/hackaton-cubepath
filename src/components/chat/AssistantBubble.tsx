@@ -50,7 +50,7 @@ export function AssistantBubble({ msg }: Readonly<AssistantBubbleProps>) {
 
   return (
     <div className="flex justify-start">
-      <div className="max-w-[90%] min-w-0 space-y-1 overflow-hidden">
+      <div className="max-w-[90%] min-w-0 space-y-1 overflow-hidden motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-left-3">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10">
             <Zap className="h-3 w-3 text-primary" />
@@ -66,7 +66,7 @@ export function AssistantBubble({ msg }: Readonly<AssistantBubbleProps>) {
           )}
         </div>
 
-        <div className="rounded-2xl rounded-tl-sm border border-border/60 bg-card px-4 py-3 shadow-sm">
+        <div className="rounded-2xl rounded-tl-sm border border-border/60 bg-card px-4 py-3 shadow-sm transition-all hover:border-border hover:shadow-md">
           {msg.error && (
             <Alert variant="destructive" className="rounded-xl border-destructive/20 bg-red-50 dark:bg-red-950/20">
               <AlertCircle className="h-4 w-4" />

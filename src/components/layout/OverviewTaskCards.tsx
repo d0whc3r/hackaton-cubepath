@@ -134,18 +134,25 @@ function TaskCardGrid({
 }: Readonly<{ tasks: TaskCard[]; modelConfig: ReturnType<typeof loadModelConfig> }>) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-      {tasks.map(({ task, href, icon: Icon, iconBg, color, title, description }) => {
+      {tasks.map(({ task, href, icon: Icon, iconBg, color, title, description }, index) => {
         const modelId = getModelForTask(modelConfig, task)
         const modelLabel = MODELS_BY_TASK[task].find((model) => model.id === modelId)?.label ?? modelId
 
         return (
-          <a key={task} href={href} className="group block">
+          <a
+            key={task}
+            href={href}
+            className="group scroll-reveal-fast block"
+            style={{ animationDelay: `${120 + index * 90}ms` }}
+          >
             <Card
               size="sm"
-              className="h-full border border-border/70 shadow-sm ring-0 transition-colors group-hover:border-primary/40"
+              className="h-full border border-border/70 shadow-sm ring-0 transition-all group-hover:-translate-y-0.5 group-hover:border-primary/40 group-hover:shadow-md"
             >
               <CardHeader>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${iconBg} ${color}`}>
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-lg transition-transform group-hover:scale-105 ${iconBg} ${color}`}
+                >
                   <Icon className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-base text-foreground transition-colors group-hover:text-primary">

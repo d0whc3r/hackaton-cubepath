@@ -14,7 +14,7 @@ export function EmptyState() {
   const hint = TASK_HINTS[activeTask] ?? 'Paste code below and the router will pick the right specialist model.'
 
   return (
-    <Empty className="min-h-0 flex-1 border-none p-8">
+    <Empty className="min-h-0 flex-1 border-none p-8 motion-safe:animate-in motion-safe:duration-500 motion-safe:fade-in motion-safe:slide-in-from-bottom-3">
       <EmptyHeader>
         <EmptyMedia variant="icon" className="h-14 w-14 rounded-2xl bg-primary/10 ring-1 ring-primary/20">
           <Zap className="h-6 w-6 text-primary" />
@@ -26,25 +26,25 @@ export function EmptyState() {
         <div className="flex flex-wrap justify-center gap-2">
           <a
             href="/tasks/explain"
-            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             Explain
           </a>
           <a
             href="/tasks/test"
-            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             Tests
           </a>
           <a
             href="/tasks/refactor"
-            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             Refactor
           </a>
           <a
             href="/tasks/commit"
-            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+            className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
           >
             Commit
           </a>

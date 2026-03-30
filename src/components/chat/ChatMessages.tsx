@@ -155,7 +155,10 @@ export function ChatMessages() {
         <ScrollAreaViewport ref={scrollRef}>
           <div className="space-y-6 p-4 md:p-6">
             {entries.map((entry) => (
-              <div key={entry.id} className="space-y-3">
+              <div
+                key={entry.id}
+                className="space-y-3 motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-bottom-3"
+              >
                 <UserBubble msg={entry.userMessage} />
                 <AssistantBubble msg={entry.assistantMessage} />
               </div>
@@ -168,12 +171,12 @@ export function ChatMessages() {
 
       {/* Jump to bottom; shown when user has scrolled up */}
       {!isAtBottom && (
-        <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2">
+        <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 motion-safe:animate-in motion-safe:duration-300 motion-safe:fade-in motion-safe:slide-in-from-bottom-2">
           <Button
             size="sm"
             variant="secondary"
             onClick={scrollToBottom}
-            className="h-8 gap-1.5 rounded-full px-3 text-xs shadow-md"
+            className="h-8 gap-1.5 rounded-full px-3 text-xs shadow-md transition-transform hover:scale-105"
           >
             <ArrowDown className="h-3.5 w-3.5" />
             Jump to bottom
