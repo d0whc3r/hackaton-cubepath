@@ -69,15 +69,31 @@ const SMALL_PHI3: ModelOption = {
   size: 2.2,
 }
 
-// Official Google Gemma3 1B (not a community fork). Multilingual, 32K context, 815 MB.
-// Replaces the previous zongwei/gemma3-translator:1b community model.
-const SMALL_GEMMA3_1B: ModelOption = {
+const SMALL_GEMMA3_TRANSLATOR_1B: ModelOption = {
   contextWindow: 32_768,
-  description: 'Google · 0.8 GB, multilingual 32K context — lightest reliable translator',
-  id: 'gemma3:1b',
-  label: 'Gemma 3',
+  description: 'Community (Gemma 3) · 0.8 GB, translation-only behavior with very low RAM footprint',
+  id: 'zongwei/gemma3-translator:1b',
+  label: 'Gemma3 Translator',
   params: '1B',
   size: 0.815,
+}
+
+const SMALL_ICKY_TRANSLATE: ModelOption = {
+  contextWindow: 8192,
+  description: 'icky · 1.6 GB, dedicated tiny translator for constrained CPUs and low-memory setups',
+  id: 'icky/translate',
+  label: 'icky/translate',
+  params: '~2.6B',
+  size: 1.6,
+}
+
+const SMALL_HY_MT15_18B: ModelOption = {
+  contextWindow: 8192,
+  description: 'Tencent Hunyuan MT 1.5 · 1.8B, translation-specialized model focused on quality/speed balance',
+  id: 'demonbyron/HY-MT1.5-1.8B',
+  label: 'HY-MT 1.5',
+  params: '1.8B',
+  size: 1.8,
 }
 
 // ── Per-task exports ──────────────────────────────────────────────────────────
@@ -143,7 +159,11 @@ export const DEAD_CODE_MODELS_SMALL: ModelOption[] = [
 ]
 export const DEFAULT_DEAD_CODE_MODEL_SMALL = DEAD_CODE_MODELS_SMALL[0].id
 
-export const TRANSLATE_MODELS_SMALL: ModelOption[] = [SMALL_GEMMA3_1B, SMALL_QWEN25_15B, SMALL_LLAMA32_1B]
+export const TRANSLATE_MODELS_SMALL: ModelOption[] = [
+  SMALL_HY_MT15_18B,
+  SMALL_GEMMA3_TRANSLATOR_1B,
+  SMALL_ICKY_TRANSLATE,
+]
 export const DEFAULT_TRANSLATE_MODEL_SMALL = TRANSLATE_MODELS_SMALL[0].id
 
 export const MODELS_BY_TASK_SMALL: Record<TaskType, ModelOption[]> = {
