@@ -48,7 +48,8 @@ function genericOllamaApiError(responseBody?: string): StreamError | undefined {
 }
 
 function isConnectionFailure(error: Error): boolean {
-  const combined = `${error.message} ${error.cause instanceof Error ? error.cause.message : String(error.cause ?? '')}`
+  const combined =
+    `${error.message} ${error.cause instanceof Error ? error.cause.message : String(error.cause ?? '')}`.toLowerCase()
   return (
     combined.includes('econnrefused') ||
     combined.includes('fetch failed') ||

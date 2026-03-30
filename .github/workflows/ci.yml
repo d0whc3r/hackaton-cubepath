@@ -17,6 +17,18 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      PUBLIC_OLLAMA_BASE_URL: ${{ vars.PUBLIC_OLLAMA_BASE_URL }}
+      LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+      PUBLIC_SENTRY_DSN: ${{ vars.PUBLIC_SENTRY_DSN }}
+      PUBLIC_SENTRY_TRACES_SAMPLE_RATE: ${{ vars.PUBLIC_SENTRY_TRACES_SAMPLE_RATE }}
+      PUBLIC_SENTRY_LOG_LEVEL: ${{ vars.PUBLIC_SENTRY_LOG_LEVEL }}
+      PUBLIC_LOG_LEVEL: ${{ vars.PUBLIC_LOG_LEVEL }}
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      AXIOM_TOKEN: ${{ vars.AXIOM_TOKEN }}
+      AXIOM_DATASET: ${{ vars.AXIOM_DATASET }}
+      AXIOM_LOG_LEVEL: ${{ vars.AXIOM_LOG_LEVEL }}
+      PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -145,11 +157,8 @@ jobs:
 
       # ─── Build ──────────────────────────────────────────────────────────────
       # Run `astro build` directly — type-check was already done above.
-      # SENTRY_AUTH_TOKEN is optional; without it source-maps are not uploaded.
       - name: Build
         run: pnpm run build
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
       # ─── Build size analysis (PR only) ──────────────────────────────────────
       - name: Analyze build size

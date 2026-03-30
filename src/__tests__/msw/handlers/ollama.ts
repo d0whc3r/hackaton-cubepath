@@ -2,11 +2,11 @@ import { HttpResponse, http } from 'msw'
 
 // Happy-path handlers for Ollama API
 export const ollamaHandlers = [
-  http.get('http://localhost:11434/api/tags', () =>
+  http.get('/api/tags', () =>
     HttpResponse.json({ models: [{ modified_at: '2024-01-01', name: 'llama3.2:latest', size: 1000 }] }),
   ),
 
-  http.post('http://localhost:11434/api/show', () =>
+  http.post('/api/show', () =>
     HttpResponse.json({
       capabilities: ['completion'],
       details: { family: 'llama', parameter_size: '3.2B', quantization_level: 'Q4_0' },
@@ -14,7 +14,7 @@ export const ollamaHandlers = [
     }),
   ),
 
-  http.post('http://localhost:11434/api/pull', () => {
+  http.post('/api/pull', () => {
     const stream = new ReadableStream({
       start(controller) {
         const enc = new TextEncoder()

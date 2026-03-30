@@ -227,9 +227,15 @@ export const guardCheckOptions = (baseUrl: string, retryCount: number) =>
 
 const PERCENT_BASE = 100
 
+function hasNumericProgress(event: PullEvent): event is PullEvent & { completed: number; total: number } {
+  return typeof event.completed === 'number' && typeof event.total === 'number' && event.total > 0
+}
+
 function formatProgress(event: PullEvent): string {
-  const hasProgress = typeof event.completed === 'number' && typeof event.total === 'number' && event.total > 0
-  return hasProgress ? `${Math.round((event.completed! / event.total!) * PERCENT_BASE)}%` : (event.status ?? 'Pulling…')
+  if (!hasNumericProgress(event)) {
+    return event.status ?? 'Pulling…'
+  }
+  return `${Math.round((event.completed / event.total) * PERCENT_BASE)}%`
 }
 
 /**
