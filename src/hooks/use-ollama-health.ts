@@ -46,9 +46,7 @@ const INITIAL_HEALTH: OllamaHealth = {
 }
 
 function computeHealth(response: OllamaHealthRaw, config: ModelConfig): OllamaHealth {
-  const requiredModelIds = [
-    ...new Set(SECTIONS.map((section) => config[section.configKey as keyof ModelConfig] as string).filter(Boolean)),
-  ]
+  const requiredModelIds = [...new Set(SECTIONS.map((section) => config[section.configKey]).filter(Boolean))]
 
   if (!response.ollamaReachable) {
     return {
@@ -66,7 +64,7 @@ function computeHealth(response: OllamaHealthRaw, config: ModelConfig): OllamaHe
   }
 
   const missingModels = SECTIONS.flatMap((section) => {
-    const modelId = config[section.configKey as keyof ModelConfig] as string
+    const modelId = config[section.configKey]
     if (!modelId || response.installedModels.includes(modelId)) {
       return []
     }

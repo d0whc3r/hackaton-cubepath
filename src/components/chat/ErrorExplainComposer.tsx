@@ -10,7 +10,7 @@ import { useChatContext } from '@/lib/context/chat-context'
 import { MODELS_BY_TASK } from '@/lib/router/models'
 
 function parsePreviousErrorExplainInput(content: string): { errorMsg: string; codeSnippet: string } {
-  const parsed = content.match(/^ERROR:\n([\s\S]*?)(?:\n\nCODE:\n([\s\S]*))?$/)
+  const parsed = new RegExp(/^ERROR:\n([\s\S]*?)(?:\n\nCODE:\n([\s\S]*))?$/).exec(content)
   if (!parsed) {
     return { codeSnippet: '', errorMsg: content }
   }

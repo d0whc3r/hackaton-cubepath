@@ -71,7 +71,7 @@ export function RoutingProgress({ steps, specialist, isStreaming }: Readonly<Rou
     return null
   }
 
-  const stepPlural = doneCount !== 1 ? 's' : ''
+  const stepPlural = doneCount > 1 ? 's' : ''
   let statusLine = `${doneCount} step${stepPlural} completed`
   if (activeStep) {
     statusLine = activeStep.label

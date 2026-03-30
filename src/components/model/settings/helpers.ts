@@ -33,7 +33,7 @@ export function buildInitialCustomModels(
   const custom: Record<string, string> = {}
 
   for (const section of sections) {
-    const value = config[section.configKey] as string
+    const value = config[section.configKey]
     const isKnown = section.models.some((model) => model.id === value)
     if (!isKnown && value) {
       custom[section.id] = value
@@ -44,7 +44,7 @@ export function buildInitialCustomModels(
 }
 
 export function getDefaultModelIdForRuntime(section: SectionDef, modelRuntime: ModelConfig['modelRuntime']): string {
-  return buildDefaultsForRuntime(modelRuntime)[section.configKey] as string
+  return buildDefaultsForRuntime(modelRuntime)[section.configKey]
 }
 
 export function getActiveSection(activeSection: SectionId, sections: SectionDef[] = SECTIONS): SectionDef {
@@ -70,7 +70,7 @@ export function buildModelSizeIndex(sections: SectionDef[] = SECTIONS): Map<stri
 }
 
 export function getUniqueSelectedModelIds(config: ModelConfig, sections: SectionDef[] = SECTIONS): string[] {
-  return [...new Set(sections.map((section) => config[section.configKey] as string).filter(Boolean))]
+  return [...new Set(sections.map((section) => config[section.configKey]).filter(Boolean))]
 }
 
 export function getUniqueSelectedSizeGb(config: ModelConfig, sections: SectionDef[] = SECTIONS): number {

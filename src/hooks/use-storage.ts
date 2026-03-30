@@ -15,7 +15,7 @@ export function useStorage<T>(
   const defaultValue = options?.defaultValue ?? null
   const storageType = options?.storage
 
-  const [value, setValue] = useState<T | null>(defaultValue as T | null)
+  const [value, setValue] = useState<T | null>(defaultValue)
   const [storageError, setStorageError] = useState<Error | null>(null)
 
   // Post-hydration read
@@ -25,7 +25,7 @@ export function useStorage<T>(
       setValue(result.value)
       setStorageError(null)
     } else {
-      setValue(defaultValue as T | null)
+      setValue(defaultValue)
       if (result.error instanceof Error) {
         setStorageError(result.error)
       } else {
@@ -43,7 +43,7 @@ export function useStorage<T>(
       }
 
       if (event.newValue === null) {
-        setValue(defaultValue as T | null)
+        setValue(defaultValue)
         setStorageError(null)
         return
       }
@@ -85,7 +85,7 @@ export function useStorage<T>(
   const remove = useCallback((): AttemptResult<void> => {
     const result = removeStorage(key, { storage: storageType })
     if (result.ok) {
-      setValue(defaultValue as T | null)
+      setValue(defaultValue)
       setStorageError(null)
     } else if (result.error instanceof Error) {
       setStorageError(result.error)

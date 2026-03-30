@@ -113,9 +113,7 @@ function ModelHealthGrid({ health, config }: Readonly<{ health: OllamaHealth; co
     <div className="space-y-3">
       {(['infrastructure', 'analysis', 'generation', 'language'] as const).map((group) => {
         const groupSections = SECTIONS.filter((section) => section.group === group)
-        const uniqueModelIds = [
-          ...new Set(groupSections.map((section) => config[section.configKey] as string).filter(Boolean)),
-        ]
+        const uniqueModelIds = [...new Set(groupSections.map((section) => config[section.configKey]).filter(Boolean))]
         const totalSizeGb = uniqueModelIds.reduce((total, modelId) => total + (sizeByModel.get(modelId) ?? 0), 0)
 
         return (
@@ -128,7 +126,7 @@ function ModelHealthGrid({ health, config }: Readonly<{ health: OllamaHealth; co
             </p>
             <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 lg:grid-cols-4">
               {groupSections.map((section) => {
-                const modelId = config[section.configKey as keyof ModelConfig] as string
+                const modelId = config[section.configKey]
                 const isInstalled = health.installedModels.includes(modelId)
                 return (
                   <ModelPill
