@@ -30,7 +30,12 @@ export function attempt<T>(
       return { error, ok: false }
     }
     try {
-      const value = typeof fallback === 'function' ? (fallback as () => T)() : (fallback as T)
+      const value = invokeFallback(fallback)
+      if (value instanceof Promise) {
+        return value
+          .then((resolved): AttemptResult<T> => ({ ok: true, value: resolved }))
+          .catch((): AttemptResult<T> => ({ error, ok: false }))
+      }
       return { ok: true, value }
     } catch {
       return { error, ok: false } // Preserve original error
@@ -38,12 +43,23 @@ export function attempt<T>(
   }
 }
 
+function invokeFallback<T>(fallback: T | (() => T | Promise<T>)): T | Promise<T> {
+  if (isFallbackFactory(fallback)) {
+    return fallback()
+  }
+  return fallback
+}
+
+function isFallbackFactory<T>(value: T | (() => T | Promise<T>)): value is () => T | Promise<T> {
+  return typeof value === 'function'
+}
+
 async function resolveAsyncFallback<T>(
   originalError: unknown,
   fallback: T | (() => T | Promise<T>),
 ): Promise<AttemptResult<T>> {
   try {
-    const value = typeof fallback === 'function' ? await (fallback as () => T | Promise<T>)() : (fallback as T)
+    const value = await invokeFallback(fallback)
     return { ok: true, value }
   } catch {
     return { error: originalError, ok: false }

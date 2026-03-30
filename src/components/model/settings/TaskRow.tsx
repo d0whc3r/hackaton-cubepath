@@ -105,65 +105,50 @@ export function TaskRow({
     pullLabel = 'Retry pull'
   }
 
-  function handleRowKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      onActivate()
-    }
-  }
-
   return (
     <div
       className={cn(
-        'flex cursor-pointer flex-col gap-4 px-5 py-4 transition-colors sm:flex-row sm:items-start sm:gap-6',
+        'flex flex-col gap-4 px-5 py-4 transition-colors sm:flex-row sm:items-start sm:gap-6',
         isActive ? 'bg-accent/15' : 'hover:bg-accent/10',
       )}
-      onClick={onActivate}
-      onKeyDown={handleRowKeyDown}
-      // oxlint-disable-next-line jsx_a11y/prefer-tag-over-role
-      role="button"
-      tabIndex={0}
-      aria-pressed={isActive}
     >
       {/* Left: task info */}
       <div className="min-w-0 flex-1">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/60 bg-muted/60 text-muted-foreground">
-            <Icon className="h-3.5 w-3.5" />
-          </span>
-          <span className="text-sm font-semibold text-foreground">{section.title}</span>
-          {showGroupBadge && (
-            <span
-              className={cn(
-                'rounded-full border px-2 py-0.5 font-mono text-[9px] font-semibold tracking-wider uppercase',
-                badge.className,
-              )}
-            >
-              {badge.label}
+        <button type="button" className="w-full text-left" onClick={onActivate} aria-pressed={isActive}>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-border/60 bg-muted/60 text-muted-foreground">
+              <Icon className="h-3.5 w-3.5" />
             </span>
-          )}
-        </div>
-        <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{section.subtitle}</p>
-        <p className="mt-1.5 text-[11px] text-muted-foreground/70 italic">{section.selectionHint}</p>
+            <span className="text-sm font-semibold text-foreground">{section.title}</span>
+            {showGroupBadge && (
+              <span
+                className={cn(
+                  'rounded-full border px-2 py-0.5 font-mono text-[9px] font-semibold tracking-wider uppercase',
+                  badge.className,
+                )}
+              >
+                {badge.label}
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{section.subtitle}</p>
+          <p className="mt-1.5 text-[11px] text-muted-foreground/70 italic">{section.selectionHint}</p>
+        </button>
         {isLocalRuntime && installedModelsReady && (
           <div className="mt-2 flex items-center">
-            {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, sx_a11y/no-static-element-interactions */}
-            <div onClick={(event) => event.stopPropagation()}>
-              <ModelStatusBadge
-                modelId={modelId}
-                installed={isInstalled}
-                pullState={pullState}
-                ollamaBaseUrl={ollamaBaseUrl}
-                onPull={onPull}
-              />
-            </div>
+            <ModelStatusBadge
+              modelId={modelId}
+              installed={isInstalled}
+              pullState={pullState}
+              ollamaBaseUrl={ollamaBaseUrl}
+              onPull={onPull}
+            />
           </div>
         )}
       </div>
 
-      {/* oxlint-disable-next-line jsx_a11y/click-events-have-key-events, jsx_a11y/no-static-element-interactions
-      Right: select + model details */}
-      <div className="flex w-full shrink-0 flex-col gap-3 sm:w-104" onClick={(event) => event.stopPropagation()}>
+      {/* Right: select + model details */}
+      <div className="flex w-full shrink-0 flex-col gap-3 sm:w-104">
         {/* Select */}
         <div className="flex min-w-0 items-center gap-2">
           <Select value={selectValue} onValueChange={onModelChange}>

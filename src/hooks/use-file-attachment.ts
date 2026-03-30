@@ -18,17 +18,10 @@ export function useFileAttachment(onContent: OnFileContent, maxChars: number): U
     if (!file) {
       return
     }
-    const reader = new FileReader()
-    // oxlint-disable-next-line unicorn/prefer-add-event-listener
-    reader.onload = (ev) => {
-      const content = ev.target?.result
-      if (typeof content === 'string') {
-        onContent(content.slice(0, maxChars), file.name)
-        setAttachedFileName(file.name)
-      }
-    }
-    // oxlint-disable-next-line unicorn/prefer-blob-reading-methods
-    reader.readAsText(file)
+    void file.text().then((content) => {
+      onContent(content.slice(0, maxChars), file.name)
+      setAttachedFileName(file.name)
+    })
     event.target.value = ''
   }
 

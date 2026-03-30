@@ -6,6 +6,12 @@ const MAX_BUFFER = 1000
 const RETENTION_DAYS = 30
 const PRUNE_INTERVAL_MS = 60_000
 
+function hasAttackVectorCategory(
+  event: ValidationEvent,
+): event is ValidationEvent & { attackVectorCategory: AttackVectorCategory } {
+  return event.attackVectorCategory !== null
+}
+
 /**
  * Module-level in-memory circular buffer used for local inspection and tests.
  * Durable retention comes from structured server logs emitted in appendEvent().
@@ -90,11 +96,11 @@ export function getMetrics(windowStart: Date, windowEnd: Date): SecurityMetrics 
   const totalEvaluations = windowEvents.length
 
   const byCategory = windowEvents
-    .filter((event) => event.decision === 'blocked' && event.attackVectorCategory !== null)
+    .filter((event) => event.decision === 'blocked')
+    .filter((event) => hasAttackVectorCategory(event))
     .reduce(
       (acc, event) => {
-        const cat = event.attackVectorCategory as AttackVectorCategory
-        acc[cat] = (acc[cat] ?? 0) + 1
+        acc[event.attackVectorCategory] = (acc[event.attackVectorCategory] ?? 0) + 1
         return acc
       },
       { ...zeroByCategory },

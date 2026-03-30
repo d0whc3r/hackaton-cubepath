@@ -24,11 +24,12 @@ export function readStorage<T>(
     return getResult
   }
 
-  if (getResult.value === null) {
+  const rawValue = getResult.value
+  if (rawValue === null) {
     return { ok: true, value: options?.defaultValue ?? null }
   }
 
-  const parseResult = attempt(() => JSON.parse(getResult.value as string) as T)
+  const parseResult = attempt(() => JSON.parse(rawValue) as T)
   if (!parseResult.ok) {
     return parseResult
   }
