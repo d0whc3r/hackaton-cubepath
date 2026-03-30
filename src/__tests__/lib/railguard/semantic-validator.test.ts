@@ -120,6 +120,16 @@ describe('validateInputSemantic', () => {
       )
     })
 
+    it('normalizes user input before sending it to the guard model', async () => {
+      mockGenerateText.mockResolvedValue({ text: 'YES' })
+      await validateInputSemantic('Ｆunction   foo( )  {\n\n return 1;\n}', 'explain', BASE_URL)
+      expect(mockGenerateText).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: expect.stringContaining('User: "Function foo( ) { return 1; }"'),
+        }),
+      )
+    })
+
     it('accepts a custom guard model override', async () => {
       mockGenerateText.mockResolvedValue({ text: 'YES' })
       await validateInputSemantic('function foo() {}', 'explain', BASE_URL, 'llama3.2:1b')

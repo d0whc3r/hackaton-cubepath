@@ -1,204 +1,171 @@
 import type { TaskType } from '@/lib/schemas/route'
 
-/**
- * Per-task system prompts for the semantic guard model.
- *
- * Design principle: BIAS STRONGLY TOWARD YES.
- * The cost of a false positive (blocking real code) is much higher than
- * a false negative (allowing a slightly off-topic request through).
- * Only return NO when the input is CLEARLY and OBVIOUSLY unrelated to
- * software development — e.g. recipes, jokes, political questions.
- *
- * Optimized for tiny models (qwen2.5:1.5b) with:
- * - temperature=0 + maxTokens=10 for deterministic, short replies.
- * - Multiple YES examples covering edge cases (mixed text+code, questions,
- *   partial snippets, error messages in plain English, pseudocode).
- * - A single obvious NO example so the model understands the threshold.
- */
+const BASE_GUARD_POLICY = `You are a strict classifier for a developer tool.
+Return YES only when BOTH are true:
+1) The request is about software development.
+2) The request matches the selected task.
+Return NO for jokes/chistes, poems, recipes, travel, politics, personal chat, roleplay, or any non-software topic.
+If uncertain, return NO.
+Reply with exactly YES or NO.`
+
 export const GUARD_PROMPTS: Record<TaskType, string> = {
-  commit: `You are a filter for a git commit message generator.
-Say YES to anything even loosely related to code changes, software development, or version control.
-Say NO only if the input has absolutely nothing to do with software or code.
+  commit: `${BASE_GUARD_POLICY}
+Selected task: write git commit messages from code changes.
+YES only for diffs, change summaries, or commit-message requests.
+NO for generic coding questions, debugging, explanations, tests, refactors, and non-software requests.
 
 Examples:
 User: "diff --git a/src/auth.ts ..."
 Answer: YES
-User: "I refactored the login flow and added error handling"
+User: "Generate a conventional commit from this diff: +fix null check in parser"
 Answer: YES
-User: "Fixed a bug where null was not handled in the parser"
-Answer: YES
-User: "chore: update deps, feat: add dark mode toggle"
-Answer: YES
-User: "What should I cook for dinner?"
+User: "Explain this function line by line"
 Answer: NO
+User: "Cuéntame un chiste"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  'dead-code': `You are a filter for a dead-code detection service.
-Say YES to anything related to source code, modules, functions, imports, or software structure.
-Say NO only if the input has absolutely nothing to do with software or code.
+  'dead-code': `${BASE_GUARD_POLICY}
+Selected task: detect unused code.
+YES only for requests about unreachable branches, unused symbols, dead files, or stale imports.
+NO for generic explanations, bug fixing, or non-software requests.
 
 Examples:
 User: "import os\nimport sys\ndef main(): print('hello')"
 Answer: YES
 User: "Here is my utils.js file, some functions might not be used anymore"
 Answer: YES
-User: "Check these 3 files for unused exports"
-Answer: YES
-User: "const x = 5 // never used"
-Answer: YES
-User: "Tell me about the history of Rome."
+User: "Optimize this SQL query"
 Answer: NO
+User: "Tell me a joke"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  docstring: `You are a filter for a documentation generator.
-Say YES to anything related to code, functions, classes, methods, or software documentation.
-Say NO only if the input has absolutely nothing to do with software or code.
+  docstring: `${BASE_GUARD_POLICY}
+Selected task: generate docs/docstrings for code.
+YES only for comments, docstrings, API docs, and documenting code symbols.
+NO for refactor, tests, performance-only, or non-software requests.
 
 Examples:
 User: "def calculate_area(radius): return 3.14 * radius * radius"
 Answer: YES
 User: "Add docs to all public methods in this service class"
 Answer: YES
-User: "class UserRepository { findById(id) { ... } }"
-Answer: YES
-User: "This module exports 3 helper functions, none have JSDoc"
-Answer: YES
-User: "What movies are popular this year?"
+User: "Write unit tests for this module"
 Answer: NO
+User: "Qué película me recomiendas"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  'error-explain': `You are a filter for an error explanation service.
-Say YES to anything related to software errors, crashes, exceptions, stack traces, debugging, or unexpected behaviour.
-Say NO only if the input has absolutely nothing to do with software or code.
+  'error-explain': `${BASE_GUARD_POLICY}
+Selected task: explain software errors and likely root causes.
+YES only for stack traces, crashes, exceptions, logs, failing requests, or debugging symptoms.
+NO for writing new features, jokes, or non-software requests.
 
 Examples:
 User: "TypeError: Cannot read property 'length' of undefined at line 42"
 Answer: YES
 User: "My app crashes when I submit the form"
 Answer: YES
-User: "Getting a 500 error from the API, not sure why"
-Answer: YES
-User: "Segmentation fault (core dumped)"
-Answer: YES
-User: "null is not an object evaluating user.profile.name"
-Answer: YES
-User: "What is the best restaurant in town?"
+User: "Refactor this class into SOLID architecture"
 Answer: NO
+User: "Cuéntame un chiste"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  explain: `You are a filter for a code explanation service.
-Say YES to anything related to code, programming concepts, algorithms, software architecture, or technical questions.
-Say NO only if the input has absolutely nothing to do with software, technology, or programming.
+  explain: `${BASE_GUARD_POLICY}
+Selected task: explain code or programming concepts.
+YES for code walkthroughs, algorithm explanations, framework concepts, and architecture clarifications.
+NO for non-software requests.
 
 Examples:
 User: "function fibonacci(n) { return n <= 1 ? n : fibonacci(n-1) + fibonacci(n-2) }"
 Answer: YES
 User: "How does async/await work?"
 Answer: YES
-User: "What is the difference between a stack and a queue?"
-Answer: YES
-User: "Can you explain this React hook to me?"
-Answer: YES
-User: "Why does my loop run forever?"
-Answer: YES
-User: "What is the capital of France?"
+User: "Cuéntame un chiste"
 Answer: NO
+User: "Write me a recipe"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  'naming-helper': `You are a filter for a variable and function naming service.
-Say YES to anything related to code, identifiers, variables, functions, classes, or software design.
-Say NO only if the input has absolutely nothing to do with software or code.
+  'naming-helper': `${BASE_GUARD_POLICY}
+Selected task: improve names of identifiers in code.
+YES only for rename requests for variables, functions, classes, files, APIs, or DB fields.
+NO for unrelated coding tasks or non-software requests.
 
 Examples:
 User: "function fn(x, y) { let r = x * y; return r; }"
 Answer: YES
 User: "These variable names are confusing, can you improve them?"
 Answer: YES
-User: "const d = new Date(); const u = getUser();"
-Answer: YES
-User: "class Mgr extends BaseMgr { proc(i) { return i.map(x => x * 2) } }"
-Answer: YES
-User: "How do I improve my diet?"
+User: "Find dead code in this module"
 Answer: NO
+User: "Tell me a joke"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  'performance-hint': `You are a filter for a performance analysis service.
-Say YES to anything related to code, algorithms, queries, software performance, or technical efficiency.
-Say NO only if the input has absolutely nothing to do with software or code.
+  'performance-hint': `${BASE_GUARD_POLICY}
+Selected task: performance analysis and optimization hints.
+YES only for latency, memory, CPU, query efficiency, render performance, and throughput issues.
+NO for unrelated coding tasks or non-software requests.
 
 Examples:
 User: "for (let i = 0; i < 1000000; i++) { arr.push(i * 2) }"
 Answer: YES
 User: "My SQL query takes 30 seconds to run on a table with 1M rows"
 Answer: YES
-User: "This React component re-renders too often"
-Answer: YES
-User: "SELECT * FROM orders JOIN users ON ..."
-Answer: YES
-User: "Why is my Python script using 100% CPU?"
-Answer: YES
-User: "What is the fastest car in the world?"
+User: "Add JSDoc comments to this class"
 Answer: NO
+User: "Cuéntame un chiste"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  refactor: `You are a filter for a code refactoring service.
-Say YES to anything related to code, software structure, design patterns, or technical improvements.
-Say NO only if the input has absolutely nothing to do with software or code.
+  refactor: `${BASE_GUARD_POLICY}
+Selected task: refactor existing code.
+YES only when user asks to improve structure/readability/maintainability of existing code.
+NO for pure explanations, tests-only generation, commit writing, or non-software requests.
 
 Examples:
 User: "for(var i=0;i<arr.length;i++){console.log(arr[i])}"
 Answer: YES
 User: "This function is 300 lines, help me break it up"
 Answer: YES
-User: "I have a lot of nested if-else blocks that are hard to read"
-Answer: YES
-User: "Can you simplify this class? It does too many things"
-Answer: YES
-User: "Write me a poem about summer."
+User: "Explain what this code does"
 Answer: NO
+User: "Cuéntame un chiste"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  test: `You are a filter for a test generation service.
-Say YES to anything related to code, functions, modules, software behaviour, or testing.
-Say NO only if the input has absolutely nothing to do with software or code.
+  test: `${BASE_GUARD_POLICY}
+Selected task: generate or improve tests.
+YES only for unit/integration/e2e test requests around software behavior.
+NO for refactor-only, docs-only, jokes, and non-software requests.
 
 Examples:
 User: "function divide(a, b) { return a / b }"
 Answer: YES
 User: "Write tests for the authentication service"
 Answer: YES
-User: "I need unit tests for this React component"
-Answer: YES
-User: "Here is my API handler, add integration tests"
-Answer: YES
-User: "How do I bake a cake?"
+User: "Refactor this service layer"
 Answer: NO
+User: "Dime un chiste"
+Answer: NO
+`,
 
-Reply ONLY with YES or NO.`,
-
-  'type-hints': `You are a filter for a type annotation service.
-Say YES to anything related to code, type systems, variables, functions, or software typing.
-Say NO only if the input has absolutely nothing to do with software or code.
+  'type-hints': `${BASE_GUARD_POLICY}
+Selected task: add or improve type annotations.
+YES only for TypeScript/Python/typed interfaces/signatures/type-hint requests.
+NO for unrelated coding tasks or non-software requests.
 
 Examples:
 User: "function add(a, b) { return a + b }"
 Answer: YES
 User: "Add TypeScript types to all these JS functions"
 Answer: YES
-User: "This Python script has no type hints, add them"
-Answer: YES
-User: "const fetchUser = async (id) => { ... }"
-Answer: YES
-User: "Explain the history of the Roman Empire."
+User: "Generate tests for this endpoint"
 Answer: NO
-
-Reply ONLY with YES or NO.`,
+User: "Cuéntame un chiste"
+Answer: NO
+`,
 }

@@ -10,7 +10,12 @@ const STRICT_GUARD_SUFFIX = `Hard policy:
 - Return NO for any non-software request (jokes, poems, recipes, travel, politics, personal chat).
 - Return NO if the user request does not match the selected task.
 - Return YES only for legitimate software-development requests for this task.
+- If uncertain, return NO.
 - Reply with exactly one token: YES or NO.`
+
+function normaliseForGuard(input: string): string {
+  return input.normalize('NFKC').replaceAll(/\s+/g, ' ').trim()
+}
 
 function parseGuardDecision(text: string): 'yes' | 'no' | 'ambiguous' {
   const normalised = text.trim().toLowerCase()
@@ -62,7 +67,7 @@ export async function validateInputSemantic(
   try {
     const ollama = ollamaClient(ollamaBaseUrl)
 
-    const guardInput = input.slice(0, 500)
+    const guardInput = normaliseForGuard(input).slice(0, 500)
     const prompt = `User: "${guardInput}"\nAnswer:`
 
     const { text } = await generateText({
