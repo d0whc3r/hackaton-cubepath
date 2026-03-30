@@ -1,10 +1,14 @@
 import { validateInputSemantic } from '@/lib/railguard/semantic-validator'
 
-vi.mock(import('ai'), async () => ({
-  generateText: vi.fn(),
-}))
+vi.mock(import('ai'), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    generateText: vi.fn(),
+  }
+})
 
-vi.mock(import('@/lib/api/sse'), async () => ({
+vi.mock(import('@/lib/api/sse'), () => ({
   ollamaClient: vi.fn(() => vi.fn((modelId: string) => ({ modelId }))),
 }))
 
@@ -32,30 +36,30 @@ describe('validateInputSemantic', () => {
       expect(result.decision).toBe('allowed')
     })
 
-    it('allows when model returns ambiguous text with both YES and NO', async () => {
+    it('blocks when model returns ambiguous text with both YES and NO', async () => {
       mockGenerateText.mockResolvedValue({ text: 'yes no maybe' })
       const result = await validateInputSemantic('some input', 'test', BASE_URL)
-      expect(result.decision).toBe('allowed')
+      expect(result.decision).toBe('blocked')
     })
 
-    it('allows when model returns neither YES nor NO', async () => {
+    it('blocks when model returns neither YES nor NO', async () => {
       mockGenerateText.mockResolvedValue({ text: 'I am not sure' })
       const result = await validateInputSemantic('some input', 'commit', BASE_URL)
-      expect(result.decision).toBe('allowed')
+      expect(result.decision).toBe('blocked')
     })
 
-    it('allows when model is unavailable (fail-open)', async () => {
+    it('blocks when model is unavailable', async () => {
       mockGenerateText.mockRejectedValue(new Error('connection refused'))
       const result = await validateInputSemantic('some input', 'explain', BASE_URL)
-      expect(result.decision).toBe('allowed')
+      expect(result.decision).toBe('blocked')
     })
 
-    it('allows on timeout (fail-open)', async () => {
+    it('blocks on timeout', async () => {
       const abortError = new Error('The operation was aborted')
       abortError.name = 'AbortError'
       mockGenerateText.mockRejectedValue(abortError)
       const result = await validateInputSemantic('some input', 'explain', BASE_URL)
-      expect(result.decision).toBe('allowed')
+      expect(result.decision).toBe('blocked')
     })
 
     it('returns null fields for allowed result', async () => {
@@ -100,10 +104,20 @@ describe('validateInputSemantic', () => {
   })
 
   describe('model configuration', () => {
-    it('uses maxTokens: 10 to keep the guard model fast', async () => {
+    it('uses maxOutputTokens: 10 to keep the guard model fast', async () => {
       mockGenerateText.mockResolvedValue({ text: 'YES' })
       await validateInputSemantic('function foo() {}', 'explain', BASE_URL)
-      expect(mockGenerateText).toHaveBeenCalledWith(expect.objectContaining({ maxTokens: 10 }))
+      expect(mockGenerateText).toHaveBeenCalledWith(expect.objectContaining({ maxOutputTokens: 10 }))
+    })
+
+    it('injects strict no-entertainment policy in the guard system prompt', async () => {
+      mockGenerateText.mockResolvedValue({ text: 'YES' })
+      await validateInputSemantic('cuéntame un chiste', 'explain', BASE_URL)
+      expect(mockGenerateText).toHaveBeenCalledWith(
+        expect.objectContaining({
+          system: expect.stringContaining('Return NO for any non-software request'),
+        }),
+      )
     })
 
     it('accepts a custom guard model override', async () => {
