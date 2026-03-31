@@ -1,7 +1,8 @@
 import { redactionPlugin } from '@/lib/observability/redact'
 
 function callPlugin(plugin: ReturnType<typeof redactionPlugin>, metadata: Record<string, unknown>) {
-  return plugin.onMetadataCalled!(metadata)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return plugin.onMetadataCalled!(metadata, null as any)
 }
 
 describe('redactionPlugin', () => {
