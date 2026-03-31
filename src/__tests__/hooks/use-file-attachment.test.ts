@@ -55,43 +55,37 @@ describe('useFileAttachment', () => {
     expect(onContent).not.toHaveBeenCalled()
   })
 
-  it('onFileChange reads file content and calls onContent with sliced content', () => {
+  it('onFileChange reads file content and calls onContent with sliced content', async () => {
     const onContent = vi.fn()
     const { result } = renderHook(() => useFileAttachment(onContent, MAX_CHARS))
 
     const fileContent = 'const hello = "world"'
     const file = new File([fileContent], 'test.ts', { type: 'text/plain' })
-    const { triggerLoad } = makeMockFileReader(fileContent)
+    vi.spyOn(file, 'text').mockResolvedValue(fileContent)
 
-    act(() => {
+    await act(async () => {
       result.current.onFileChange({
         target: { files: [file], value: 'test.ts' },
       } as unknown as React.ChangeEvent<HTMLInputElement>)
-    })
-    act(() => {
-      triggerLoad()
     })
 
     expect(onContent).toHaveBeenCalledWith(fileContent.slice(0, MAX_CHARS), 'test.ts')
     expect(result.current.attachedFileName).toBe('test.ts')
   })
 
-  it('onFileChange slices content to maxChars', () => {
+  it('onFileChange slices content to maxChars', async () => {
     const maxChars = 10
     const onContent = vi.fn()
     const { result } = renderHook(() => useFileAttachment(onContent, maxChars))
 
     const longContent = 'a'.repeat(100)
     const file = new File([longContent], 'big.ts', { type: 'text/plain' })
-    const { triggerLoad } = makeMockFileReader(longContent)
+    vi.spyOn(file, 'text').mockResolvedValue(longContent)
 
-    act(() => {
+    await act(async () => {
       result.current.onFileChange({
         target: { files: [file], value: 'big.ts' },
       } as unknown as React.ChangeEvent<HTMLInputElement>)
-    })
-    act(() => {
-      triggerLoad()
     })
 
     expect(onContent).toHaveBeenCalledWith('a'.repeat(maxChars), 'big.ts')

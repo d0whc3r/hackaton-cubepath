@@ -10,6 +10,8 @@ export default defineConfig({
   test: {
     coverage: {
       exclude: ['src/**/*.test.{ts,tsx}', 'src/__tests__/**'],
+      provider: 'v8',
+      reportOnFailure: true,
     },
     environment: 'happy-dom',
     globals: true,
