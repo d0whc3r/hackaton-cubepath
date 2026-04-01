@@ -146,8 +146,6 @@ export default defineConfig({
     'import/no-default-export': 'error',
     'import/no-duplicates': 'error',
     'import/no-named-default': 'warn',
-    'import/no-unresolved': 'error',
-    'import/no-unused-modules': 'warn',
     'max-dependencies': 'off',
     'max-depth': ['warn', 6],
     'max-lines': ['warn', MAX_LINES],
@@ -165,28 +163,10 @@ export default defineConfig({
     ],
     'no-inline-comments': 'off',
     'no-magic-numbers': 'off',
-    // 'no-magic-numbers': [
-    //   'warn',
-    //   {
-    //     Ignore: [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 100, 1024],
-    //     IgnoreArrayIndexes: true,
-    //     IgnoreDefaultValues: true,
-    //     IgnoreNumericLiteralTypes: true,
-    //     IgnoreReadonlyClassProperties: true,
-    //     IgnoreTypeIndexes: true,
-    //   },
-    // ],
     'no-map-spread': 'off',
     'no-named-export': 'allow',
     'no-negated-condition': 'off',
     'no-nested-ternary': 'error',
-    'no-restricted-syntax': [
-      'error',
-      {
-        message: 'Export objects are not allowed. Use inline exports instead.',
-        selector: 'ExportNamedDeclaration[declaration=null][source=null]',
-      },
-    ],
     'no-ternary': 'allow',
     'prefer-default-export': 'off',
     'require-await': 'off',
@@ -197,18 +177,5 @@ export default defineConfig({
     'unicorn/filename-case': ['warn', { case: 'kebabCase' }],
     'unicorn/no-nested-ternary': 'error',
     'unicorn/no-null': 'off',
-    'unicorn/prevent-abbreviations': [
-      'warn',
-      {
-        allowList: {
-          Params: true,
-          Props: true,
-          Ref: true,
-          params: true,
-          props: true,
-          ref: true,
-        },
-      },
-    ],
   },
 })
